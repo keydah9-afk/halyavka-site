@@ -7,6 +7,7 @@ import FacebookComments from '~/components/FacebookComments.astro';
 import RecentlyViewed from '../../../components/RecentlyViewed.astro';
 
 
+import BookSchema from '../../../components/BookSchema.astro';
 import GdzTracker from '../../../components/GdzTracker.astro';
 // === МЕСТА ДЛЯ ИЗМЕНЕНИЙ ДЛЯ НОВОГО УЧЕБНИКА ===
 
@@ -63,60 +64,22 @@ const pageSeoProps = {
 // Для нового учебника: измените 'gdz-matematyka-bedenko' на имя папки нового ГДЗ.
 const galleryBasePath = "/images/6-klas/gdz-matematyka-kravchuk";
 
-// Вспомогательная переменная для Schema.org, генерирующая пути к изображениям галереи
-const galleryImagesForSchema = images.map(num => ({
-  url: `${Astro.url.origin}${galleryBasePath}/${num}.webp`, // Предполагается .webp, измените если другой формат
-}));
 ---
 
 {/* Компонент PageLayout включает <head> и <body>, а также общие стили */}
 <PageLayout metadata={pageSeoProps}>
 
 
-      {/* JSON-LD Schema.org для улучшения отображения в поисковой выдаче */}
-  <script type="application/ld+json" set:html={JSON.stringify({
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Book",
-        "@id": `${Astro.url.href}#book`,
-        "name": title,
-        "author": {
-          "@type": "Person",
-          "name": author
-        },
-        "datePublished": year,
-        "description": description,
-        "image": `${Astro.url.origin}${coverImage.src}`, 
-        "bookFormat": "https://schema.org/EBook",
-        // ЦЕЙ БЛОК ВКЛЮЧИТЬ ЗІРОЧКИ В ПОШУКУ
-        "aggregateRating": {
-          "@type": "AggregateRating",
-          "ratingValue": "4.8",
-          "ratingCount": "137", 
-          "bestRating": "5",
-          "worstRating": "1"
-        }
-      },
-      {
-        "@type": "WebPage",
-        "@id": Astro.url.href,
-        "url": Astro.url.href,
-        "name": pageSeoProps.title,
-        "description": pageSeoProps.description,
-        "mainEntity": { "@id": `${Astro.url.href}#book` }
-      },
-      {
-        "@type": "ImageGallery",
-        "name": `Галерея зображень ГДЗ ${title}`,
-        "associatedMedia": galleryImagesForSchema.map(img => ({
-          "@type": "ImageObject",
-          "contentUrl": img.url 
-        }))
-      }
-    ]
-  })} />
 
+  <BookSchema
+    title={title}
+    author={author}
+    year={year}
+    description={description}
+    coverImage={coverImage}
+    pageTitle={pageSeoProps.title}
+    pageDescription={pageSeoProps.description}
+  />
   <main itemprop="mainContentOfPage" class="text-center">
 
     <BookCover
