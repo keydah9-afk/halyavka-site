@@ -5,6 +5,7 @@ import SeoComponent from '../../components/common/Metadata.astro';
 import { Image } from 'astro:assets';
 import image4Klas from '../../assets/images/3-klas.webp';
 import FacebookComments from '~/components/FacebookComments.astro';
+import RecentlyViewed from '../../components/RecentlyViewed.astro';
 
 
 // Импорты для обложек
@@ -110,7 +111,7 @@ const pageH1Title = "ГДЗ 3 клас";
   </style>
 
 
-
+<RecentlyViewed />
 
     <div class="max-w-4xl mx-auto px-4">
       <FacebookComments />

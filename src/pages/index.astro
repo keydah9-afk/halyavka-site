@@ -4,7 +4,7 @@ import SeoComponent from '../components/common/Metadata.astro'; // Импорт�
 import { Image } from 'astro:assets'; // Импортируем Image компонент
 import FacebookComments from '~/components/FacebookComments.astro';
 import halyavkaImage from '../assets/images/halyavka.webp';
-
+import RecentlyViewed from '../components/RecentlyViewed.astro';
 
 // Мета-данные для страницы, передаваемые в SeoComponent
 const pageSeoProps = {
@@ -141,7 +141,7 @@ const classes = [2, 3, 4, 5, 6, 7, 8, 9, 10]; // Добавьте все кла�
     </section>
 
 
-
+<RecentlyViewed />
 
 <div class="max-w-4xl mx-auto px-4">
       <FacebookComments />

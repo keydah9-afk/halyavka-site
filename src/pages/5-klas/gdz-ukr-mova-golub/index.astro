@@ -5,6 +5,7 @@ import BookCover from '../../../components/BookCover.astro';
 import RatingShare from '~/components/widgets/RatingShare.astro';
 import FacebookComments from '~/components/FacebookComments.astro'; // Импортируем наш новый компонент
 import RecentlyViewed from '../../../components/RecentlyViewed.astro';
+import GdzTracker from '../../../components/GdzTracker.astro';
 // === МЕСТА ДЛЯ ИЗМЕНЕНИЙ ДЛЯ НОВОГО УЧЕБНИКА ===
 
 // 1. ИМПОРТ ОБЛОЖКИ КНИГИ
@@ -150,40 +151,7 @@ const galleryImagesForSchema = images.map(num => ({
 
 
 <RecentlyViewed />
-
-<script is:inline define:vars={{ pageTitle: title, pageUrl: Astro.url.pathname }}>
-  window.__halyavkaPageData = { pageTitle, pageUrl };
-</script>
-
-<script>
-  import { trackView } from '~/scripts/recently-viewed';
-
-  function setupTracker() {
-    const data = window.__halyavkaPageData;
-    if (!data) return;
-
-    const { pageTitle, pageUrl } = data;
-    const normalized = pageUrl.endsWith('/') ? pageUrl : pageUrl + '/';
-
-    // При заходе на страницу — записываем посещение
-    // (с hash-номером если он есть, или просто книгу если нет)
-    function record() {
-      const hash = window.location.hash.replace('#', '');
-      const exercise = hash && /^\d+$/.test(hash) ? parseInt(hash, 10) : undefined;
-      trackView({ url: normalized, title: pageTitle, exercise });
-    }
-
-    record();
-
-    // При переключении номера в галерее — записываем новую запись
-    window.addEventListener('hashchange', record);
-  }
-
-  document.addEventListener('astro:page-load', setupTracker);
-  if (document.readyState !== 'loading') {
-    setupTracker();
-  }
-</script>
+  <GdzTracker pageTitle={title} />
 
 <div class="max-w-4xl mx-auto px-4">
       <FacebookComments />

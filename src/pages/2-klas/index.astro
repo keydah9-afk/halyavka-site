@@ -5,7 +5,7 @@ import SeoComponent from '../../components/common/Metadata.astro';
 import { Image } from 'astro:assets';
 import image4Klas from '../../assets/images/2-klas.webp';
 import FacebookComments from '~/components/FacebookComments.astro';
-
+import RecentlyViewed from '../../components/RecentlyViewed.astro';
 
 // 1. Импортируем изображения обложек из папки src/assets
 import coverMatLystopad from '../../assets/images/covers/200/2-mat-lystopad-2019-gdz.webp';
@@ -108,7 +108,7 @@ const pageH1Title = "ГДЗ 2 клас";
     }
   </style>
 
-
+<RecentlyViewed />
 
   <div class="max-w-4xl mx-auto px-4">
       <FacebookComments />

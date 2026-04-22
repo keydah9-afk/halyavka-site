@@ -1,0 +1,192 @@
+---
+import PageLayout from '../../../layouts/PageLayout.astro';
+import ImageGallery from '../../../components/ImageGallery.astro';
+import BookCover from '../../../components/BookCover.astro';
+import RatingShare from '~/components/widgets/RatingShare.astro';
+import FacebookComments from '~/components/FacebookComments.astro'; 
+import RecentlyViewed from '../../../components/RecentlyViewed.astro';
+
+// === МЕСТА ДЛЯ ИЗМЕНЕНИЙ ДЛЯ НОВОГО УЧЕБНИКА ===
+
+// 1. ИМПОРТ ОБЛОЖКИ КНИГИ
+// Укажите правильный относительный путь к файлу обложки в папке src/assets/images/covers/
+// Для нового учебника: измените '5-mat-bedenko-2022-gdz.webp' на имя файла новой обложки.
+import coverImage from '../../../assets/images/covers/4-ukr-mova-sapun-2021-gdz-ch2.webp'; 
+
+// 2. СПИСОК НОМЕРОВ КАРТИНОК ГАЛЕРЕИ
+// Перечислите все номера страниц ГДЗ, которые у вас есть в папке public/images/5-klas/gdz-matematyka-merzlyak/
+// Для нового учебника: обновите этот массив номерами страниц нового ГДЗ.
+const images = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 19, 20, 23, 24, 26, 27, 29, 30, 31, 32, 34, 35, 37, 38, 39, 40, 41, 43, 44, 45, 46, 47, 49, 50, 51, 52, 53, 54, 55, 56, 57, 59, 60, 61, 62, 63, 64, 65, 66, 67, 69, 70, 72, 73, 74, 76, 77, 78, 79, 80, 81, 82, 84, 85, 87, 88, 89, 90, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 108, 109, 110, 111, 112, 113, 114, 115, 116, 118, 119, 120, 121, 122, 126, 127, 128, 129, 130, 132, 134, 136, 137, 138, 139, 140, 141, 142, 144, 145, 147, 148, 149, 150, 151, 152, 154, 155, 156, 158, 159, 161, 162, 163, 164, 165, 167, 168, 171, 172, 173, 174, 176, 177, 178, 181, 182, 185, 186, 187, 189, 190, 191, 192, 193, 194, 195, 199, 200, 201, 202, 203, 206, 207, 208, 209, 211, 212, 213, 214, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 232
+
+
+];
+
+// 3. ОСНОВНЫЕ ДАННЫЕ О КНИГЕ
+// Для нового учебника: обновите эти переменные.
+const title = 'ГДЗ українська мова 4 клас — Сапун 2 частина';
+const author = 'Г. М. Сапун';
+const year = '2021';
+const description = "Повне ГДЗ вправ до підручника “Українська мова, 4 клас 2 частина” ОГ. М. Сапун. Усі вправи з докладним поясненням і розв'язком, складені відповідно до навчальної програми.";
+const typegdz = 'ГДЗ';
+
+
+// 4. SEO МЕТАДАННЫЕ ДЛЯ СТРАНИЦЫ
+const pageSeoProps = {
+  title: `${title} - Відповіді до підручника | halyavka.net`,
+  shortTitle: title,
+  description: description,
+  canonical: String(Astro.url.href),
+  openGraph: {
+    // 👇 ИСПРАВЛЕНИЕ ЗДЕСЬ 👇
+    images: [
+      {
+        url: coverImage, // <--- Передаем ОБЪЕКТ coverImage, а не coverImage.src
+        alt: title,
+      }
+    ],
+    type: 'book',
+    locale: 'uk_UA', 
+  },
+  twitter: {
+    card: 'summary_large_image',
+    image: coverImage, // <--- Тут тоже лучше передать объект, Astro сам разберется
+  },
+};
+
+// 5. БАЗОВЫЙ ПУТЬ К ИЗОБРАЖЕНИЯМ ГАЛЕРЕИ В PUBLIC/
+// Это путь к папке с изображениями страниц ГДЗ внутри public/images/
+// Для нового учебника: измените 'gdz-matematyka-bedenko' на имя папки нового ГДЗ.
+const galleryBasePath = "/images/4-klas/gdz-ukr-mova-sapun-ch2";
+
+// Вспомогательная переменная для Schema.org, генерирующая пути к изображениям галереи
+const galleryImagesForSchema = images.map(num => ({
+  url: `${Astro.url.origin}${galleryBasePath}/${num}.webp`, // Предполагается .webp, измените если другой формат
+}));
+---
+
+{/* Компонент PageLayout включает <head> и <body>, а также общие стили */}
+<PageLayout metadata={pageSeoProps}>
+
+
+  {/* JSON-LD Schema.org для улучшения отображения в поисковой выдаче */}
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "http://schema.org",
+    "@graph": [
+      {
+        "@type": ["WebPage", "ItemPage"], // WebPage для страницы, ItemPage для конкретного элемента
+        "name": pageSeoProps.title, 
+        "description": pageSeoProps.description, 
+        "url": pageSeoProps.canonical, 
+        "image": coverImage.src, // URL обложки книги
+        "mainEntity": {
+          "@type": "Book",
+          "name": title,
+          "author": {
+            "@type": "Person",
+            "name": author
+          },
+          
+          "datePublished": year,
+          "description": description,
+          "image": coverImage.src, // URL обложки книги
+          "bookFormat": "https://schema.org/EBook", // Или другое подходящее значение
+          "potentialAction": {
+            "@type": "ReadAction",
+            "target": pageSeoProps.canonical // Ссылка на текущую страницу
+          }
+        }
+      },
+      // Дополнительный раздел для галереи изображений, если это применимо
+      {
+        "@type": "ImageGallery",
+        "name": `Галлерея изображений ГДЗ ${title}`,
+        "description": `Все страницы ГДЗ для учебника ${title}`,
+        "associatedMedia": galleryImagesForSchema.map(img => ({
+          "@type": "ImageObject",
+          "contentUrl": img.url
+        }))
+      }
+    ]
+  })} />
+
+  <main itemprop="mainContentOfPage" class="text-center">
+
+    <BookCover
+      title={title}
+      author={author}
+      year={year}
+      img={coverImage} // Передаем ИМПОРТИРОВАННЫЙ ОБЪЕКТ coverImage
+      alt={`${title} обкладинка`} // Альтернативный текст для изображения
+      description={description}
+      typegdz={typegdz}
+    />
+    
+    <ImageGallery
+      id="gallery2"
+      base={galleryBasePath} // Используем переменную для базового пути
+      list={images}
+    />
+    </main>
+
+<div class="flex justify-center my-4">
+  <a
+    href="/4-klas/"
+    class="
+      inline-flex items-center justify-center
+      h-[40px] min-w-[42px] px-4
+      rounded-[7px] border-4 border-[#C1121F]
+      bg-[#033049]
+      font-semibold text-[21px] text-white
+      transition duration-150 ease-in-out
+      hover:-translate-y-1 hover:shadow-lg
+      shadow-none
+      hover:bg-[#204060]
+      active:bg-[#045]
+    "
+  >
+    <span>Усі гдз для 4 класу</span>
+  </a>
+</div>
+
+<RatingShare classTitle={title} />
+
+
+<RecentlyViewed />
+
+<script is:inline define:vars={{ pageTitle: title, pageUrl: Astro.url.pathname }}>
+  window.__halyavkaPageData = { pageTitle, pageUrl };
+</script>
+
+<script>
+  import { trackView } from '~/scripts/recently-viewed';
+
+  function setupTracker() {
+    const data = window.__halyavkaPageData;
+    if (!data) return;
+
+    const { pageTitle, pageUrl } = data;
+    const normalized = pageUrl.endsWith('/') ? pageUrl : pageUrl + '/';
+
+    // При заходе на страницу — записываем посещение
+    // (с hash-номером если он есть, или просто книгу если нет)
+    function record() {
+      const hash = window.location.hash.replace('#', '');
+      const exercise = hash && /^\d+$/.test(hash) ? parseInt(hash, 10) : undefined;
+      trackView({ url: normalized, title: pageTitle, exercise });
+    }
+
+    record();
+
+    // При переключении номера в галерее — записываем новую запись
+    window.addEventListener('hashchange', record);
+  }
+
+  document.addEventListener('astro:page-load', setupTracker);
+  if (document.readyState !== 'loading') {
+    setupTracker();
+  }
+</script>
+<div class="max-w-4xl mx-auto px-4">
+      <FacebookComments />
+</div>
+</PageLayout>
