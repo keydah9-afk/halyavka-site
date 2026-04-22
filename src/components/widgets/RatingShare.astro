@@ -22,6 +22,7 @@ const { classTitle = "ГДЗ", url = Astro.url.href } = Astro.props;
 
        <button id="btn-dislike" class="group flex items-center gap-1 rounded-full bg-white dark:bg-slate-700 px-3 py-1.5 text-sm font-bold text-gray-700 dark:text-gray-200 shadow-sm transition hover:bg-red-50 hover:text-red-600 border border-gray-200 dark:border-gray-600">
          <Icon name="tabler:thumb-down" class="w-5 h-5 group-hover:scale-110 transition-transform mt-1" />
+         <span id="dislike-count"></span>
        </button>
     </div>
 
@@ -29,7 +30,7 @@ const { classTitle = "ГДЗ", url = Astro.url.href } = Astro.props;
 
     <div class="hidden sm:flex items-center gap-1 text-yellow-500 font-bold">
         <Icon name="tabler:star-filled" class="w-5 h-5" />
-        <span id="rating-text">4.8/5</span>
+        <span id="rating-text">—</span>
     </div>
   </div>
 
@@ -41,140 +42,204 @@ const { classTitle = "ГДЗ", url = Astro.url.href } = Astro.props;
     <div id="share-dropdown" class="absolute right-0 top-full mt-2 w-56 hidden z-50 origin-top-right rounded-lg bg-white dark:bg-slate-800 shadow-xl border border-gray-100 dark:border-gray-700">
        <div class="p-1">
  
-<a 
-  href={`https://www.facebook.com/sharer/sharer.php?u=${url}`} 
-  target="_blank" 
-  rel="noopener noreferrer" 
-  class="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-blue-50 dark:hover:bg-slate-700 rounded-md transition"
->
-  <Icon name="tabler:brand-facebook" class="w-5 h-5 text-blue-600" /> 
-  Facebook
-</a>
+        <a 
+          href={`https://www.facebook.com/sharer/sharer.php?u=${url}`} 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          class="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-blue-50 dark:hover:bg-slate-700 rounded-md transition"
+        >
+          <Icon name="tabler:brand-facebook" class="w-5 h-5 text-blue-600" /> 
+          Facebook
+        </a>
 
-<a 
-  href={`viber://forward?text=${url}`} 
-  target="_blank" 
-  rel="noopener noreferrer" 
-  class="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-purple-50 dark:hover:bg-slate-700 rounded-md transition"
->
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    class="w-5 h-5 text-purple-500" 
-    width="24" height="24" 
-    viewBox="0 0 24 24" 
-    stroke-width="2" 
-    stroke="currentColor" 
-    fill="none" 
-    stroke-linecap="round" 
-    stroke-linejoin="round"
-  >
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M2 10l1 1h2l.5 3.5l2.5 -2.5h6l1 -1v-6l-1 -1h-11l-1 1z" />
-    <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
-    <path d="M8 12a4 4 0 0 1 4 -4" />
-  </svg>
-  Viber
-</a>
+        <a 
+          href={`viber://forward?text=${url}`} 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          class="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-purple-50 dark:hover:bg-slate-700 rounded-md transition"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-purple-500" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+            <path d="M2 10l1 1h2l.5 3.5l2.5 -2.5h6l1 -1v-6l-1 -1h-11l-1 1z" />
+            <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+            <path d="M8 12a4 4 0 0 1 4 -4" />
+          </svg>
+          Viber
+        </a>
 
-  <a href={`https://wa.me/?text=${url}`} target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 rounded-md hover:bg-green-50 dark:hover:bg-slate-700 hover:text-green-500 transition">
+        <a href={`https://wa.me/?text=${url}`} target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 rounded-md hover:bg-green-50 dark:hover:bg-slate-700 hover:text-green-500 transition">
           <Icon name="tabler:brand-whatsapp" class="w-5 h-5 text-green-500" /> WhatsApp
         </a>
 
-         <a href={`https://t.me/share/url?url=${url}&text=${classTitle}`} target="_blank" class="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-blue-50 dark:hover:bg-slate-700 rounded-md">
-            <Icon name="tabler:brand-telegram" class="w-5 h-5 text-blue-400" /> Telegram
-         </a>
-         <button id="copy-link-btn" class="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md border-t border-gray-100 dark:border-gray-700 mt-1">
-            <Icon name="tabler:copy" class="w-5 h-5 text-gray-400" /> Скопіювати
-         </button>
+        <a href={`https://t.me/share/url?url=${url}&text=${classTitle}`} target="_blank" class="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-blue-50 dark:hover:bg-slate-700 rounded-md">
+          <Icon name="tabler:brand-telegram" class="w-5 h-5 text-blue-400" /> Telegram
+        </a>
+        <button id="copy-link-btn" class="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md border-t border-gray-100 dark:border-gray-700 mt-1">
+          <Icon name="tabler:copy" class="w-5 h-5 text-gray-400" /> Скопіювати
+        </button>
        </div>
     </div>
   </div>
 </div>
 
-<script is:inline>
-// Функция для генерации "стабильного" числа на основе строки (URL)
-// Чтобы на странице /task/1 всегда было условно 50 лайков, а на /task/2 — 130.
-function getPseudoRandomCount(seedString) {
-    let hash = 0;
-    for (let i = 0; i < seedString.length; i++) {
-        hash = seedString.charCodeAt(i) + ((hash << 5) - hash);
+<script>
+  import { supabase } from '~/lib/supabase';
+
+  // Получить или создать анонимный ID для этого пользователя
+  function getAnonId(): string {
+    let id = localStorage.getItem('halyavka_anon_id');
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem('halyavka_anon_id', id);
     }
-    // Преобразуем в положительное число и берем диапазон от 40 до 300
-    const positiveHash = Math.abs(hash);
-    return (positiveHash % 260) + 40; 
-}
-
-// ✨ ГЛАВНОЕ ИЗМЕНЕНИЕ: Слушаем astro:page-load
-document.addEventListener('astro:page-load', () => {
-  
-  const likeBtn = document.getElementById('btn-like');
-  const dislikeBtn = document.getElementById('btn-dislike');
-  const likeCountSpan = document.getElementById('like-count');
-  
-  // Если виджета нет на странице, выходим
-  if (!likeBtn) return;
-
-  const storageKey = 'vote_' + window.location.pathname;
-
-  // 1. Генерируем "базовое" число лайков для этой страницы
-  let baseLikes = getPseudoRandomCount(window.location.pathname);
-  
-  // 2. Проверяем голос пользователя
-  const userVote = localStorage.getItem(storageKey);
-
-  if (userVote === 'like') {
-    likeBtn.classList.add('bg-green-100', 'text-green-700', 'border-green-300');
-    baseLikes++; // Плюс мой голос
-  } else if (userVote === 'dislike') {
-    dislikeBtn.classList.add('bg-red-100', 'text-red-700', 'border-red-300');
+    return id;
   }
 
-  if (likeCountSpan) likeCountSpan.innerText = baseLikes;
+  // bookId = путь страницы, нормализованный
+  function getBookId(): string {
+    const path = window.location.pathname;
+    return path.endsWith('/') ? path : path + '/';
+  }
 
-  // Обработчики (клонируем или удаляем старые, чтобы не двоились, но проще просто перенавесить)
-  // При ViewTransitions элементы пересоздаются, так что просто вешаем новые.
-  
-  likeBtn.onclick = () => {
-    if (localStorage.getItem(storageKey)) return; 
-    baseLikes++;
-    likeCountSpan.innerText = baseLikes;
-    likeBtn.classList.add('bg-green-100', 'text-green-700', 'border-green-300');
-    localStorage.setItem(storageKey, 'like');
-  };
+  // Показать звёзды по соотношению лайков к общему числу
+  function formatRating(likes: number, dislikes: number): string {
+    const total = likes + dislikes;
+    if (total === 0) return '—';
+    const score = (likes / total) * 5;
+    return `${score.toFixed(1)}/5`;
+  }
 
-  dislikeBtn.onclick = () => {
-    if (localStorage.getItem(storageKey)) return;
-    dislikeBtn.classList.add('bg-red-100', 'text-red-700', 'border-red-300');
-    localStorage.setItem(storageKey, 'dislike');
-  };
+  async function initRating() {
+    const likeBtn = document.getElementById('btn-like') as HTMLButtonElement | null;
+    const dislikeBtn = document.getElementById('btn-dislike') as HTMLButtonElement | null;
+    const likeCountEl = document.getElementById('like-count');
+    const dislikeCountEl = document.getElementById('dislike-count');
+    const ratingTextEl = document.getElementById('rating-text');
 
-  // Логика "Поделиться"
-  const shareBtn = document.getElementById('share-btn');
-  const dropdown = document.getElementById('share-dropdown');
-  const copyBtn = document.getElementById('copy-link-btn');
+    if (!likeBtn || !dislikeBtn || !likeCountEl) return;
 
-  if(shareBtn && dropdown) {
-      // Сбрасываем состояние дропдауна
-      dropdown.classList.add('hidden');
-      
-      shareBtn.onclick = (e) => {
-        e.stopPropagation();
-        dropdown.classList.toggle('hidden');
-      };
-      
-      document.onclick = (e) => {
-         if (!shareBtn.contains(e.target) && !dropdown.contains(e.target)) {
-            dropdown.classList.add('hidden');
-         }
-      };
+    const bookId = getBookId();
+    const anonId = getAnonId();
 
-      if(copyBtn) {
-          copyBtn.onclick = () => {
-            navigator.clipboard.writeText(window.location.href);
-            copyBtn.innerHTML = '<span class="text-green-600 text-xs font-bold">Скопійовано!</span>';
-            setTimeout(() => copyBtn.innerHTML = 'Скопіювати', 1500);
-          }
+    // Загрузить агрегат
+    const { data: agg } = await supabase
+      .from('book_rating_agg')
+      .select('likes, dislikes')
+      .eq('book_id', bookId)
+      .maybeSingle();
+
+    let likes = agg?.likes ?? 0;
+    let dislikes = agg?.dislikes ?? 0;
+
+    // Узнать, голосовал ли уже этот аноним
+    const { data: myVote } = await supabase
+      .from('book_votes')
+      .select('vote')
+      .eq('book_id', bookId)
+      .eq('anon_id', anonId)
+      .maybeSingle();
+
+    function render() {
+      likeCountEl!.innerText = String(likes);
+      if (dislikeCountEl) {
+        dislikeCountEl.innerText = dislikes > 0 ? String(dislikes) : '';
       }
+      if (ratingTextEl) {
+        ratingTextEl.innerText = formatRating(likes, dislikes);
+      }
+
+      // Снять все подсветки
+      likeBtn!.classList.remove('bg-green-100', 'text-green-700', 'border-green-300');
+      dislikeBtn!.classList.remove('bg-red-100', 'text-red-700', 'border-red-300');
+
+      // Подсветить текущий голос
+      if (currentVote === 1) {
+        likeBtn!.classList.add('bg-green-100', 'text-green-700', 'border-green-300');
+      } else if (currentVote === -1) {
+        dislikeBtn!.classList.add('bg-red-100', 'text-red-700', 'border-red-300');
+      }
+    }
+
+    let currentVote: number | null = myVote?.vote ?? null;
+    render();
+
+    async function vote(newVote: number) {
+      // Оптимистичное обновление UI
+      const prevVote = currentVote;
+      if (prevVote === newVote) {
+        // Повторный клик — отмена голоса
+        if (newVote === 1) likes--;
+        else dislikes--;
+        currentVote = null;
+      } else {
+        if (prevVote === 1) likes--;
+        if (prevVote === -1) dislikes--;
+        if (newVote === 1) likes++;
+        if (newVote === -1) dislikes++;
+        currentVote = newVote;
+      }
+      render();
+
+      // Отправить на сервер
+      const { data, error } = await supabase.rpc('cast_vote', {
+        p_book_id: bookId,
+        p_anon_id: anonId,
+        p_vote: newVote,
+      });
+
+      if (error) {
+        console.error('Vote error:', error);
+        return;
+      }
+
+      // Подстроиться под реальные значения из БД
+      if (data && data[0]) {
+        likes = data[0].likes;
+        dislikes = data[0].dislikes;
+        render();
+      }
+    }
+
+    likeBtn.onclick = () => vote(1);
+    dislikeBtn.onclick = () => vote(-1);
   }
-});
+
+  function initShare() {
+    const shareBtn = document.getElementById('share-btn');
+    const dropdown = document.getElementById('share-dropdown');
+    const copyBtn = document.getElementById('copy-link-btn');
+
+    if (!shareBtn || !dropdown) return;
+
+    dropdown.classList.add('hidden');
+
+    shareBtn.onclick = (e) => {
+      e.stopPropagation();
+      dropdown.classList.toggle('hidden');
+    };
+
+    document.onclick = (e) => {
+      if (!shareBtn.contains(e.target as Node) && !dropdown.contains(e.target as Node)) {
+        dropdown.classList.add('hidden');
+      }
+    };
+
+    if (copyBtn) {
+      copyBtn.onclick = () => {
+        navigator.clipboard.writeText(window.location.href);
+        copyBtn.innerHTML = '<span class="text-green-600 text-xs font-bold">Скопійовано!</span>';
+        setTimeout(() => copyBtn.innerHTML = 'Скопіювати', 1500);
+      };
+    }
+  }
+
+  function init() {
+    initRating();
+    initShare();
+  }
+
+  document.addEventListener('astro:page-load', init);
+  if (document.readyState !== 'loading') {
+    init();
+  }
 </script>
