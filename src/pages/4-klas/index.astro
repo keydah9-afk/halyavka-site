@@ -1,0 +1,182 @@
+---
+import BookCard from '../../components/BookCard.astro';
+import MainLayout from '../../layouts/PageLayout.astro';
+import SeoComponent from '../../components/common/Metadata.astro';
+import { Image } from 'astro:assets';
+import image4Klas from '../../assets/images/4-klas.webp';
+import FacebookComments from '~/components/FacebookComments.astro';
+import RecentlyViewed from '../../components/RecentlyViewed.astro';
+
+// --- Импорты для всех обложек ---
+import coverBevzCh1 from '../../assets/images/covers/200/4-mat-bevz-2021-gdz-ch1.webp';
+import coverBevzCh2 from '../../assets/images/covers/200/4-mat-bevz-2021-gdz-ch2.webp';
+import coverBudnaCh1 from '../../assets/images/covers/200/4-mat-budna-2021-gdz-ch1.webp';
+import coverBudnaCh2 from '../../assets/images/covers/200/4-mat-budna-2021-gdz-ch2.webp';
+import coverGisCh1 from '../../assets/images/covers/200/4-mat-gis-2021-gdz-ch1.webp';
+import coverGisCh2 from '../../assets/images/covers/200/4-mat-gis-2021-gdz-ch2.webp';
+import coverKozakCh1 from '../../assets/images/covers/200/4-mat-kozak-2021-gdz-ch1.webp';
+import coverKozakCh2 from '../../assets/images/covers/200/4-mat-kozak-2021-gdz-ch2.webp';
+import coverLogachevskaCh1 from '../../assets/images/covers/200/4-mat-logachevska-2021-gdz-ch1.webp';
+import coverLogachevskaCh2 from '../../assets/images/covers/200/4-mat-logachevska-2021-gdz-ch2.webp';
+import coverLyshenkoCh1 from '../../assets/images/covers/200/4-mat-lyshenko-2021-gdz-ch1.webp';
+import coverLyshenkoCh2 from '../../assets/images/covers/200/4-mat-lyshenko-2021-gdz-ch2.webp';
+import coverLystopadCh1 from '../../assets/images/covers/200/4-mat-lystopad-2021-gdz-ch1.webp';
+import coverLystopadCh2 from '../../assets/images/covers/200/4-mat-lystopad-2021-gdz-ch2.webp';
+import coverOlyanytskaCh1 from '../../assets/images/covers/200/4-mat-olyanytska-2021-gdz-ch1.webp';
+import coverOlyanytskaCh2 from '../../assets/images/covers/200/4-mat-olyanytska-2021-gdz-ch2.webp';
+import coverSkvortsovaCh1 from '../../assets/images/covers/200/4-mat-skvortsova-2021-gdz-ch1.webp';
+import coverSkvortsovaCh2 from '../../assets/images/covers/200/4-mat-skvortsova-2021-gdz-ch2.webp';
+import coverZaikaCh1 from '../../assets/images/covers/200/4-mat-zaika-2021-gdz-ch1.webp';
+import coverZaikaCh2 from '../../assets/images/covers/200/4-mat-zaika-2021-gdz-ch2.webp';
+import coverBolshakovaCh1 from '../../assets/images/covers/200/4-ukr-mova-bolshakova-2021-gdz-ch1.webp';
+import coverBolshakovaCh2 from '../../assets/images/covers/200/4-ukr-mova-bolshakova-2021-gdz-ch2.webp';
+import coverChabayovskaCh1 from '../../assets/images/covers/200/4-ukr-mova-chabayovska-2021-gdz-ch1.webp';
+import coverChabayovskaCh2 from '../../assets/images/covers/200/4-ukr-mova-chabayovska-2021-gdz-ch2.webp';
+import coverIshchenkoCh1 from '../../assets/images/covers/200/4-ukr-mova-ishchenko-2021-gdz-ch1.webp';
+import coverIshchenkoCh2 from '../../assets/images/covers/200/4-ukr-mova-ishchenko-2021-gdz-ch2.webp';
+import coverKravtsova from '../../assets/images/covers/200/4-ukr-mova-kravtsova-2021-gdz.webp';
+import coverOstapenkoCh1 from '../../assets/images/covers/200/4-ukr-mova-ostapenko-2021-gdz-ch1.webp';
+import coverOstapenkoCh2 from '../../assets/images/covers/200/4-ukr-mova-ostapenko-2021-gdz-ch2.webp';
+import coverPonomareva from '../../assets/images/covers/200/4-ukr-mova-ponomareva-2021-gdz.webp';
+import coverSapunCh1 from '../../assets/images/covers/200/4-ukr-mova-sapun-2021-gdz-ch1.webp';
+import coverSapunCh2 from '../../assets/images/covers/200/4-ukr-mova-sapun-2021-gdz-ch2.webp';
+import coverVarzatska from '../../assets/images/covers/200/4-ukr-mova-varzatska-2021-gdz.webp';
+import coverVashulenko from '../../assets/images/covers/200/4-ukr-mova-vashulenko-2021-gdz.webp';
+import coverZahariychuk from '../../assets/images/covers/200/4-ukr-mova-zahariychuk-2021-gdz.webp';
+
+// --- Обновленный массив books ---
+const books = [
+  { cover: coverBevzCh1, subject: 'Математика', author: 'Бевз 1 частина', type: 'ГДЗ', href: '/4-klas/gdz-matematyka-bevz-ch1/' },
+  { cover: coverBevzCh2, subject: 'Математика', author: 'Бевз 2 частина', type: 'ГДЗ', href: '/4-klas/gdz-matematyka-bevz-ch2/' },
+  { cover: coverBudnaCh1, subject: 'Математика', author: 'Будна 1 частина', type: 'ГДЗ', href: '/4-klas/gdz-matematyka-budna-ch1/' },
+  { cover: coverBudnaCh2, subject: 'Математика', author: 'Будна 2 частина', type: 'ГДЗ', href: '/4-klas/gdz-matematyka-budna-ch2/' },
+  { cover: coverGisCh1, subject: 'Математика', author: 'Гісь 1 частина', type: 'ГДЗ', href: '/4-klas/gdz-matematyka-gis-ch1/' },
+  { cover: coverGisCh2, subject: 'Математика', author: 'Гісь 2 частина', type: 'ГДЗ', href: '/4-klas/gdz-matematyka-gis-ch2/' },
+  { cover: coverKozakCh1, subject: 'Математика', author: 'Козак 1 частина', type: 'ГДЗ', href: '/4-klas/gdz-matematyka-kozak-ch1/' },
+  { cover: coverKozakCh2, subject: 'Математика', author: 'Козак 2 частина', type: 'ГДЗ', href: '/4-klas/gdz-matematyka-kozak-ch2/' },
+  { cover: coverLogachevskaCh1, subject: 'Математика', author: 'Логачевська 1 частина', type: 'ГДЗ', href: '/4-klas/gdz-matematyka-logachevska-ch1/' },
+  { cover: coverLogachevskaCh2, subject: 'Математика', author: 'Логачевська 2 частина', type: 'ГДЗ', href: '/4-klas/gdz-matematyka-logachevska-ch2/' },
+  { cover: coverLyshenkoCh1, subject: 'Математика', author: 'Лишенко 1 частина', type: 'ГДЗ', href: '/4-klas/gdz-matematyka-lyshenko-ch1/' },
+  { cover: coverLyshenkoCh2, subject: 'Математика', author: 'Лишенко 2 частина', type: 'ГДЗ', href: '/4-klas/gdz-matematyka-lyshenko-ch2/' },
+  { cover: coverLystopadCh1, subject: 'Математика', author: 'Листопад 1 частина', type: 'ГДЗ', href: '/4-klas/gdz-matematyka-lystopad-ch1/' },
+  { cover: coverLystopadCh2, subject: 'Математика', author: 'Листопад 2 частина', type: 'ГДЗ', href: '/4-klas/gdz-matematyka-lystopad-ch2/' },
+  { cover: coverOlyanytskaCh1, subject: 'Математика', author: 'Оляницька 1 частина', type: 'ГДЗ', href: '/4-klas/gdz-matematyka-olyanytska-ch1/' },
+  { cover: coverOlyanytskaCh2, subject: 'Математика', author: 'Оляницька 2 частина', type: 'ГДЗ', href: '/4-klas/gdz-matematyka-olyanytska-ch2/' },
+  { cover: coverSkvortsovaCh1, subject: 'Математика', author: 'Скворцова 1 частина', type: 'ГДЗ', href: '/4-klas/gdz-matematyka-skvortsova-ch1/' },
+  { cover: coverSkvortsovaCh2, subject: 'Математика', author: 'Скворцова 2 частина', type: 'ГДЗ', href: '/4-klas/gdz-matematyka-skvortsova-ch2/' },
+  { cover: coverZaikaCh1, subject: 'Математика', author: 'Заїка 1 частина', type: 'ГДЗ', href: '/4-klas/gdz-matematyka-zaika-ch1/' },
+  { cover: coverZaikaCh2, subject: 'Математика', author: 'Заїка 2 частина', type: 'ГДЗ', href: '/4-klas/gdz-matematyka-zaika-ch2/' },
+  { cover: coverBolshakovaCh1, subject: 'Українська мова', author: 'Большакова 1 частина', type: 'ГДЗ', href: '/4-klas/gdz-ukr-mova-bolshakova-ch1/' },
+  { cover: coverBolshakovaCh2, subject: 'Українська мова', author: 'Большакова 2 частина', type: 'ГДЗ', href: '/4-klas/gdz-ukr-mova-bolshakova-ch2/' },
+  { cover: coverChabayovskaCh1, subject: 'Українська мова', author: 'Чабайовська 1 частина', type: 'ГДЗ', href: '/4-klas/gdz-ukr-mova-chabayovska-ch1/' },
+  { cover: coverChabayovskaCh2, subject: 'Українська мова', author: 'Чабайовська 2 частина', type: 'ГДЗ', href: '/4-klas/gdz-ukr-mova-chabayovska-ch2/' },
+  { cover: coverIshchenkoCh1, subject: 'Українська мова', author: 'Іщенко 1 частина', type: 'ГДЗ', href: '/4-klas/gdz-ukr-mova-ishchenko-ch1/' },
+  { cover: coverIshchenkoCh2, subject: 'Українська мова', author: 'Іщенко 2 частина', type: 'ГДЗ', href: '/4-klas/gdz-ukr-mova-ishchenko-ch2/' },
+  { cover: coverKravtsova, subject: 'Українська мова', author: 'Кравцова', type: 'ГДЗ', href: '/4-klas/gdz-ukr-mova-kravtsova/' },
+  { cover: coverOstapenkoCh1, subject: 'Українська мова', author: 'Остапенко 1 частина', type: 'ГДЗ', href: '/4-klas/gdz-ukr-mova-ostapenko-ch1/' },
+  { cover: coverOstapenkoCh2, subject: 'Українська мова', author: 'Остапенко 2 частина', type: 'ГДЗ', href: '/4-klas/gdz-ukr-mova-ostapenko-ch2/' },
+  { cover: coverPonomareva, subject: 'Українська мова', author: 'Пономарева', type: 'ГДЗ', href: '/4-klas/gdz-ukr-mova-ponomareva/' },
+  { cover: coverSapunCh1, subject: 'Українська мова', author: 'Сапун 1 частина', type: 'ГДЗ', href: '/4-klas/gdz-ukr-mova-sapun-ch1/' },
+  { cover: coverSapunCh2, subject: 'Українська мова', author: 'Сапун 2 частина', type: 'ГДЗ', href: '/4-klas/gdz-ukr-mova-sapun-ch2/' },
+  { cover: coverVarzatska, subject: 'Українська мова', author: 'Варзацька', type: 'ГДЗ', href: '/4-klas/gdz-ukr-mova-varzatska/' },
+  { cover: coverVashulenko, subject: 'Українська мова', author: 'Вашуленко', type: 'ГДЗ', href: '/4-klas/gdz-ukr-mova-vashulenko/' },
+  { cover: coverZahariychuk, subject: 'Українська мова', author: 'Захарійчук', type: 'ГДЗ', href: '/4-klas/gdz-ukr-mova-zahariychuk/' }
+];
+
+const subjects = Array.from(new Set(books.map(b => b.subject)));
+
+const pageSeoProps = {
+  title: "ГДЗ 4 клас: Математика, Укр. мова - Відповіді",
+  description: "⭐ Готові домашні завдання (ГДЗ) для 4 класу. Відповіді до підручників з математики, укр. мови. Заходьте на ГДЗ Халявка та звіряйте домашню роботу за хвилину!",
+  canonical: String(Astro.url.href),
+  openGraph: { images: [image4Klas], type: 'website', locale: 'uk_UA' },
+  twitter: { card: 'summary_large_image' },
+};
+
+const pageH1Title = "ГДЗ 4 клас";
+---
+<SeoComponent {...pageSeoProps} />
+
+<MainLayout>
+  <script type="application/ld+json" set:html={JSON.stringify({ "@context": "http://schema.org", "@graph": [ { "@type": ["WebPage", "CollectionPage"], "name": pageSeoProps.title, "description": pageSeoProps.description, "url": pageSeoProps.canonical, "mainEntity": { "@type": "ItemList", "itemListElement": books.map((book, index) => ({ "@type": "ListItem", "position": index + 1, "item": { "@type": "CreativeWork", "name": `ГДЗ ${book.subject} ${book.author} (${book.type})`, "url": `${Astro.url.origin}${book.href}`, "image": `${Astro.url.origin}${book.cover}`, "author": { "@type": "Person", "name": book.author }, "genre": book.type, "about": book.subject } })) }, "image": image4Klas.src } ] })} />
+
+  <main>
+    <h1 class="text-3xl font-bold text-center my-8 text-[#003049] dark:text-gray-50">{pageH1Title}</h1>
+    <p class="max-w-3xl mx-auto mb-10 text-lg text-center text-[#003049] dark:text-gray-300">{pageSeoProps.description}</p>
+
+    <div class="main-image-block">
+      <Image src={image4Klas} alt="ГДЗ 4 клас - головне зображення" widths={[320, 640, 900]} sizes="(max-width: 600px) 100vw, 900px" loading="eager" fetchpriority="high" class="main-class-image" />
+    </div>
+
+    <div class="filter-buttons-wrapper">
+      <div class="subject-filters">
+        <button class="filter-btn active" data-subject="Всі">Всі предмети</button>
+        {subjects.map((subj) => (
+          <button class="filter-btn" data-subject={subj}>{subj}</button>
+        ))}
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 min-[300px]:grid-cols-2 min-[385px]:grid-cols-3 min-[600px]:grid-cols-4 xl:grid-cols-7 gap-2 items-stretch">
+      {books.map((book, i) => (
+        <div class="book-item w-[130px] rounded-[15px] flex flex-col items-center p-0 mx-auto h-full" data-subject={book.subject} key={i}>
+          <BookCard {...book} />
+        </div>
+      ))}
+    </div>
+  </main>
+
+  <script is:inline>
+    document.addEventListener('astro:page-load', () => {
+      const filterWrapper = document.querySelector('.filter-buttons-wrapper');
+      if (!filterWrapper || filterWrapper.dataset.initialized) { return; }
+      filterWrapper.dataset.initialized = 'true';
+      const buttons = filterWrapper.querySelectorAll('.filter-btn');
+      const bookItems = document.querySelectorAll('.book-item');
+      if (buttons.length === 0 || bookItems.length === 0) { return; }
+      buttons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const selectedSubject = btn.dataset.subject;
+          buttons.forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          bookItems.forEach((item) => {
+            if (selectedSubject === 'Всі' || item.dataset.subject === selectedSubject) {
+              item.style.display = '';
+            } else {
+              item.style.display = 'none';
+            }
+          });
+        });
+      });
+    });
+  </script>
+
+  <style>
+    main { max-width: 1200px; margin: 0 auto; padding: 28px 8px; }
+    .main-image-block { text-align: center; margin-bottom: 30px; padding: 10px; background: #FDF0D5; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .main-class-image { max-width: 100%; height: auto; border-radius: 10px; display: block; margin: 0 auto; }
+    .book-item { transition: transform .12s, box-shadow .12s; padding: 5px; border-radius: 15px; }
+    .book-item:hover { transform: scale(1.04); box-shadow: 0 6px 20px rgba(0,0,0,0.13); }
+    .filter-buttons-wrapper { display: flex; justify-content: center; margin-bottom: 24px; }
+    .subject-filters { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+    .filter-btn { padding: 7px 17px; border-radius: 19px; font-weight: 600; border: none; cursor: pointer; transition: background-color 0.2s, color 0.2s, border-color 0.2s; white-space: nowrap; }
+    .filter-btn[data-subject="Всі"] { background:#003049; color:#fff; }
+    .filter-btn:not([data-subject="Всі"]) { background:#FDF0D5; color:#003049; border:1px solid #003049; }
+    .filter-btn.active:not([data-subject="Всі"]) { background:#C1121F; color:#fff; border-color: #C1121F; }
+    @media (prefers-color-scheme: dark) {
+      .main-image-block { background: #2a2a2a; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 1px solid #333; }
+      .book-item:hover { box-shadow: 0 6px 20px rgba(255,255,255,0.1); }
+      .filter-btn[data-subject="Всі"] { background: #4A90E2; color: #fff; border: none; }
+      .filter-btn:not([data-subject="Всі"]) { background: #333; color: #f0f0f0; border: 1px solid #555; }
+      .filter-btn.active:not([data-subject="Всі"]) { background: #C1121F; color: #fff; border-color: #C1121F; }
+      .filter-btn:hover:not([data-subject="Всі"]):not(.active) { background: #555; }
+    }
+  </style>
+
+  <RecentlyViewed />
+
+
+      <div class="max-w-4xl mx-auto px-4">
+      <FacebookComments />
+  </div>
+</MainLayout>

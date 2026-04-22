@@ -1,0 +1,217 @@
+---
+// Нормализуем текущий путь, чтобы он всегда гарантированно заканчивался на слэш,
+// так как Astro иногда может отдавать путь без него, а в словаре у нас пути со слэшами.
+let currentPath = Astro.url.pathname;
+if (!currentPath.endsWith('/')) { currentPath += '/'; }
+
+// Ваш полный словарь страниц и соответствующих им ID постов в Телеграме
+const postMap = {
+  '/': '4', 
+  '/2-klas/': '6',
+  '/2-klas/gdz-matematyka-lystopad/': '7',
+  '/2-klas/gdz-ukr-mova-ponomareva/': '8',
+  '/3-klas/': '9',
+  '/3-klas/gdz-matematyka-lystopad-ch1/': '10',
+  '/3-klas/gdz-matematyka-lystopad-ch2/': '11',
+  '/3-klas/gdz-ukr-mova-ponomareva/': '12',
+  '/4-klas/': '13',
+  '/4-klas/gdz-matematyka-bevz-ch1/': '14',
+  '/4-klas/gdz-matematyka-bevz-ch2/': '15',
+  '/4-klas/gdz-matematyka-budna-ch1/': '16',
+  '/4-klas/gdz-matematyka-budna-ch2/': '17',
+  '/4-klas/gdz-matematyka-gis-ch1/': '18',
+  '/4-klas/gdz-matematyka-gis-ch2/': '19',
+  '/4-klas/gdz-matematyka-kozak-ch1/': '20',
+  '/4-klas/gdz-matematyka-kozak-ch2/': '21',
+  '/4-klas/gdz-matematyka-logachevska-ch1/': '22',
+  '/4-klas/gdz-matematyka-logachevska-ch2/': '23',
+  '/4-klas/gdz-matematyka-lyshenko-ch1/': '24',
+  '/4-klas/gdz-matematyka-lyshenko-ch2/': '25',
+  '/4-klas/gdz-matematyka-lystopad-ch1/': '26',
+  '/4-klas/gdz-matematyka-lystopad-ch2/': '27',
+  '/4-klas/gdz-matematyka-olyanytska-ch1/': '28',
+  '/4-klas/gdz-matematyka-olyanytska-ch2/': '29',
+  '/4-klas/gdz-matematyka-skvortsova-ch1/': '30',
+  '/4-klas/gdz-matematyka-skvortsova-ch2/': '31',
+  '/4-klas/gdz-matematyka-zaika-ch1/': '32',
+  '/4-klas/gdz-matematyka-zaika-ch2/': '33',
+  '/4-klas/gdz-ukr-mova-bolshakova-ch1/': '34',
+  '/4-klas/gdz-ukr-mova-bolshakova-ch2/': '35',
+  '/4-klas/gdz-ukr-mova-chabayovska-ch1/': '36',
+  '/4-klas/gdz-ukr-mova-chabayovska-ch2/': '37',
+  '/4-klas/gdz-ukr-mova-ishchenko-ch1/': '38',
+  '/4-klas/gdz-ukr-mova-ishchenko-ch2/': '39',
+  '/4-klas/gdz-ukr-mova-kravtsova/': '40',
+  '/4-klas/gdz-ukr-mova-ostapenko-ch1/': '41',
+  '/4-klas/gdz-ukr-mova-ostapenko-ch2/': '42',
+  '/4-klas/gdz-ukr-mova-ponomareva/': '43',
+  '/4-klas/gdz-ukr-mova-sapun-ch1/': '44',
+  '/4-klas/gdz-ukr-mova-sapun-ch2/': '45',
+  '/4-klas/gdz-ukr-mova-varzatska/': '46',
+  '/4-klas/gdz-ukr-mova-vashulenko/': '47',
+  '/4-klas/gdz-ukr-mova-zahariychuk/': '48',
+  '/5-klas/': '49',
+  '/5-klas/gdz-matematyka-bedenko/': '50',
+  '/5-klas/gdz-matematyka-bevz/': '51',
+  '/5-klas/gdz-matematyka-bios/': '52',
+  '/5-klas/gdz-matematyka-ister/': '53',
+  '/5-klas/gdz-matematyka-kravchuk/': '54',
+  '/5-klas/gdz-matematyka-merzlyak/': '55',
+  '/5-klas/gdz-matematyka-skvortsova/': '56',
+  '/5-klas/gdz-matematyka-tarasenkova/': '57',
+  '/5-klas/gdz-ukr-mova-avramenko/': '58',
+  '/5-klas/gdz-ukr-mova-gapon/': '59',
+  '/5-klas/gdz-ukr-mova-glazova/': '60',
+  '/5-klas/gdz-ukr-mova-golub/': '61',
+  '/5-klas/gdz-ukr-mova-litvinova/': '62',
+  '/5-klas/gdz-ukr-mova-onatiy/': '63',
+  '/5-klas/gdz-ukr-mova-panchuk/': '64',
+  '/5-klas/gdz-ukr-mova-semenog/': '65',
+  '/5-klas/gdz-ukr-mova-voron/': '67',
+  '/5-klas/gdz-ukr-mova-yushchuk/': '68',
+  '/5-klas/gdz-ukr-mova-zabolotnyi/': '66',
+  '/6-klas/': '69',
+  '/6-klas/gdz-matematyka-bevz-ch1/': '70',
+  '/6-klas/gdz-matematyka-bevz-ch2/': '71',
+  '/6-klas/gdz-matematyka-bios-ch1/': '72',
+  '/6-klas/gdz-matematyka-bios-ch2/': '73',
+  '/6-klas/gdz-matematyka-ister/': '74',
+  '/6-klas/gdz-matematyka-kravchuk/': '75',
+  '/6-klas/gdz-matematyka-merzlyak/': '76',
+  '/6-klas/gdz-matematyka-tarasenkova/': '77',
+  '/6-klas/gdz-ukr-mova-avramenko/': '78',
+  '/6-klas/gdz-ukr-mova-golub/': '79',
+  '/6-klas/gdz-ukr-mova-litvinova/': '80',
+  '/6-klas/gdz-ukr-mova-onatiy/': '81',
+  '/6-klas/gdz-ukr-mova-semenog/': '82',
+  '/6-klas/gdz-ukr-mova-zabolotnyi/': '83',
+  '/7-klas/': '84',
+  '/7-klas/gdz-algebra-bevz/': '85',
+  '/7-klas/gdz-algebra-ister/': '86',
+  '/7-klas/gdz-algebra-merzlyak/': '87',
+  '/7-klas/gdz-algebra-tarasenkova/': '88',
+  '/7-klas/gdz-geometry-ister/': '89',
+  '/7-klas/gdz-geometry-merzlyak/': '90',
+  '/7-klas/gdz-matematyka-ister/': '91',
+  '/7-klas/gdz-ukr-mova-avramenko/': '92',
+  '/7-klas/gdz-ukr-mova-golub/': '93',
+  '/7-klas/gdz-ukr-mova-onatiy/': '94',
+  '/7-klas/gdz-ukr-mova-zabolotnyi/': '95',
+  '/8-klas/': '104',
+  '/8-klas/gdz-algebra-ister/': '96',
+  '/8-klas/gdz-algebra-merzlyak/': '97',
+  '/8-klas/gdz-geometry-ister/': '98',
+  '/8-klas/gdz-geometry-merzlyak/': '99',
+  '/8-klas/gdz-ukr-mova-avramenko/': '100',
+  '/8-klas/gdz-ukr-mova-golub/': '101',
+  '/8-klas/gdz-ukr-mova-zabolotnyi/': '103',
+  '/9-klas/': '105',
+  '/9-klas/gdz-algebra-ister/': '106',
+  '/9-klas/gdz-algebra-merzlyak/': '107',
+  '/9-klas/gdz-fizyka-baryahtar/': '108',
+  '/9-klas/gdz-geometry-ister/': '109',
+  '/9-klas/gdz-geometry-merzlyak/': '110',
+  '/9-klas/gdz-ukr-mova-avramenko/': '111',
+  '/9-klas/gdz-ukr-mova-zabolotnyi/': '112',
+  '/10-klas/': '113',
+  '/10-klas/gdz-algebra-merzlyak/': '114',
+  '/10-klas/gdz-ukr-mova-avramenko/': '115',
+  '/10-klas/gdz-ukr-mova-glazova/': '116',
+  '/10-klas/gdz-ukr-mova-zabolotnyi/': '117'
+};
+
+const postId = postMap[currentPath];
+const channelName = "halyavka_net";
+const discussionPath = `${channelName}/${postId}`;
+---
+
+{postId ? (
+  <div class="telegram-comments-wrapper" id="tg-comments-container">
+    <button id="load-comments-btn" class="tg-load-btn" data-discussion={discussionPath}>
+      Показати коментарі
+    </button>
+    
+    <div id="tg-widget-area"></div>
+  </div>
+
+  <script is:inline>
+    function loadTgComments() {
+      const btn = document.getElementById('load-comments-btn');
+      const widgetArea = document.getElementById('tg-widget-area');
+
+      // Если кнопки на странице нет, прерываем работу
+      if (!btn || !widgetArea) return;
+
+      // Используем onclick напрямую, чтобы избежать двойных срабатываний
+      btn.onclick = function() {
+        const discussionPath = this.getAttribute('data-discussion');
+
+        // Создаем элемент скрипта
+        const script = document.createElement('script');
+        script.src = 'https://telegram.org/js/telegram-widget.js?22';
+        script.setAttribute('data-telegram-discussion', discussionPath);
+        script.setAttribute('data-comments-limit', '5');
+        script.setAttribute('data-color', '343638');
+        script.setAttribute('data-dark-color', 'FFFFFF');
+        script.async = true;
+
+        // Очищаем контейнер на всякий случай и вставляем скрипт
+        widgetArea.innerHTML = '';
+        widgetArea.appendChild(script);
+
+        // Скрываем кнопку
+        this.style.display = 'none';
+      };
+    }
+
+    // Запускаем функцию сразу, как только браузер дошел до этого места
+    loadTgComments();
+
+    // Запасной вариант: если Astro использует View Transitions (переходы без перезагрузки)
+    document.addEventListener('astro:page-load', loadTgComments);
+  </script>
+) : (
+  <div class="telegram-comments-wrapper empty-comments">
+    <p style="text-align: center; color: #666;">Коментарі до цього розділу з'являться згодом.</p>
+  </div>
+)}
+
+<style>
+  .telegram-comments-wrapper {
+    margin-top: 2rem;
+    width: 100%;
+    min-height: 50px; /* Уменьшили высоту, так как виджета пока нет */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  /* Стили для нашей новой кнопки */
+  .tg-load-btn {
+    background-color: #003049; /* Темный цвет, под дизайн вашей старой кнопки */
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 12px 24px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    width: 100%;
+    max-width: 400px;
+    font-weight: bold;
+  }
+
+  .tg-load-btn:hover {
+    background-color: #003049;
+  }
+
+  #tg-widget-area {
+    width: 100%;
+  }
+
+  .empty-comments {
+    background: #f9f9f9;
+    border-radius: 8px;
+    padding: 20px;
+  }
+</style>

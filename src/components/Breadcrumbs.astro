@@ -1,0 +1,183 @@
+---
+/*
+  Breadcrumbs — автоматически строит крошки по pathname.
+  
+  Usage:
+    <Breadcrumbs currentPageName={title} />
+  
+  Компонент сам разбирает Astro.url.pathname и строит цепочку.
+  
+  Для /6-klas/gdz-matematyka-bevz-ch1/ с currentPageName="ГДЗ математика 6 клас — Бевз 1 частина"
+  получится: Головна › 6 клас › ГДЗ математика 6 клас — Бевз 1 частина
+  
+  Для корня "/" ничего не рендерит (крошки не нужны).
+  
+  Разметка для Google (BreadcrumbList) отдаётся одним блоком JSON-LD —
+  HTML остаётся чистым, без дублирующей микроразметки.
+*/
+
+export interface Props {
+  currentPageName?: string;
+  // опциональный override, если автологика чего-то не знает
+  items?: Array<{ name: string; url?: string }>;
+}
+
+const { currentPageName, items: overrideItems } = Astro.props;
+
+const origin = Astro.url.origin;
+let pathname = Astro.url.pathname;
+if (!pathname.endsWith('/')) pathname += '/';
+
+// Человекочитаемые названия для сегментов URL.
+// Добавляй сюда по мере необходимости.
+const segmentLabels: Record<string, string> = {
+  '2-klas': '2 клас',
+  '3-klas': '3 клас',
+  '4-klas': '4 клас',
+  '5-klas': '5 клас',
+  '6-klas': '6 клас',
+  '7-klas': '7 клас',
+  '8-klas': '8 клас',
+  '9-klas': '9 клас',
+  '10-klas': '10 клас',
+  '11-klas': '11 клас',
+  'terms': 'Правила сайту',
+  'privacy': 'Політика конфіденційності',
+  'contacts': 'Контакти',
+  'pro-nas': 'Про нас',
+};
+
+// Основная функция: строим массив items из pathname
+function buildItemsFromPath(path: string, lastName?: string) {
+  // Корень — без крошек
+  if (path === '/') return [];
+
+  const segments = path.split('/').filter(Boolean); // ['6-klas', 'gdz-matematyka-bevz-ch1']
+  const result: Array<{ name: string; url?: string }> = [
+    { name: 'Головна', url: '/' },
+  ];
+
+  let cumulative = '';
+  segments.forEach((segment, i) => {
+    cumulative += `/${segment}/`;
+    const isLast = i === segments.length - 1;
+
+    if (isLast) {
+      // Последний элемент — название страницы (без url)
+      // Приоритет: 1) currentPageName из пропсов, 2) из словаря, 3) fallback
+      const name = lastName ?? segmentLabels[segment] ?? segment;
+      result.push({ name });
+    } else {
+      // Промежуточные — ссылки, название из словаря или fallback
+      const name = segmentLabels[segment] ?? segment;
+      result.push({ name, url: cumulative });
+    }
+  });
+
+  return result;
+}
+
+const items = overrideItems ?? buildItemsFromPath(pathname, currentPageName);
+
+// Если крошек нет (корневая страница) — выходим
+const shouldRender = items.length > 0;
+
+// JSON-LD разметка — единственный источник структурированных данных о крошках
+const itemListElement = items.map((item, index) => {
+  const entry: Record<string, unknown> = {
+    '@type': 'ListItem',
+    position: index + 1,
+    name: item.name,
+  };
+  if (item.url) {
+    entry.item = item.url.startsWith('http') ? item.url : `${origin}${item.url}`;
+  }
+  return entry;
+});
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement,
+};
+---
+
+{shouldRender && (
+  <>
+    {/* Чистый HTML для пользователей и a11y */}
+    <nav aria-label="Хлібні крихти" class="breadcrumbs">
+      <ol>
+        {items.map((item, index) => (
+          <li>
+            {item.url ? (
+              <a href={item.url}>{item.name}</a>
+            ) : (
+              <span aria-current="page">{item.name}</span>
+            )}
+            {index < items.length - 1 && (
+              <span class="breadcrumbs__sep" aria-hidden="true">›</span>
+            )}
+          </li>
+        ))}
+      </ol>
+    </nav>
+
+    {/* Структурированные данные для Google */}
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  </>
+)}
+
+<style>
+  .breadcrumbs {
+    max-width: 1000px;
+    width: 80%;
+    margin: 1rem auto 0 auto;
+    font-size: 0.95rem;
+    color: #003049;
+    text-align: left;
+  }
+  .breadcrumbs ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.5rem;
+    align-items: center;
+  }
+  .breadcrumbs li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .breadcrumbs a {
+    color: #003049;
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+  .breadcrumbs a:hover {
+    color: #C1121F;
+    text-decoration: underline;
+  }
+  .breadcrumbs [aria-current="page"] {
+    color: #6c757d;
+    font-weight: 500;
+  }
+  .breadcrumbs__sep {
+    color: #C1121F;
+    font-weight: bold;
+  }
+  @media (max-width: 600px) {
+    .breadcrumbs {
+      width: 99%;
+      max-width: 99vw;
+      padding: 0 0.3rem;
+      font-size: 0.85rem;
+    }
+  }
+  :global(.dark) .breadcrumbs { color: #FDF0D5; }
+  :global(.dark) .breadcrumbs a { color: #FDF0D5; }
+  :global(.dark) .breadcrumbs a:hover { color: #ff6b6b; }
+  :global(.dark) .breadcrumbs [aria-current="page"] { color: #b5b5b5; }
+  :global(.dark) .breadcrumbs__sep { color: #ff6b6b; }
+</style>

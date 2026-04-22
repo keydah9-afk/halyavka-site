@@ -1,0 +1,152 @@
+---
+import BookCard from '../../components/BookCard.astro';
+import MainLayout from '../../layouts/PageLayout.astro';
+import SeoComponent from '../../components/common/Metadata.astro';
+import { Image } from 'astro:assets';
+import image5Klas from '../../assets/images/5-klas.webp';
+import FacebookComments from '~/components/FacebookComments.astro';
+import RecentlyViewed from '../../components/RecentlyViewed.astro';
+
+// --- Импорты для обложек ---
+import coverBedenko from '../../assets/images/covers/200/5-mat-bedenko-2022-gdz.webp';
+import coverBevz from '../../assets/images/covers/200/5-mat-bevz-2022-gdz.webp';
+import coverBios from '../../assets/images/covers/200/5-mat-bios-2022-gdz.webp';
+import coverIster from '../../assets/images/covers/200/5-mat-ister-2022-gdz.webp';
+import coverKravchuk from '../../assets/images/covers/200/5-mat-kravchuk-2022-gdz.webp';
+import coverMerzlyak from '../../assets/images/covers/200/5-mat-merzlyak-2022-gdz.webp';
+import coverSkvortsova from '../../assets/images/covers/200/5-mat-scvorzova-2022-gdz.webp';
+import coverTarasenkova from '../../assets/images/covers/200/5-mat-tarasenkova-2022-gdz.webp';
+import coverAvramenko from '../../assets/images/covers/200/5-ukr-mova-avram-2022-gdz.webp';
+import coverGapon from '../../assets/images/covers/200/5-ukr-mova-gapon-2022-gdz.webp';
+import coverGlazova from '../../assets/images/covers/200/5-ukr-mova-glazova-2022-gdz.webp';
+import coverGolub from '../../assets/images/covers/200/5-ukr-mova-golub-2022-gdz.webp';
+import coverLitvinova from '../../assets/images/covers/200/5-ukr-mova-litvinova-2022-gdz.webp';
+import coverOnatiy from '../../assets/images/covers/200/5-ukr-mova-onat-2022-gdz.webp';
+import coverPanchuk from '../../assets/images/covers/200/5-ukr-mova-panchuk-2022-gdz.webp';
+import coverSemenog from '../../assets/images/covers/200/5-ukr-mova-semenog-2022-gdz.webp';
+import coverZabolotnyi from '../../assets/images/covers/200/5-ukr-mova-zabol-2022-gdz.webp';
+import coverVoron from '../../assets/images/covers/200/5-ukr-mova-voron-2022-gdz.webp';
+import coverYushchuk from '../../assets/images/covers/200/5-ukr-mova-yuzhuk-2022-gdz.webp';
+import coverKarpuk from '../../assets/images/covers/200/5-angl-karpuk.webp';
+
+// --- Обновленный массив books ---
+const books = [
+  { cover: coverBedenko, subject: 'Математика', author: 'Беденко', type: 'ГДЗ', href: '/5-klas/gdz-matematyka-bedenko/' },
+  { cover: coverBevz, subject: 'Математика', author: 'Бевз', type: 'ГДЗ', href: '/5-klas/gdz-matematyka-bevz/' },
+  { cover: coverBios, subject: 'Математика', author: 'Біос', type: 'ГДЗ', href: '/5-klas/gdz-matematyka-bios/' },
+  { cover: coverIster, subject: 'Математика', author: 'Істер', type: 'ГДЗ', href: '/5-klas/gdz-matematyka-ister/' },
+  { cover: coverKravchuk, subject: 'Математика', author: 'Кравчук', type: 'ГДЗ', href: '/5-klas/gdz-matematyka-kravchuk/' },
+  { cover: coverMerzlyak, subject: 'Математика', author: 'Мерзляк', type: 'ГДЗ', href: '/5-klas/gdz-matematyka-merzlyak/' },
+  { cover: coverSkvortsova, subject: 'Математика', author: 'Скворцова', type: 'ГДЗ', href: '/5-klas/gdz-matematyka-skvortsova/' },
+  { cover: coverTarasenkova, subject: 'Математика', author: 'Тарасенкова', type: 'ГДЗ', href: '/5-klas/gdz-matematyka-tarasenkova/' },
+  { cover: coverAvramenko, subject: 'Українська мова', author: 'Авраменко', type: 'ГДЗ', href: '/5-klas/gdz-ukr-mova-avramenko/' },
+  { cover: coverGapon, subject: 'Українська мова', author: 'Гапон', type: 'ГДЗ', href: '/5-klas/gdz-ukr-mova-gapon/' },
+  { cover: coverGlazova, subject: 'Українська мова', author: 'Глазова', type: 'ГДЗ', href: '/5-klas/gdz-ukr-mova-glazova/' },
+  { cover: coverGolub, subject: 'Українська мова', author: 'Голуб', type: 'ГДЗ', href: '/5-klas/gdz-ukr-mova-golub/' },
+  { cover: coverLitvinova, subject: 'Українська мова', author: 'Літвінова', type: 'ГДЗ', href: '/5-klas/gdz-ukr-mova-litvinova/' },
+  { cover: coverOnatiy, subject: 'Українська мова', author: 'Онатій', type: 'ГДЗ', href: '/5-klas/gdz-ukr-mova-onatiy/' },
+  { cover: coverPanchuk, subject: 'Українська мова', author: 'Панчук', type: 'ГДЗ', href: '/5-klas/gdz-ukr-mova-panchuk/' },
+  { cover: coverSemenog, subject: 'Українська мова', author: 'Семеног', type: 'ГДЗ', href: '/5-klas/gdz-ukr-mova-semenog/' },
+  { cover: coverZabolotnyi, subject: 'Українська мова', author: 'Заболотний', type: 'ГДЗ', href: '/5-klas/gdz-ukr-mova-zabolotnyi/' },
+  { cover: coverVoron, subject: 'Українська мова', author: 'Ворон', type: 'ГДЗ', href: '/5-klas/gdz-ukr-mova-voron/' },
+  { cover: coverYushchuk, subject: 'Українська мова', author: 'Ющук', type: 'ГДЗ', href: '/5-klas/gdz-ukr-mova-yushchuk/' },
+    { cover: coverKarpuk, subject: 'Англійська мова', author: 'Карпюк', type: 'ГДЗ', href: '/5-klas/gdz-english-karpuk/' }
+];
+
+const subjects = Array.from(new Set(books.map(b => b.subject)));
+
+const pageSeoProps = {
+  title: "ГДЗ 5 клас: Математика, Укр. мова - Відповіді",
+  description: "⭐ Готові домашні завдання (ГДЗ) для 5 класу. Відповіді до підручників з математики, укр. мови та англійської. Заходьте на ГДЗ Халявка та звіряйте домашню роботу за хвилину!",
+  canonical: String(Astro.url.href),
+  openGraph: { images: [image5Klas], type: 'website', locale: 'uk_UA' },
+  twitter: { card: 'summary_large_image' },
+};
+
+const pageH1Title = "ГДЗ 5 клас";
+---
+<SeoComponent {...pageSeoProps} />
+
+<MainLayout>
+  <script type="application/ld+json" set:html={JSON.stringify({ "@context": "http://schema.org", "@graph": [ { "@type": ["WebPage", "CollectionPage"], "name": pageSeoProps.title, "description": pageSeoProps.description, "url": pageSeoProps.canonical, "mainEntity": { "@type": "ItemList", "itemListElement": books.map((book, index) => ({ "@type": "ListItem", "position": index + 1, "item": { "@type": "CreativeWork", "name": `ГДЗ ${book.subject} ${book.author} (${book.type})`, "url": `${Astro.url.origin}${book.href}`, "image": `${Astro.url.origin}${book.cover}`, "author": { "@type": "Person", "name": book.author }, "genre": book.type, "about": book.subject } })) }, "image": image5Klas.src } ] })} />
+
+  <main>
+    <h1 class="text-3xl font-bold text-center my-8 text-[#003049] dark:text-gray-50">{pageH1Title}</h1>
+    <p class="max-w-3xl mx-auto mb-10 text-lg text-center text-[#003049] dark:text-gray-300">{pageSeoProps.description}</p>
+
+    <div class="main-image-block">
+      <Image src={image5Klas} alt="ГДЗ 5 клас - головне зображення" widths={[320, 640, 900]} sizes="(max-width: 600px) 100vw, 900px" loading="eager" fetchpriority="high" class="main-class-image" />
+    </div>
+
+    <div class="filter-buttons-wrapper">
+      <div class="subject-filters">
+        <button class="filter-btn active" data-subject="Всі">Всі предмети</button>
+        {subjects.map((subj) => (
+          <button class="filter-btn" data-subject={subj}>{subj}</button>
+        ))}
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 min-[300px]:grid-cols-2 min-[385px]:grid-cols-3 min-[600px]:grid-cols-4 xl:grid-cols-7 gap-2 items-stretch">
+      {books.map((book, i) => (
+        <div class="book-item w-[130px] rounded-[15px] flex flex-col items-center p-0 mx-auto h-full" data-subject={book.subject} key={i}>
+          <BookCard {...book} />
+        </div>
+      ))}
+    </div>
+  </main>
+
+  <script is:inline>
+    document.addEventListener('astro:page-load', () => {
+      const filterWrapper = document.querySelector('.filter-buttons-wrapper');
+      if (!filterWrapper || filterWrapper.dataset.initialized) { return; }
+      filterWrapper.dataset.initialized = 'true';
+      const buttons = filterWrapper.querySelectorAll('.filter-btn');
+      const bookItems = document.querySelectorAll('.book-item');
+      if (buttons.length === 0 || bookItems.length === 0) { return; }
+      buttons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const selectedSubject = btn.dataset.subject;
+          buttons.forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          bookItems.forEach((item) => {
+            if (selectedSubject === 'Всі' || item.dataset.subject === selectedSubject) {
+              item.style.display = '';
+            } else {
+              item.style.display = 'none';
+            }
+          });
+        });
+      });
+    });
+  </script>
+
+  <style>
+    main { max-width: 1200px; margin: 0 auto; padding: 28px 8px; }
+    .main-image-block { text-align: center; margin-bottom: 30px; padding: 10px; background: #FDF0D5; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .main-class-image { max-width: 100%; height: auto; border-radius: 10px; display: block; margin: 0 auto; }
+    .book-item { transition: transform .12s, box-shadow .12s; padding: 5px; border-radius: 15px; }
+    .book-item:hover { transform: scale(1.04); box-shadow: 0 6px 20px rgba(0,0,0,0.13); }
+    .filter-buttons-wrapper { display: flex; justify-content: center; margin-bottom: 24px; }
+    .subject-filters { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+    .filter-btn { padding: 7px 17px; border-radius: 19px; font-weight: 600; border: none; cursor: pointer; transition: background-color 0.2s, color 0.2s, border-color 0.2s; white-space: nowrap; }
+    .filter-btn[data-subject="Всі"] { background:#003049; color:#fff; }
+    .filter-btn:not([data-subject="Всі"]) { background:#FDF0D5; color:#003049; border:1px solid #003049; }
+    .filter-btn.active:not([data-subject="Всі"]) { background:#C1121F; color:#fff; border-color: #C1121F; }
+    @media (prefers-color-scheme: dark) {
+      .main-image-block { background: #2a2a2a; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 1px solid #333; }
+      .book-item:hover { box-shadow: 0 6px 20px rgba(255,255,255,0.1); }
+      .filter-btn[data-subject="Всі"] { background: #4A90E2; color: #fff; border: none; }
+      .filter-btn:not([data-subject="Всі"]) { background: #333; color: #f0f0f0; border: 1px solid #555; }
+      .filter-btn.active:not([data-subject="Всі"]) { background: #C1121F; color: #fff; border-color: #C1121F; }
+      .filter-btn:hover:not([data-subject="Всі"]):not(.active) { background: #555; }
+    }
+  </style>
+
+  <RecentlyViewed />
+
+
+      <div class="max-w-4xl mx-auto px-4">
+      <FacebookComments />
+  </div>
+</MainLayout>

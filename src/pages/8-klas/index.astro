@@ -1,0 +1,128 @@
+---
+import BookCard from '../../components/BookCard.astro';
+import MainLayout from '../../layouts/PageLayout.astro';
+import SeoComponent from '../../components/common/Metadata.astro';
+import { Image } from 'astro:assets';
+import image8Klas from '../../assets/images/8-klas.webp';
+import FacebookComments from '~/components/FacebookComments.astro';
+import RecentlyViewed from '../../components/RecentlyViewed.astro';
+
+// --- Импорты для обложек ---
+import coverAlgebraIster from '../../assets/images/covers/200/8-algebra-ister-2025.webp';
+import coverAlgebraMerzlyak from '../../assets/images/covers/200/8-algebra-merzlyak-2025.webp';
+import coverAlgebraTarasenkova from '../../assets/images/covers/200/8-algebra-taras.webp';
+import coverGeomIster from '../../assets/images/covers/200/8-geom-ister-2025.webp';
+import coverGeomMerzlyak from '../../assets/images/covers/200/8-geom-merzlyak-2025.webp';
+import coverUkrMovaAvramenko from '../../assets/images/covers/200/8-ukr-mova-avram-2025.webp';
+import coverUkrMovaGolub from '../../assets/images/covers/200/8-ukr-mova-golub-2025.webp';
+import coverUkrMovaZabolotnyi from '../../assets/images/covers/200/8-ukr-mova-zabol-2025.webp';
+
+// --- Обновленный массив books ---
+const books = [
+  { cover: coverAlgebraIster, subject: 'Алгебра', author: 'Істер', type: 'ГДЗ', href: '/8-klas/gdz-algebra-ister/' },
+  { cover: coverAlgebraMerzlyak, subject: 'Алгебра', author: 'Мерзляк', type: 'ГДЗ', href: '/8-klas/gdz-algebra-merzlyak/' },
+  { cover: coverAlgebraTarasenkova, subject: 'Алгебра', author: 'Тарасенкова', type: 'ГДЗ', href: '/8-klas/gdz-algebra-tarasenkova/' },
+  { cover: coverGeomIster, subject: 'Геометрія', author: 'Істер', type: 'ГДЗ', href: '/8-klas/gdz-geometry-ister/' },
+  { cover: coverGeomMerzlyak, subject: 'Геометрія', author: 'Мерзляк', type: 'ГДЗ', href: '/8-klas/gdz-geometry-merzlyak/' },
+  { cover: coverUkrMovaAvramenko, subject: 'Українська мова', author: 'Авраменко', type: 'ГДЗ', href: '/8-klas/gdz-ukr-mova-avramenko/' },
+  { cover: coverUkrMovaGolub, subject: 'Українська мова', author: 'Голуб', type: 'ГДЗ', href: '/8-klas/gdz-ukr-mova-golub/' },
+  { cover: coverUkrMovaZabolotnyi, subject: 'Українська мова', author: 'Заболотний', type: 'ГДЗ', href: '/8-klas/gdz-ukr-mova-zabolotnyi/' }
+];
+
+const subjects = Array.from(new Set(books.map(b => b.subject)));
+
+const pageSeoProps = {
+  title: "ГДЗ 8 клас: Алгебра, Геометрія, Укр. мова - Відповіді",
+  description: "⭐ Готові домашні завдання (ГДЗ) для 8 класу. Відповіді до підручників з алгебри, української мови. Заходьте на ГДЗ Халявка та звіряйте домашню роботу за хвилину!",
+  canonical: String(Astro.url.href),
+  openGraph: { images: [image8Klas], type: 'website', locale: 'uk_UA' },
+  twitter: { card: 'summary_large_image' },
+};
+
+const pageH1Title = "ГДЗ 8 клас";
+---
+<SeoComponent {...pageSeoProps} />
+
+<MainLayout>
+  <script type="application/ld+json" set:html={JSON.stringify({ "@context": "http://schema.org", "@graph": [ { "@type": ["WebPage", "CollectionPage"], "name": pageSeoProps.title, "description": pageSeoProps.description, "url": pageSeoProps.canonical, "mainEntity": { "@type": "ItemList", "itemListElement": books.map((book, index) => ({ "@type": "ListItem", "position": index + 1, "item": { "@type": "CreativeWork", "name": `ГДЗ ${book.subject} ${book.author} (${book.type})`, "url": `${Astro.url.origin}${book.href}`, "image": `${Astro.url.origin}${book.cover}`, "author": { "@type": "Person", "name": book.author }, "genre": book.type, "about": book.subject } })) }, "image": image8Klas.src } ] })} />
+
+  <main>
+    <h1 class="text-3xl font-bold text-center my-8 text-[#003049] dark:text-gray-50">{pageH1Title}</h1>
+    <p class="max-w-3xl mx-auto mb-10 text-lg text-center text-[#003049] dark:text-gray-300">{pageSeoProps.description}</p>
+
+    <div class="main-image-block">
+      <Image src={image8Klas} alt="ГДЗ 8 клас - головне зображення" widths={[320, 640, 900]} sizes="(max-width: 600px) 100vw, 900px" loading="eager" fetchpriority="high" class="main-class-image" />
+    </div>
+
+    <div class="filter-buttons-wrapper">
+      <div class="subject-filters">
+        <button class="filter-btn active" data-subject="Всі">Всі предмети</button>
+        {subjects.map((subj) => (
+          <button class="filter-btn" data-subject={subj}>{subj}</button>
+        ))}
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 min-[300px]:grid-cols-2 min-[385px]:grid-cols-3 min-[600px]:grid-cols-4 xl:grid-cols-7 gap-2 items-stretch">
+      {books.map((book, i) => (
+        <div class="book-item w-[130px] rounded-[15px] flex flex-col items-center p-0 mx-auto h-full" data-subject={book.subject} key={i}>
+          <BookCard {...book} />
+        </div>
+      ))}
+    </div>
+  </main>
+
+  <script is:inline>
+    document.addEventListener('astro:page-load', () => {
+      const filterWrapper = document.querySelector('.filter-buttons-wrapper');
+      if (!filterWrapper || filterWrapper.dataset.initialized) { return; }
+      filterWrapper.dataset.initialized = 'true';
+      const buttons = filterWrapper.querySelectorAll('.filter-btn');
+      const bookItems = document.querySelectorAll('.book-item');
+      if (buttons.length === 0 || bookItems.length === 0) { return; }
+      buttons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const selectedSubject = btn.dataset.subject;
+          buttons.forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          bookItems.forEach((item) => {
+            if (selectedSubject === 'Всі' || item.dataset.subject === selectedSubject) {
+              item.style.display = '';
+            } else {
+              item.style.display = 'none';
+            }
+          });
+        });
+      });
+    });
+  </script>
+
+  <style>
+    main { max-width: 1200px; margin: 0 auto; padding: 28px 8px; }
+    .main-image-block { text-align: center; margin-bottom: 30px; padding: 10px; background: #FDF0D5; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .main-class-image { max-width: 100%; height: auto; border-radius: 10px; display: block; margin: 0 auto; }
+    .book-item { transition: transform .12s, box-shadow .12s; padding: 5px; border-radius: 15px; }
+    .book-item:hover { transform: scale(1.04); box-shadow: 0 6px 20px rgba(0,0,0,0.13); }
+    .filter-buttons-wrapper { display: flex; justify-content: center; margin-bottom: 24px; }
+    .subject-filters { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+    .filter-btn { padding: 7px 17px; border-radius: 19px; font-weight: 600; border: none; cursor: pointer; transition: background-color 0.2s, color 0.2s, border-color 0.2s; white-space: nowrap; }
+    .filter-btn[data-subject="Всі"] { background:#003049; color:#fff; }
+    .filter-btn:not([data-subject="Всі"]) { background:#FDF0D5; color:#003049; border:1px solid #003049; }
+    .filter-btn.active:not([data-subject="Всі"]) { background:#C1121F; color:#fff; border-color: #C1121F; }
+    @media (prefers-color-scheme: dark) {
+      .main-image-block { background: #2a2a2a; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 1px solid #333; }
+      .book-item:hover { box-shadow: 0 6px 20px rgba(255,255,255,0.1); }
+      .filter-btn[data-subject="Всі"] { background: #4A90E2; color: #fff; border: none; }
+      .filter-btn:not([data-subject="Всі"]) { background: #333; color: #f0f0f0; border: 1px solid #555; }
+      .filter-btn.active:not([data-subject="Всі"]) { background: #C1121F; color: #fff; border-color: #C1121F; }
+      .filter-btn:hover:not([data-subject="Всі"]):not(.active) { background: #555; }
+    }
+  </style>
+
+  <RecentlyViewed />
+
+
+  <div class="max-w-4xl mx-auto px-4">
+      <FacebookComments />
+  </div>
+</MainLayout>

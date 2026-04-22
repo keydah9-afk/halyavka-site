@@ -1,0 +1,524 @@
+---
+/*
+  Компонент галереи: принимает
+    – id    : уникальный идентификатор (например "gallery2")
+    – base  : путь в папке public (например "/images/2")
+    – list  : массив номеров файлов (например [1,2,3])
+*/
+const { id, base, list } = Astro.props;
+
+const initialImageSrc = list.length > 0 ? `${base}/${list[0]}.webp` : '/images/placeholder.webp';
+const initialImageAlt = list.length > 0 ? `ГДЗ до вправи ${list[0]}` : 'Изображення не знайдено';
+const initialNumber = list.length > 0 ? list[0] : '-';
+---
+
+<div id={id} class="gallery-wrapper space-y-4">
+
+  <ul class="gallery-thumbs grid grid-cols-[repeat(auto-fit,minmax(42px,1fr))] sm:grid-cols-[repeat(auto-fit,minmax(70px,1fr))] gap-2 px-4 list-none p-0">
+    {list.map((n, index) => (
+      <li>
+        <button
+          type="button"
+          class:list={[
+            "gallery-thumb-btn border p-1 rounded w-full transition-colors duration-200 ease-in-out",
+            index === 0 ? "active-thumb" : "" 
+          ]}
+          title={`ГДЗ до вправи ${n}`}
+          data-image-id={n}
+          data-index={index}
+        >
+          {n}
+        </button>
+      </li>
+    ))}
+  </ul>
+
+  <div class="gallery-outer">
+    <div class="gallery-middle">
+      <div class="gallery-inner">
+        <img
+          id={`${id}-img`}
+          src={initialImageSrc}
+          alt={initialImageAlt}
+          class="gallery-main-img transition-transform"
+          loading="lazy"
+          onerror={`if (this.src.indexOf('placeholder.webp') === -1) this.src='/images/placeholder.webp';`}
+        />
+      </div>
+    </div>
+  </div>
+
+  <div class="gallery-controls">
+    <div class="gallery-search-group">
+        <input type="search" id={`${id}-search-input`} class="gallery-search-input" placeholder="Пошук за номером" />
+        <button type="button" id={`${id}-search-button`} class="gallery-button-square" title="Знайти">🔍</button>
+    </div>
+    
+    <div class="gallery-actions-group">
+      {/* Верхний ряд: Индикатор и Зум */}
+      <div class="gallery-actions-row">
+        <span id={`${id}-current-number`} class="gallery-current-number" title="Поточна вправа">{initialNumber}</span>
+        <button type="button" id={`${id}-zoom-in`} class="gallery-button-square" title="Збільшити">+</button>
+        <button type="button" id={`${id}-zoom-out`} class="gallery-button-square" title="Зменшити">−</button>
+      </div>
+      
+      {/* Нижний ряд: Навигация */}
+      <div class="gallery-actions-row">
+        <button type="button" id={`${id}-prev-btn`} class="gallery-button-rect" title="Попередня вправа">←</button>
+        <button type="button" id={`${id}-next-btn`} class="gallery-button-rect" title="Наступна вправа">→</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .gallery-wrapper {}
+  
+  .gallery-outer {
+    border: 6px solid #C1121F; padding: 0; background: none; width: 100%; max-width: 820px; margin: 0 auto;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2); box-sizing: border-box; display: flex; flex-direction: column; align-items: center;
+  }
+  
+  .gallery-middle {
+    border: 6px solid #FDF0D5; padding: 0; background: none; box-sizing: border-box; margin: 0; width: 100%;
+  }
+  
+  .gallery-inner {
+    border: 6px solid #003049; padding: 0; background: white; position: relative; overflow: hidden; width: 100%;
+    display: flex; align-items: center; justify-content: center; box-sizing: border-box; height: auto !important; max-height: none !important;
+  }
+  
+.gallery-main-img {
+    display: block;
+    max-width: 100%;      
+    width: auto;
+    height: auto;     
+    object-fit: contain;
+    transform-origin: 50% 50%; user-select: none;
+    -webkit-user-drag: none; margin: 0;
+  }
+  
+  .gallery-controls {
+    display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 1rem;
+    margin: 10px auto 0 auto; width: fit-content;
+  }
+  
+  /* Общие стили для групп */
+  .gallery-search-group, .gallery-actions-group {
+    border: 2px solid #C1121F; background: #FDF0D5;
+    border-radius: 4px; padding: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+
+  /* Поиск */
+  .gallery-search-group {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 6px 4px;
+  }
+
+  /* Группа действий - колонка */
+  .gallery-actions-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* Ряды кнопок */
+  .gallery-actions-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  /* --- СТИЛИ КНОПОК МИНИАТЮР --- */
+  .gallery-thumb-btn {
+    background-color: white;
+    color: #003049;
+    border: 1px solid #003049;
+    cursor: pointer;
+  }
+  .gallery-thumb-btn:hover {
+    background-color: #C1121F !important;
+    color: white !important;
+    border-color: #C1121F !important;
+  }
+  .gallery-thumb-btn.active-thumb {
+    background-color: #C1121F;
+    color: white;
+    border-color: #C1121F;
+  }
+
+  /* Квадратные кнопки управления */
+  .gallery-button-square {
+    background-color: #003049; color: white; width: 2.2rem; height: 2.2rem; display: flex; align-items: center;
+    justify-content: center; border-radius: 0.25rem; font-weight: bold; font-size: 1.2rem; cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease; border: none; text-decoration: none;
+  }
+  .gallery-button-square:hover { background-color: #C1121F; transform: translateY(-1px); }
+  .gallery-button-square:active { transform: translateY(0); }
+
+  /* Прямоугольные кнопки (стрелки) */
+  .gallery-button-rect {
+    background-color: #003049; color: white; height: 2.2rem; 
+    flex: 1;
+    display: flex; align-items: center; justify-content: center; 
+    border-radius: 0.25rem; font-weight: bold; font-size: 1.5rem; cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease; border: none; text-decoration: none;
+    padding-bottom: 4px;
+  }
+  .gallery-button-rect:hover { background-color: #C1121F; transform: translateY(-1px); }
+  .gallery-button-rect:active { transform: translateY(0); }
+
+  .gallery-search-input {
+    min-width: 130px; width: 100%; flex: 1 1 0%; height: 2.2rem; border-radius: 0.25rem; border: 1px solid #003049;
+    padding: 0 0.25rem; font-size: 0.7rem; background-color: white; color: #003049;
+    transition: border-color 0.2s;
+  }
+  .gallery-search-input:focus {
+    outline: none; border-color: #C1121F; box-shadow: 0 0 0 2px rgba(193, 18, 31, 0.3);
+  }
+
+  .gallery-current-number {
+    font-size: 1.2rem; font-weight: bold; color: #003049; min-width: 40px;
+    text-align: center; padding: 0 0.5rem;
+  }
+
+  /* --- DARK MODE --- */
+  :global(.dark) .gallery-outer { border-color: #8D0000; }
+  :global(.dark) .gallery-middle { border-color: #A08C75; }
+  :global(.dark) .gallery-inner { border-color: #001f30; background: #222; }
+  
+  :global(.dark) .gallery-search-group,
+  :global(.dark) .gallery-actions-group { background-color: #003049; border-color: #8D0000; }
+  
+  :global(.dark) .gallery-button-square,
+  :global(.dark) .gallery-button-rect { background-color: #1a73e8; }
+  
+  :global(.dark) .gallery-button-square:hover,
+  :global(.dark) .gallery-button-rect:hover { background-color: #ff4444; } 
+
+  :global(.dark) .gallery-thumb-btn {
+    background-color: #222;
+    color: #FDF0D5;
+    border-color: #003049;
+  }
+  :global(.dark) .gallery-thumb-btn:hover,
+  :global(.dark) .gallery-thumb-btn.active-thumb {
+    background-color: #C1121F; 
+    border-color: #C1121F;
+    color: white;
+  }
+  
+  :global(.dark) .gallery-search-input { background-color: #222; color: #f0f0f0; border-color: #1a73e8; }
+  :global(.dark) .gallery-search-input:focus { border-color: #ff4444; }
+  :global(.dark) .gallery-current-number { color: #f0f0f0; }
+
+  /* АНИМАЦИЯ ОШИБКИ */
+  .gallery-search-input.search-error {
+    border-color: #C1121F;
+    animation: shake-horizontal 0.5s ease-in-out;
+  }
+  :global(.dark) .gallery-search-input.search-error {
+    border-color: #ff5555;
+  }
+  @keyframes shake-horizontal {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+  }
+
+@media (max-width: 640px) {
+  .gallery-thumb-btn {
+    font-size: 0.9rem;
+  }
+}
+</style>
+
+<script define:vars={{ id, base, list }}>
+  const activeClasses = ['active-thumb'];
+
+  function initGallery() {
+    const gallery = document.getElementById(id);
+    if (!gallery || gallery.dataset.initialized === 'true') return;
+    gallery.dataset.initialized = 'true';
+
+    const mainImage = gallery.querySelector(`#${id}-img`);
+    const galleryInner = gallery.querySelector('.gallery-inner');
+    const zoomInBtn = gallery.querySelector(`#${id}-zoom-in`);
+    const zoomOutBtn = gallery.querySelector(`#${id}-zoom-out`);
+    const downloadLink = gallery.querySelector(`#${id}-download`);
+    const searchInput = gallery.querySelector(`#${id}-search-input`);
+    const searchButton = gallery.querySelector(`#${id}-search-button`);
+    const currentNumberDisplay = gallery.querySelector(`#${id}-current-number`);
+    
+    const prevBtn = gallery.querySelector(`#${id}-prev-btn`);
+    const nextBtn = gallery.querySelector(`#${id}-next-btn`);
+    
+    let scale = 1, isDragging = false;
+    let startPointerX, startPointerY, currentImageX = 0, currentImageY = 0;
+    let imageRenderedWidth, imageRenderedHeight, containerWidth, containerHeight;
+    let currentActiveButton = gallery.querySelector('.gallery-thumb-btn[data-index="0"]');
+    
+    function applyTransform() {
+        mainImage.style.transform = `translate(${currentImageX}px, ${currentImageY}px) scale(${scale})`;
+    }
+
+    function constrainPan() {
+        const scaledImageWidth = imageRenderedWidth * scale;
+        const scaledImageHeight = imageRenderedHeight * scale;
+
+        const maxOffsetX = Math.max(0, (scaledImageWidth - containerWidth) / 2);
+        const maxOffsetY = Math.max(0, (scaledImageHeight - containerHeight) / 2);
+
+        currentImageX = Math.max(-maxOffsetX, Math.min(currentImageX, maxOffsetX));
+        currentImageY = Math.max(-maxOffsetY, Math.min(currentImageY, maxOffsetY));
+    }
+
+    function resetZoomAndPan() {
+        scale = 1;
+        currentImageX = 0;
+        currentImageY = 0;
+        applyTransform();
+        mainImage.style.cursor = 'default';
+    }
+
+    function updateDownloadLink(imageNumber) {
+        if (downloadLink) {
+            downloadLink.href = `${base}/${imageNumber}.webp`;
+        }
+    }
+
+    function setupImageAndContainerDimensions() {
+        containerWidth = galleryInner.clientWidth;
+        containerHeight = galleryInner.clientHeight;
+
+        imageRenderedWidth = mainImage.clientWidth || containerWidth;
+        imageRenderedHeight = mainImage.clientHeight || containerHeight;
+
+        resetZoomAndPan();
+    }
+
+    function getPointerCoords(e) {
+        if (e.touches && e.touches.length > 0) {
+            return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        }
+        return { x: e.clientX, y: e.clientY };
+    }
+
+    function handlePointerDown(e) {
+        if (scale > 1) {
+            isDragging = true;
+            mainImage.style.cursor = 'grabbing';
+            const coords = getPointerCoords(e);
+            startPointerX = coords.x - currentImageX;
+            startPointerY = coords.y - currentImageY;
+            e.preventDefault();
+        }
+    }
+
+    function handlePointerMove(e) {
+        if (!isDragging) return;
+        const coords = getPointerCoords(e);
+        e.preventDefault(); 
+        currentImageX = coords.x - startPointerX;
+        currentImageY = coords.y - startPointerY;
+        constrainPan();
+        applyTransform();
+    }
+
+    function handlePointerUp() {
+        isDragging = false;
+        if (scale > 1) {
+            mainImage.style.cursor = 'grab';
+        } else {
+            mainImage.style.cursor = 'default';
+        }
+    }
+    
+    /**
+     * Центральная функция обновления UI.
+     */
+    function updateToImage(imageNumber, scroll = true) {
+        const targetButton = gallery.querySelector(`.gallery-thumb-btn[data-image-id="${imageNumber}"]`);
+        if (!targetButton) return;
+
+        resetZoomAndPan();
+        mainImage.src = `${base}/${imageNumber}.webp`;
+        mainImage.alt = `ГДЗ до вправи ${imageNumber}`;
+        
+        updateDownloadLink(imageNumber);
+        
+        if (currentNumberDisplay) currentNumberDisplay.textContent = imageNumber;
+        
+        // Обновляем hash в URL (без перезагрузки, без записи в history)
+        if (window.history && window.history.replaceState) {
+            window.history.replaceState(null, '', `#${imageNumber}`);
+            window.dispatchEvent(new HashChangeEvent('hashchange'));
+        }
+
+        if (currentActiveButton) currentActiveButton.classList.remove(...activeClasses);
+        targetButton.classList.add(...activeClasses);
+        currentActiveButton = targetButton;
+        
+        if (scroll) {
+            targetButton.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+    }
+
+    function navigateImage(direction) {
+        if (!currentActiveButton) return;
+        const currentIndex = parseInt(currentActiveButton.dataset.index, 10);
+        const newIndex = currentIndex + direction;
+
+        if (newIndex >= 0 && newIndex < list.length) {
+             const nextImageNumber = list[newIndex];
+             updateToImage(nextImageNumber, false);
+        }
+    }
+    
+    function performSearch() {
+        const numberToFind = searchInput.value.trim();
+        if (!numberToFind) return;
+
+        if (list.map(String).includes(numberToFind)) {
+            updateToImage(numberToFind, false); 
+            searchInput.value = '';
+            searchInput.classList.remove('search-error');
+        } else {
+            searchInput.classList.add('search-error');
+            setTimeout(() => {
+                searchInput.classList.remove('search-error');
+            }, 600);
+        }
+    }
+    
+    galleryInner.addEventListener('mousedown', handlePointerDown);
+    galleryInner.addEventListener('touchstart', handlePointerDown, { passive: false });
+    window.addEventListener('mousemove', handlePointerMove);
+    window.addEventListener('touchmove', handlePointerMove, { passive: false });
+    window.addEventListener('mouseup', handlePointerUp);
+    window.addEventListener('touchend', handlePointerUp);
+    window.addEventListener('resize', setupImageAndContainerDimensions);
+
+    galleryInner.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const oldScale = scale;
+        const zoomAmount = 0.1;
+        
+        if (e.deltaY < 0) {
+            scale += zoomAmount;
+        } else {
+            scale = Math.max(1, scale - zoomAmount);
+        }
+
+        const rect = galleryInner.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        currentImageX = mouseX - (mouseX - currentImageX) * (scale / oldScale);
+        currentImageY = mouseY - (mouseY - currentImageY) * (scale / oldScale);
+
+        constrainPan();
+        applyTransform();
+
+        if (scale > 1) {
+            mainImage.style.cursor = 'grab';
+        } else {
+            mainImage.style.cursor = 'default';
+            resetZoomAndPan();
+        }
+    }, { passive: false });
+
+
+    gallery.querySelectorAll('.gallery-thumb-btn').forEach(button => {
+      button.addEventListener('click', () => {
+        const imageNumber = button.dataset.imageId;
+        updateToImage(imageNumber, true);
+        gallery.querySelector('.gallery-outer').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    });
+
+    zoomInBtn?.addEventListener('click', () => {
+        const oldScale = scale;
+        scale = Math.min(3, scale + 0.2);
+        if (scale > oldScale) {
+            currentImageX = currentImageY = 0;
+        }
+        constrainPan();
+        applyTransform();
+        if (scale > 1) mainImage.style.cursor = 'grab';
+    });
+    zoomOutBtn?.addEventListener('click', () => {
+        scale = Math.max(1, scale - 0.2);
+        if (scale === 1) {
+            resetZoomAndPan();
+        } else {
+            constrainPan();
+            applyTransform();
+        }
+        if (scale === 1) mainImage.style.cursor = 'default';
+    });
+
+    prevBtn?.addEventListener('click', () => navigateImage(-1));
+    nextBtn?.addEventListener('click', () => navigateImage(1));
+
+    searchButton?.addEventListener('click', performSearch);
+    searchInput?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            performSearch();
+        }
+    });
+
+    mainImage.addEventListener('load', setupImageAndContainerDimensions);
+    
+    if (mainImage.complete) {
+        setupImageAndContainerDimensions();
+    }
+    
+    // Если в URL есть hash с номером — открываем его
+    const initialHash = window.location.hash.replace('#', '');
+    if (initialHash && /^\d+$/.test(initialHash) && list.map(String).includes(initialHash)) {
+      updateToImage(initialHash, true);
+    }
+
+    if (currentActiveButton) {
+        updateDownloadLink(currentActiveButton.dataset.imageId);
+    }
+
+    gallery.cleanup = () => {
+        mainImage.removeEventListener('load', setupImageAndContainerDimensions);
+        galleryInner.removeEventListener('mousedown', handlePointerDown);
+        galleryInner.removeEventListener('touchstart', handlePointerDown);
+        window.removeEventListener('mousemove', handlePointerMove);
+        window.removeEventListener('touchmove', handlePointerMove);
+        window.removeEventListener('mouseup', handlePointerUp);
+        window.removeEventListener('touchend', handlePointerUp);
+        window.removeEventListener('resize', setupImageAndContainerDimensions);
+        galleryInner.removeEventListener('wheel', (e) => {});
+        zoomInBtn?.removeEventListener('click', () => {});
+        zoomOutBtn?.removeEventListener('click', () => {});
+        prevBtn?.removeEventListener('click', () => {});
+        nextBtn?.removeEventListener('click', () => {});
+        searchButton?.removeEventListener('click', performSearch);
+        searchInput?.removeEventListener('keydown', (e) => {});
+        gallery.querySelectorAll('.gallery-thumb-btn').forEach(button => {
+            button.removeEventListener('click', () => {});
+        });
+        gallery.dataset.initialized = 'false';
+    };
+  }
+
+  document.addEventListener('astro:page-load', initGallery);
+  document.addEventListener('astro:before-swap', () => {
+    const gallery = document.getElementById(id);
+    if (gallery && typeof gallery.cleanup === 'function') gallery.cleanup();
+  });
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGallery);
+  } else {
+    initGallery();
+  }
+</script>

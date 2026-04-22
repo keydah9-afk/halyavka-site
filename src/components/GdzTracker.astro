@@ -1,0 +1,68 @@
+---
+/*
+  GdzTracker — компонент трекинга просмотров для страницы ГДЗ.
+  
+  Передаётся название страницы, компонент пишет в localStorage:
+  - при заходе на страницу — запись с текущим hash (если есть)
+  - при смене hash (переключение упражнений) — новая запись
+  
+  Слушатель hashchange регистрируется глобально ОДИН раз на всю сессию,
+  чтобы избежать накопления слушателей при View Transitions.
+*/
+
+export interface Props {
+  pageTitle: string;
+}
+
+const { pageTitle } = Astro.props;
+const pageUrl = Astro.url.pathname;
+---
+
+<script is:inline define:vars={{ pageTitle, pageUrl }}>
+  window.__halyavkaPageData = { pageTitle, pageUrl };
+</script>
+
+<script>
+  import { trackView } from '~/scripts/recently-viewed';
+
+  // Один глобальный обработчик hashchange на всю сессию.
+  // Читает свежие данные из window.__halyavkaPageData при каждом срабатывании,
+  // не захватывает их в замыкание — поэтому всегда знает текущую страницу.
+  function handleHashChange() {
+    const data = (window as any).__halyavkaPageData;
+    if (!data) return;
+
+    const { pageTitle, pageUrl } = data;
+    const normalized = pageUrl.endsWith('/') ? pageUrl : pageUrl + '/';
+
+    const hash = window.location.hash.replace('#', '');
+    const exercise = hash && /^\d+$/.test(hash) ? parseInt(hash, 10) : undefined;
+
+    trackView({ url: normalized, title: pageTitle, exercise });
+  }
+
+  // Регистрируем слушатель один раз через флаг на window
+  if (!(window as any).__halyavkaHashListenerAttached) {
+    window.addEventListener('hashchange', handleHashChange);
+    (window as any).__halyavkaHashListenerAttached = true;
+  }
+
+  // При каждом заходе на страницу (включая View Transitions) — записываем
+  function recordOnPageLoad() {
+    const data = (window as any).__halyavkaPageData;
+    if (!data) return;
+
+    const { pageTitle, pageUrl } = data;
+    const normalized = pageUrl.endsWith('/') ? pageUrl : pageUrl + '/';
+
+    const hash = window.location.hash.replace('#', '');
+    const exercise = hash && /^\d+$/.test(hash) ? parseInt(hash, 10) : undefined;
+
+    trackView({ url: normalized, title: pageTitle, exercise });
+  }
+
+  document.addEventListener('astro:page-load', recordOnPageLoad);
+  if (document.readyState !== 'loading') {
+    recordOnPageLoad();
+  }
+</script>

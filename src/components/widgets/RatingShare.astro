@@ -1,0 +1,180 @@
+---
+import { Icon } from 'astro-icon/components';
+
+export interface Props {
+  classTitle?: string;
+  url?: string;
+}
+
+const { classTitle = "ГДЗ", url = Astro.url.href } = Astro.props;
+---
+
+<div class="rating-share-widget flex flex-wrap items-center justify-between gap-4 rounded-xl bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-gray-700 p-4 mb-6 shadow-sm">
+  
+  <div class="flex items-center gap-4">
+    <div class="flex items-center gap-2">
+       <span class="text-sm font-semibold text-gray-500 dark:text-gray-400 hidden sm:inline">Корисно?</span>
+       
+       <button id="btn-like" class="group flex items-center gap-1 rounded-full bg-white dark:bg-slate-700 px-3 py-1.5 text-sm font-bold text-gray-700 dark:text-gray-200 shadow-sm transition hover:bg-green-50 hover:text-green-600 border border-gray-200 dark:border-gray-600">
+         <Icon name="tabler:thumb-up" class="w-5 h-5 group-hover:scale-110 transition-transform" />
+         <span id="like-count">...</span>
+       </button>
+
+       <button id="btn-dislike" class="group flex items-center gap-1 rounded-full bg-white dark:bg-slate-700 px-3 py-1.5 text-sm font-bold text-gray-700 dark:text-gray-200 shadow-sm transition hover:bg-red-50 hover:text-red-600 border border-gray-200 dark:border-gray-600">
+         <Icon name="tabler:thumb-down" class="w-5 h-5 group-hover:scale-110 transition-transform mt-1" />
+       </button>
+    </div>
+
+    <div class="h-6 w-px bg-gray-300 dark:bg-gray-600 hidden sm:block"></div>
+
+    <div class="hidden sm:flex items-center gap-1 text-yellow-500 font-bold">
+        <Icon name="tabler:star-filled" class="w-5 h-5" />
+        <span id="rating-text">4.8/5</span>
+    </div>
+  </div>
+
+  <div class="relative">
+    <button id="share-btn" class="flex items-center gap-2 rounded-lg bg-[#003049] text-white px-4 py-2 text-sm font-semibold hover:bg-[#c1121f] transition-colors shadow-md">
+      <Icon name="tabler:share" class="w-5 h-5" />
+      <span>Поділитися</span>
+    </button>
+    <div id="share-dropdown" class="absolute right-0 top-full mt-2 w-56 hidden z-50 origin-top-right rounded-lg bg-white dark:bg-slate-800 shadow-xl border border-gray-100 dark:border-gray-700">
+       <div class="p-1">
+ 
+<a 
+  href={`https://www.facebook.com/sharer/sharer.php?u=${url}`} 
+  target="_blank" 
+  rel="noopener noreferrer" 
+  class="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-blue-50 dark:hover:bg-slate-700 rounded-md transition"
+>
+  <Icon name="tabler:brand-facebook" class="w-5 h-5 text-blue-600" /> 
+  Facebook
+</a>
+
+<a 
+  href={`viber://forward?text=${url}`} 
+  target="_blank" 
+  rel="noopener noreferrer" 
+  class="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-purple-50 dark:hover:bg-slate-700 rounded-md transition"
+>
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    class="w-5 h-5 text-purple-500" 
+    width="24" height="24" 
+    viewBox="0 0 24 24" 
+    stroke-width="2" 
+    stroke="currentColor" 
+    fill="none" 
+    stroke-linecap="round" 
+    stroke-linejoin="round"
+  >
+    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+    <path d="M2 10l1 1h2l.5 3.5l2.5 -2.5h6l1 -1v-6l-1 -1h-11l-1 1z" />
+    <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+    <path d="M8 12a4 4 0 0 1 4 -4" />
+  </svg>
+  Viber
+</a>
+
+  <a href={`https://wa.me/?text=${url}`} target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 rounded-md hover:bg-green-50 dark:hover:bg-slate-700 hover:text-green-500 transition">
+          <Icon name="tabler:brand-whatsapp" class="w-5 h-5 text-green-500" /> WhatsApp
+        </a>
+
+         <a href={`https://t.me/share/url?url=${url}&text=${classTitle}`} target="_blank" class="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-blue-50 dark:hover:bg-slate-700 rounded-md">
+            <Icon name="tabler:brand-telegram" class="w-5 h-5 text-blue-400" /> Telegram
+         </a>
+         <button id="copy-link-btn" class="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md border-t border-gray-100 dark:border-gray-700 mt-1">
+            <Icon name="tabler:copy" class="w-5 h-5 text-gray-400" /> Скопіювати
+         </button>
+       </div>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+// Функция для генерации "стабильного" числа на основе строки (URL)
+// Чтобы на странице /task/1 всегда было условно 50 лайков, а на /task/2 — 130.
+function getPseudoRandomCount(seedString) {
+    let hash = 0;
+    for (let i = 0; i < seedString.length; i++) {
+        hash = seedString.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    // Преобразуем в положительное число и берем диапазон от 40 до 300
+    const positiveHash = Math.abs(hash);
+    return (positiveHash % 260) + 40; 
+}
+
+// ✨ ГЛАВНОЕ ИЗМЕНЕНИЕ: Слушаем astro:page-load
+document.addEventListener('astro:page-load', () => {
+  
+  const likeBtn = document.getElementById('btn-like');
+  const dislikeBtn = document.getElementById('btn-dislike');
+  const likeCountSpan = document.getElementById('like-count');
+  
+  // Если виджета нет на странице, выходим
+  if (!likeBtn) return;
+
+  const storageKey = 'vote_' + window.location.pathname;
+
+  // 1. Генерируем "базовое" число лайков для этой страницы
+  let baseLikes = getPseudoRandomCount(window.location.pathname);
+  
+  // 2. Проверяем голос пользователя
+  const userVote = localStorage.getItem(storageKey);
+
+  if (userVote === 'like') {
+    likeBtn.classList.add('bg-green-100', 'text-green-700', 'border-green-300');
+    baseLikes++; // Плюс мой голос
+  } else if (userVote === 'dislike') {
+    dislikeBtn.classList.add('bg-red-100', 'text-red-700', 'border-red-300');
+  }
+
+  if (likeCountSpan) likeCountSpan.innerText = baseLikes;
+
+  // Обработчики (клонируем или удаляем старые, чтобы не двоились, но проще просто перенавесить)
+  // При ViewTransitions элементы пересоздаются, так что просто вешаем новые.
+  
+  likeBtn.onclick = () => {
+    if (localStorage.getItem(storageKey)) return; 
+    baseLikes++;
+    likeCountSpan.innerText = baseLikes;
+    likeBtn.classList.add('bg-green-100', 'text-green-700', 'border-green-300');
+    localStorage.setItem(storageKey, 'like');
+  };
+
+  dislikeBtn.onclick = () => {
+    if (localStorage.getItem(storageKey)) return;
+    dislikeBtn.classList.add('bg-red-100', 'text-red-700', 'border-red-300');
+    localStorage.setItem(storageKey, 'dislike');
+  };
+
+  // Логика "Поделиться"
+  const shareBtn = document.getElementById('share-btn');
+  const dropdown = document.getElementById('share-dropdown');
+  const copyBtn = document.getElementById('copy-link-btn');
+
+  if(shareBtn && dropdown) {
+      // Сбрасываем состояние дропдауна
+      dropdown.classList.add('hidden');
+      
+      shareBtn.onclick = (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle('hidden');
+      };
+      
+      document.onclick = (e) => {
+         if (!shareBtn.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.classList.add('hidden');
+         }
+      };
+
+      if(copyBtn) {
+          copyBtn.onclick = () => {
+            navigator.clipboard.writeText(window.location.href);
+            copyBtn.innerHTML = '<span class="text-green-600 text-xs font-bold">Скопійовано!</span>';
+            setTimeout(() => copyBtn.innerHTML = 'Скопіювати', 1500);
+          }
+      }
+  }
+});
+</script>

@@ -1,0 +1,43 @@
+---
+// Подключение переменных сайта (имя сайта и т.д.)
+import { SITE } from 'astrowind:config';
+import { getHomePermalink } from '~/utils/permalinks';
+---
+
+<footer class="relative border-t border-gray-200 dark:border-slate-800 bg-white dark:bg-dark py-8 text-sm text-gray-500">
+  <div class="max-w-4xl mx-auto px-4 flex flex-col items-center">
+    <!-- Логотип и название сайта -->
+    <div class="mb-2 flex items-center gap-2">
+      <!-- Можно добавить лого (иконку) вместо /favicon.svg -->
+      <img src="/favicon.svg" alt="Халявка" class="w-7 h-7" />
+      <a class="font-bold text-lg text-black dark:text-white" href={getHomePermalink()}>{SITE?.name}</a>
+    </div>
+    
+    <!-- Основные ссылки: Правила, Політика, Контакти -->
+    <div class="mb-2">
+      <a href="/terms/" class="mx-2 hover:underline">Правила сайту</a>
+      <a href="/privacy/" class="mx-2 hover:underline">Політика конфіденційності</a>
+      <a href="/contacts/" class="mx-2 hover:underline">Контакти</a>
+      <a href="/pro-nas/" class="hover:underline mx-2">Про нас</a>
+    </div>
+    
+    <!-- E-mail для связи -->
+    <div class="mb-2">
+      <a href="mailto:admin@halyavka.net" class="text-blue-600 hover:underline">admin@halyavka.net</a>
+    </div>
+    
+    <!-- Здесь можно добавить иконки соцсетей, если появятся. Пример (пока закомментирован): -->
+    {/*
+    <div class="flex gap-3 mb-2">
+      <a href="https://t.me/ваш_канал" aria-label="Telegram">
+        <svg>...</svg>
+      </a>
+    </div>
+    */}
+    
+    <!-- Копирайт -->
+    <div class="mt-2 text-xs text-gray-400">
+      © {SITE?.name}, {new Date().getFullYear()}
+    </div>
+  </div>
+</footer>

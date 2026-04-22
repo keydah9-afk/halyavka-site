@@ -1,0 +1,150 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+import SeoComponent from '../components/common/Metadata.astro'; // Импортируем SeoComponent
+import { Image } from 'astro:assets'; // Импортируем Image компонент
+import FacebookComments from '~/components/FacebookComments.astro';
+import halyavkaImage from '../assets/images/halyavka.webp';
+import RecentlyViewed from '../components/RecentlyViewed.astro';
+
+// Мета-данные для страницы, передаваемые в SeoComponent
+const pageSeoProps = {
+  title: 'ГДЗ Халявка — Готові домашні завдання з 1 по 11 клас онлайн',
+  description: '✅ Найбільша база ГДЗ в Україні! На сайті ГДЗ Халявка ви знайдете готові відповіді до підручників з математики, української мови та інших предметів з 1 по 11 клас. Заходьте!',
+  canonical: String(Astro.url.href), // Канонический URL для текущей страницы
+  openGraph: {
+    images: [halyavkaImage], // Используем импортированный объект изображения
+    type: 'website',
+    locale: 'uk_UA',
+  },
+  twitter: {
+    card: 'summary_large_image',
+  },
+};
+
+const classes = [2, 3, 4, 5, 6, 7, 8, 9, 10]; // Добавьте все классы, которые у вас есть
+---
+
+{/* Компонент, который использует AstroSeo для генерации всех мета-тегов в <head> */}
+<SeoComponent {...pageSeoProps} />
+
+{/* Основной макет страницы. Теперь он не принимает metadata,
+    так как SeoComponent уже позаботился об этом. */}
+<PageLayout>
+  {/* JSON-LD микроразметка для главной страницы */}
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "http://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite", // Тип для главной страницы
+        "name": pageSeoProps.title,
+        "description": pageSeoProps.description,
+        "url": pageSeoProps.canonical,
+        "image": halyavkaImage.src // Используем .src для получения URL изображения
+      },
+      {
+        "@type": "CollectionPage", // Можно также добавить CollectionPage, если это список классов
+        "name": pageSeoProps.title,
+        "description": pageSeoProps.description,
+        "url": pageSeoProps.canonical,
+        "mainEntity": {
+          "@type": "ItemList",
+          "itemListElement": classes.map((c, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "item": {
+              "@type": "WebPage", // Или CreativeWork, если это страницы отдельных классов
+              "name": `${c} клас ГДЗ`,
+              "url": `${Astro.url.origin}/${c}-klas`
+            }
+          }))
+        },
+        "image": halyavkaImage.src
+      }
+    ]
+  })} />
+
+  <main itemprop="mainContentOfPage" class="px-4 text-center">
+
+    {/* H1 уже использует Tailwind классы, но убедитесь, что они поддерживают dark: */}
+    <h1 itemprop="headline" class="text-3xl font-bold text-center my-8 text-gray-900 dark:text-gray-50">
+      ГДЗ Халявка — відповіді до шкільних підручників
+    </h1>
+
+    {/* ИСПОЛЬЗУЕМ КОМПОНЕНТ <Image> ДЛЯ ОПТИМИЗАЦИИ ГЛАВНОГО ИЗОБРАЖЕНИЯ */}
+    <Image
+      src={halyavkaImage}
+      alt="Головна обкладинка Халявка — ГДЗ, готові домашні завдання онлайн"
+      widths={[300, 700, 1000]}
+      sizes="(max-width: 768px) 100vw, 700px"
+      loading="eager"
+      fetchpriority="high"
+      class="mx-auto rounded-2xl shadow-xl max-w-full"
+    />
+
+    {/* P уже использует dark:text-gray-300 - отлично! */}
+    <p class="max-w-3xl mx-auto mb-10 text-lg text-gray-700 dark:text-gray-300">
+      Ласкаво просимо! Ми створили цей сайт, щоб допомогти учням та їхнім батькам
+      швидко перевіряти домашні завдання та краще розуміти шкільну програму.
+      Просто оберіть свій клас нижче, щоб почати.
+    </p>
+
+    <section itemscope itemtype="https://schema.org/ItemList" itemprop="hasPart" class="py-6">
+      <meta itemprop="numberOfItems" content={classes.length} />
+      {/* H2 - добавим dark: классы */}
+      <h2 class="text-2xl font-semibold mb-6 text-gray-900 dark:text-gray-50">Оберіть клас</h2>
+      <ul class="grid gap-4 grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 max-w-6xl mx-auto list-none p-0">
+        {classes.map((c, i) => (
+          <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem" class="m-0">
+            <meta itemprop="position" content={i + 1} />
+            <a
+              itemprop="url"
+              href={`/${c}-klas/`}
+              class="
+                flex h-12 w-full items-center justify-center
+                rounded-xl border border-gray-300 dark:border-gray-600
+                bg-white/60 dark:bg-gray-800/60
+                active:bg-blue-600 active:text-white dark:active:bg-blue-500
+                font-semibold text-xl transition
+                hover:bg-blue-700 hover:text-white
+                text-gray-900 dark:text-gray-100 {/* Важно для текста кнопки класса */}
+              "
+            >
+              <span itemprop="name">{c}&nbsp;клас</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="max-w-4xl mx-auto mt-12 py-8 text-left border-t border-gray-200 dark:border-gray-700">
+      {/* H2 - добавим dark: классы */}
+      <h2 class="text-2xl font-bold mb-4 text-center text-gray-900 dark:text-gray-50">Чим корисні готові домашні завдання?</h2>
+      {/* Prose уже поддерживает dark:prose-invert - отлично! */}
+      <div class="prose dark:prose-invert max-w-none text-lg">
+        <p>
+          Готові домашні завдання (ГДЗ) — це не просто шпаргалки, а незамінний інструмент
+          для самоперевірки та поглиблення знань. Вони допомагають учням переконатися у
+          правильності власних рішень, а батькам — легко проконтролювати виконання
+          домашньої роботи.
+        </p>
+        <p>
+          На нашому сайті "ГДЗ Халявка" зібрані відповіді до найактуальніших підручників
+          шкільної програми України на 2025-2026 навчальний рік. Ми охоплюємо ключові
+          предмети: математику, алгебру, геометрію, українську та англійську мови,
+          фізику, хімію та багато інших.
+        </p>
+        <p>
+          Користуватися сайтом дуже просто: оберіть ваш клас, знайдіть потрібний предмет
+          і підручник, і ви миттєво отримаєте доступ до розв'язання усіх вправ та завдань.
+        </p>
+      </div>
+    </section>
+
+<RecentlyViewed />
+
+
+<div class="max-w-4xl mx-auto px-4">
+      <FacebookComments />
+  </div>
+  </main>
+</PageLayout>

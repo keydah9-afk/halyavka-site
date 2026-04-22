@@ -1,0 +1,80 @@
+site:
+  name: "Халявка"                     # Назва сайту
+  site: "https://halyavka.net/"     # Домен (тимчасово, якщо ще не визначився)
+  base: "/"                           # Базовий шлях (майже завжди "/")
+  trailingSlash: always                # Без "/" в кінці URL
+
+  googleSiteVerificationId: ""        # Якщо потрібно, додаси пізніше
+
+# Мета-дані для SEO (показується у пошуку)
+metadata:
+  title:
+    default: "Халявка"
+    template: "%s — Халявка"
+  description: "ГДЗ, готую домашні роботи онлайн. Все безкоштовно для школярів України."  # Короткий опис
+  robots:
+    index: true
+    follow: true
+  openGraph:
+    site_name: "Халявка"
+    images:
+      - url: "~/assets/images/default.png"
+        width: 1200
+        height: 628
+    type: website
+  twitter:
+    handle: ""
+    site: ""
+    cardType: summary_large_image
+
+i18n:
+  language: uk                      # Українська мова сайту
+  textDirection: ltr                # Зліва направо
+
+# Якщо буде блог, можна залишити так. Якщо не потрібен — приберемо пізніше
+apps:
+  blog:
+    isEnabled: false                # Вимкнули блог (можна ввімкнути true)
+    postsPerPage: 6
+
+    post:
+      isEnabled: false
+      permalink: '/%slug%'
+      robots:
+        index: true
+
+    list:
+      isEnabled: false
+      pathname: 'blog'
+      robots:
+        index: true
+
+    category:
+      isEnabled: false
+      pathname: 'category'
+      robots:
+        index: true
+
+    tag:
+      isEnabled: false
+      pathname: 'tag'
+      robots:
+        index: false
+
+    isRelatedPostsEnabled: false
+    relatedPostsCount: 0
+
+# Контакти (email — тут твій, якщо потрібно змінити)
+contacts:
+  email: "admin@haliavka.com.ua"
+
+# Аналитика 
+analytics:
+  vendors:
+    googleAnalytics:
+      id: 'G-WWKPMZRY5F' 
+      partytown: false # <--- Добавь эту строчку, если хочешь максимальную скорость - изменено!
+
+# Тема оформлення
+ui:
+  theme: 'system'   # Може бути "system", "light", "dark" тощо

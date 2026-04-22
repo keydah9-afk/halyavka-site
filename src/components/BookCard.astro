@@ -1,0 +1,24 @@
+---
+// ↓↓↓ 1. Импортируем компонент Image ↓↓↓
+import { Image } from 'astro:assets';
+const { cover, subject, author, type, href } = Astro.props;
+---
+
+<a href={href} 
+  class="h-full w-full bg-white rounded-xl shadow p-2 flex flex-col items-center transition hover:scale-105">
+  
+  {/* ↓↓↓ 2. Заменяем <img> на <Image /> и добавляем размеры ↓↓↓ */}
+  <Image 
+    src={cover} 
+    alt={`Обкладинка ${subject} ${author}`} 
+    width={130}
+    height={185}  
+    class="w-full max-h-[150px] object-contain rounded-lg mb-2 flex-shrink-0" 
+  />
+
+  <div class="flex-grow flex flex-col justify-end w-full">
+    <div class="subject text-[#003049] text-[15px] font-bold mb-1 text-center break-words">{subject}</div>
+    <div class="author text-[#C1121F] text-[15px] font-semibold mb-2 text-center break-words">{author}</div>
+    <div class="type bg-[#C1121F] text-white text-[12px] font-bold rounded px-2 py-0.5 uppercase mx-auto">{type}</div>
+  </div>
+</a>

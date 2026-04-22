@@ -1,0 +1,213 @@
+---
+/*
+  RecentlyViewed — блок "Ви нещодавно переглядали".
+  
+  Рендерит пустой контейнер в HTML. Данные подгружаются из localStorage
+  на клиенте через astro:page-load.
+  
+  Блок скрыт, пока нет данных — никакого мелькания.
+*/
+---
+
+<section id="recently-viewed" class="recently-viewed" hidden>
+  <h2 class="recently-viewed__title">
+    <span class="recently-viewed__icon" aria-hidden="true">🕓</span>
+    Ви нещодавно переглядали
+  </h2>
+  <ul class="recently-viewed__list" id="recently-viewed-list"></ul>
+</section>
+
+<script>
+  import { getViewedExcept } from '~/scripts/recently-viewed';
+
+  function renderRecentlyViewed() {
+    const section = document.getElementById('recently-viewed');
+    const list = document.getElementById('recently-viewed-list');
+    if (!section || !list) return;
+
+    const currentUrl = window.location.pathname;
+    const normalized = currentUrl.endsWith('/') ? currentUrl : currentUrl + '/';
+
+    const hash = window.location.hash.replace('#', '');
+    const currentExercise = hash && /^\d+$/.test(hash) ? parseInt(hash, 10) : undefined;
+
+    const items = getViewedExcept(normalized, currentExercise);
+
+    if (items.length === 0) {
+      section.hidden = true;
+      return;
+    }
+
+    // Строим HTML пилюль
+    list.innerHTML = items
+      .map((item) => {
+        const href = item.exercise
+          ? `${item.url}#${item.exercise}`
+          : item.url;
+        const label = item.exercise
+          ? `<b class="recently-viewed__num">№${item.exercise}</b> ${escapeHtml(item.title)}`
+          : escapeHtml(item.title);
+        return `<li><a href="${href}" class="recently-viewed__pill">${label}</a></li>`;
+      })
+      .join('');
+
+    section.hidden = false;
+  }
+
+  function escapeHtml(s: string): string {
+    return s
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  // При каждом переходе Astro View Transitions — перерисовываем
+  document.addEventListener('astro:page-load', renderRecentlyViewed);
+
+  // hashchange регистрируем ОДИН раз глобально (защита от накопления слушателей)
+  if (!(window as any).__halyavkaRecentHashListener) {
+    window.addEventListener('hashchange', renderRecentlyViewed);
+    (window as any).__halyavkaRecentHashListener = true;
+  }
+
+  // Первый запуск при обычной загрузке
+  if (document.readyState !== 'loading') {
+    renderRecentlyViewed();
+  } else {
+    document.addEventListener('DOMContentLoaded', renderRecentlyViewed);
+  }
+</script>
+
+<style>
+  /* Статические элементы остаются как есть */
+  .recently-viewed {
+    max-width: 1000px;
+    width: 90%;
+    margin: 2rem auto;
+    padding: 1.25rem 1.5rem;
+    background: #FDF0D5;
+    border: 2px solid #C1121F;
+    border-radius: 1rem;
+    text-align: left;
+  }
+
+  .recently-viewed__title {
+    font-size: 1.15rem;
+    font-weight: bold;
+    color: #003049;
+    margin: 0 0 0.9rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .recently-viewed__icon {
+    font-size: 1.1rem;
+  }
+
+  .recently-viewed__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    /* min(360px, 100%) — на узких экранах не вылезаем за контейнер */
+    grid-template-columns: repeat(auto-fill, minmax(min(360px, 100%), 1fr));
+    gap: 0.5rem;
+  }
+
+  /* Динамические элементы оборачиваем в :global() */
+  :global(.recently-viewed__pill) {
+    display: block;
+    background: #fff;
+    color: #003049;
+    padding: 0.6rem 0.9rem;
+    border-radius: 0.5rem;
+    border: 1.5px solid #C1121F;
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: all 0.15s ease;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  }
+
+  :global(.recently-viewed__pill:hover) {
+    background: #003049;
+    color: #FDF0D5;
+    border-color: #003049;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+  }
+
+  @media (max-width: 600px) {
+    .recently-viewed {
+      width: 98%;
+      padding: 1rem 0.75rem;
+    }
+    .recently-viewed__title {
+      font-size: 1rem;
+    }
+    .recently-viewed__list {
+      grid-template-columns: 1fr;
+    }
+    :global(.recently-viewed__pill) {
+      font-size: 0.95rem;
+      padding: 0.4rem 0.6rem;
+      /* На мобильных разрешаем перенос длинных заголовков */
+      white-space: normal;
+      overflow: visible;
+      line-height: 1.35;
+    }
+  }
+
+  @media (max-width: 450px) {
+    :global(.recently-viewed__pill) {
+      font-size: 0.85rem;
+      padding: 0.3rem 0.5rem;
+    }
+  }
+
+  @media (max-width: 380px) {
+    :global(.recently-viewed__pill) {
+      font-size: 0.75rem;
+      padding: 0.3rem 0.5rem;
+    }
+  }
+
+  /* Темная тема — статические элементы */
+  :global(.dark) .recently-viewed {
+    background: #003049;
+    border-color: #C1121F;
+  }
+  :global(.dark) .recently-viewed__title {
+    color: #FDF0D5;
+  }
+
+  /* Темная тема — динамические элементы */
+  :global(.dark .recently-viewed__pill) {
+    background: #001f30;
+    color: #FDF0D5;
+    border-color: #C1121F;
+  }
+  :global(.dark .recently-viewed__pill:hover) {
+    background: #C1121F;
+    color: #fff;
+    border-color: #C1121F;
+  }
+
+  /* Номер упражнения в пилюле */
+  :global(.recently-viewed__num) {
+    color: #C1121F;
+    font-weight: 700;
+  }
+
+  :global(.dark .recently-viewed__num) {
+    color: #ff6b6b;
+  }
+
+  :global(.recently-viewed__pill:hover .recently-viewed__num) {
+    color: inherit;
+  }
+</style>
