@@ -6,6 +6,7 @@ import RatingShare from '~/components/widgets/RatingShare.astro';
 import FacebookComments from '~/components/FacebookComments.astro'; 
 import RecentlyViewed from '../../../components/RecentlyViewed.astro';
 import GdzTracker from '../../../components/GdzTracker.astro';
+import BookSchema from '../../../components/BookSchema.astro';
 // === МЕСТА ДЛЯ ИЗМЕНЕНИЙ ДЛЯ НОВОГО УЧЕБНИКА ===
 
 // 1. ИМПОРТ ОБЛОЖКИ КНИГИ
@@ -58,10 +59,7 @@ const pageSeoProps = {
 // Для нового учебника: измените 'gdz-matematyka-bedenko' на имя папки нового ГДЗ.
 const galleryBasePath = "/images/3-klas/gdz-matematyka-lystopad-ch1";
 
-// Вспомогательная переменная для Schema.org, генерирующая пути к изображениям галереи
-const galleryImagesForSchema = images.map(num => ({
-  url: `${Astro.url.origin}${galleryBasePath}/${num}.webp`, // Предполагается .webp, измените если другой формат
-}));
+
 ---
 
 {/* Компонент PageLayout включает <head> и <body>, а также общие стили */}
@@ -69,58 +67,27 @@ const galleryImagesForSchema = images.map(num => ({
   
   
 
-  {/* JSON-LD Schema.org для улучшения отображения в поисковой выдаче */}
-  <script type="application/ld+json" set:html={JSON.stringify({
-    "@context": "http://schema.org",
-    "@graph": [
-      {
-        "@type": ["WebPage", "ItemPage"], // WebPage для страницы, ItemPage для конкретного элемента
-        "name": pageSeoProps.title, 
-        "description": pageSeoProps.description, 
-        "url": pageSeoProps.canonical, 
-        "image": coverImage.src, // URL обложки книги
-        "mainEntity": {
-          "@type": "Book",
-          "name": title,
-          "author": {
-            "@type": "Person",
-            "name": author
-          },
-          
-          "datePublished": year,
-          "description": description,
-          "image": coverImage.src, // URL обложки книги
-          "bookFormat": "https://schema.org/EBook", // Или другое подходящее значение
-          "potentialAction": {
-            "@type": "ReadAction",
-            "target": pageSeoProps.canonical // Ссылка на текущую страницу
-          }
-        }
-      },
-      // Дополнительный раздел для галереи изображений, если это применимо
-      {
-        "@type": "ImageGallery",
-        "name": `Галлерея изображений ГДЗ ${title}`,
-        "description": `Все страницы ГДЗ для учебника ${title}`,
-        "associatedMedia": galleryImagesForSchema.map(img => ({
-          "@type": "ImageObject",
-          "contentUrl": img.url
-        }))
-      }
-    ]
-  })} />
+  <BookSchema
+  title={title}
+  author={author}
+  year={year}
+  description={description}
+  coverImage={coverImage}
+  pageTitle={pageSeoProps.title}
+  pageDescription={pageSeoProps.description}
+/>
 
   <main itemprop="mainContentOfPage" class="text-center">
 
-    <BookCover
-      title={title}
-      author={author}
-      year={year}
-      img={coverImage} // Передаем ИМПОРТИРОВАННЫЙ ОБЪЕКТ coverImage
-      alt={`${title} обкладинка`} // Альтернативный текст для изображения
-      description={description}
-      typegdz={typegdz}
-    />
+<BookSchema
+  title={title}
+  author={author}
+  year={year}
+  description={description}
+  coverImage={coverImage}
+  pageTitle={pageSeoProps.title}
+  pageDescription={pageSeoProps.description}
+/>
     
     <ImageGallery
       id="gallery2"
