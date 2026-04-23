@@ -2,51 +2,24 @@
 /*
   BookSchema — JSON-LD для страницы ГДЗ halyavka.net.
 
-  Структура @graph:
-    1. Book + LearningResource (это наш ГДЗ)
-       - author: команда halyavka.net (кто составил решебник)
-       - publisher: halyavka.net (та же организация через @id)
-       - isBasedOn: Book (учебник-оригинал с автором)
-       - aggregateRating: рейтинг страницы
-       - learningResourceType / educationalUse / audience — семантика для Google и AI-поиска
-    2. WebPage — метаданные самой страницы
-    3. Organization (halyavka.net) — определяется один раз, переиспользуется через @id
-
-  Важные моменты:
-    - @type у главной сущности — массив ['Book', 'LearningResource'].
-      Это даёт rich result со звёздами (от Book) + семантику "учебного материала" (от LearningResource).
-    - isBasedOn используется вместо about — это семантически точнее для производной работы.
-    - Видимый "name" страницы не меняем — по нему уже идут клики в выдаче.
+  Рейтинг подтягивается из Supabase на этапе билда (SSG).
+  Если голосов мало (меньше MIN_VOTES) — блок aggregateRating не рендерится,
+  чтобы не раздражать Google Rich Results "рейтингом из одной оценки".
 */
 
 import type { ImageMetadata } from 'astro';
+import { supabase } from '~/lib/supabase';
 
-export interface Props {
-  /** Название страницы ГДЗ, например "ГДЗ математика 6 клас — Бевз 1 частина" */
+interface Props {
   title: string;
-  /** Автор(ы) учебника-оригинала, например "Г. Бевз, Д. Васильєва, Н. Владімірова" */
   author: string;
-  /** Год издания оригинального учебника */
   year: string | number;
-  /** Описание ГДЗ */
   description: string;
-  /** Обложка (Astro Image object) */
   coverImage: ImageMetadata;
-  /** Title для <WebPage> (длинный SEO-title) */
   pageTitle: string;
-  /** Description для <WebPage> */
   pageDescription: string;
-  /** Название оригинального учебника (если отличается от title ГДЗ) */
   textbookName?: string;
-  /** Дата последнего изменения страницы (по умолчанию — текущая дата билда) */
   dateModified?: Date;
-  /** Рейтинг */
-  rating?: {
-    value: string;
-    count: string | number;
-    best?: string;
-    worst?: string;
-  };
 }
 
 const {
@@ -59,77 +32,99 @@ const {
   pageDescription,
   textbookName,
   dateModified = new Date(),
-  rating = {
-    value: '4.8',
-    count: '66',
-    best: '5',
-    worst: '1',
-  },
 } = Astro.props;
 
 const pageUrl = Astro.url.href;
 const origin = Astro.url.origin;
 const imageUrl = `${origin}${coverImage.src}`;
 
-// Имя учебника для isBasedOn. Если не передано — берём title без префикса "ГДЗ "
 const aboutTextbookName = textbookName ?? title.replace(/^ГДЗ\s+/i, '');
+
+// --- Получаем реальный рейтинг из Supabase ---
+// bookId = путь страницы с trailing slash, как в book_rating_agg
+const bookId = Astro.url.pathname.endsWith('/')
+  ? Astro.url.pathname
+  : Astro.url.pathname + '/';
+
+const MIN_VOTES = 5;
+
+let aggregateRating: Record<string, unknown> | null = null;
+
+try {
+  const { data, error } = await supabase
+    .from('book_rating_agg')
+    .select('likes, dislikes')
+    .eq('book_id', bookId)
+    .maybeSingle();
+
+  if (error) {
+    console.warn(`[BookSchema] Supabase error for ${bookId}:`, error.message);
+  } else if (data) {
+    const likes = data.likes ?? 0;
+    const dislikes = data.dislikes ?? 0;
+    const total = likes + dislikes;
+
+    if (total >= MIN_VOTES) {
+      // Переводим лайки/дизлайки в шкалу 1-5
+      const score = (likes / total) * 4 + 1; // 0% лайков → 1, 100% → 5
+      aggregateRating = {
+        '@type': 'AggregateRating',
+        ratingValue: score.toFixed(1),
+        ratingCount: String(total),
+        bestRating: '5',
+        worstRating: '1',
+      };
+    }
+  }
+} catch (e) {
+  console.warn(`[BookSchema] Supabase fetch failed for ${bookId}:`, e);
+}
+
+// --- Собираем главную сущность Book + LearningResource ---
+const bookEntity: Record<string, unknown> = {
+  '@type': ['Book', 'LearningResource'],
+  '@id': `${pageUrl}#gdz`,
+  name: title,
+  description: description,
+  image: [imageUrl],
+  bookFormat: 'https://schema.org/EBook',
+  inLanguage: 'uk',
+  learningResourceType: 'Answer Key',
+  educationalLevel: 'Secondary education',
+  educationalUse: 'Self-study',
+  audience: {
+    '@type': 'EducationalAudience',
+    educationalRole: 'student',
+  },
+  author: {
+    '@type': 'Organization',
+    '@id': `${origin}/#organization`,
+    name: 'Команда halyavka.net',
+    url: `${origin}/pro-nas/`,
+  },
+  publisher: {
+    '@id': `${origin}/#organization`,
+  },
+  isBasedOn: {
+    '@type': 'Book',
+    name: aboutTextbookName,
+    author: {
+      '@type': 'Person',
+      name: author,
+    },
+    datePublished: String(year),
+    inLanguage: 'uk',
+  },
+};
+
+if (aggregateRating) {
+  bookEntity.aggregateRating = aggregateRating;
+}
 
 const schema = {
   '@context': 'https://schema.org',
   '@graph': [
-    {
-      // Двойной тип: Book даёт звёзды в выдаче, LearningResource — семантику учебного материала
-      '@type': ['Book', 'LearningResource'],
-      '@id': `${pageUrl}#gdz`,
-      name: title,
-      description: description,
-      image: [imageUrl],
-      bookFormat: 'https://schema.org/EBook',
-      inLanguage: 'uk',
-
-      // --- LearningResource-свойства ---
-      // Тип учебного ресурса — "сборник ответов", стандартное значение schema.org
-      learningResourceType: 'Answer Key',
-      // Уровень образования — средняя школа (2-10 классы)
-      educationalLevel: 'Secondary education',
-      // Основное назначение — самоподготовка
-      educationalUse: 'Self-study',
-      audience: {
-        '@type': 'EducationalAudience',
-        educationalRole: 'student',
-      },
-
-      // --- Автор и издатель решебника ---
-      author: {
-        '@type': 'Organization',
-        '@id': `${origin}/#organization`,
-        name: 'Команда halyavka.net',
-        url: `${origin}/pro-nas/`,
-      },
-      publisher: {
-        '@id': `${origin}/#organization`,
-      },
-
-      // --- На основе чего сделан ГДЗ: оригинальный учебник ---
-      isBasedOn: {
-        '@type': 'Book',
-        name: aboutTextbookName,
-        author: {
-          '@type': 'Person',
-          name: author,
-        },
-        datePublished: String(year),
-        inLanguage: 'uk',
-      },
-
-      aggregateRating: {
-        '@type': 'AggregateRating',
-        ratingValue: rating.value,
-        ratingCount: String(rating.count),
-        bestRating: rating.best ?? '5',
-        worstRating: rating.worst ?? '1',
-      },
-    },
+    bookEntity,
     {
       '@type': 'WebPage',
       '@id': pageUrl,
@@ -156,10 +151,7 @@ const schema = {
         '@type': 'ImageObject',
         url: `${origin}/logo-halyavka.png`,
       },
-      sameAs: [
-        'https://t.me/halyavka_net',
-        // Сюда можно добавить Facebook, YouTube, Instagram когда будут
-      ],
+      sameAs: ['https://t.me/halyavka_net'],
     },
   ],
 };
