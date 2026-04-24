@@ -9,15 +9,19 @@ const { title, author, typegdz, year, img, alt, description, publisher } = Astro
     <p itemprop="description">{description}</p>
   </div>
   <div class="book-bottom">
-    <div class="book-img">
-      {/* ИСПОЛЬЗУЕМ КОМПОНЕНТ <Image> ДЛЯ ОПТИМИЗАЦИИ */}
-      <Image
-        itemprop="thumbnailUrl"
-        src={img} // !!! img теперь должен быть импортированным объектом изображения !!!
-        alt={alt || title}
-        fetchpriority={"high"}
-        loading={"eager"} 
-      />
+ <div class="book-img">
+  <Image
+    itemprop="thumbnailUrl"
+    src={img}
+    alt={alt || title}
+    widths={[200, 400, 600, 800]}
+    sizes="(max-width: 600px) 200px, 400px"
+    fetchpriority="high"
+    loading="eager"
+    format="webp"
+    quality={80}
+  />
+</div>
     </div>
     <div class="book-authors">
       <div><b>Автор:</b> <span itemprop="author" itemscope itemtype="https://schema.org/Person"><span itemprop="name">{author}</span></span></div>

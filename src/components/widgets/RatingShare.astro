@@ -34,7 +34,17 @@ const { classTitle = "ГДЗ", url = Astro.url.href } = Astro.props;
     </div>
   </div>
 
-  <div class="relative">
+  <div class="flex items-center gap-2 relative">
+
+<button 
+  id="error-report-btn" 
+  class="flex items-center gap-1.5 rounded-lg bg-white dark:bg-slate-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 px-3 py-2 text-sm font-medium hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700 dark:hover:bg-amber-900/20 transition-colors"
+  title="Повідомити про помилку"
+>
+  <Icon name="tabler:bug" class="w-5 h-5" />
+  <span>Помилка</span>
+</button>
+
     <button id="share-btn" class="flex items-center gap-2 rounded-lg bg-[#003049] text-white px-4 py-2 text-sm font-semibold hover:bg-[#c1121f] transition-colors shadow-md">
       <Icon name="tabler:share" class="w-5 h-5" />
       <span>Поділитися</span>
@@ -82,10 +92,42 @@ const { classTitle = "ГДЗ", url = Astro.url.href } = Astro.props;
   </div>
 </div>
 
+<!-- МОДАЛКА "Повідомити про помилку" -->
+<div id="error-modal" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" role="dialog" aria-modal="true">
+  <div id="error-modal-backdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+  <div class="relative bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-md w-full p-6">
+    <button id="error-modal-close" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-2xl leading-none" aria-label="Закрити">×</button>
+    
+    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+      <Icon name="tabler:bug" class="w-6 h-6 text-amber-500" />
+      Дякуємо, що допомагаєте!
+    </h3>
+    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+      Оберіть зручний спосіб. Посилання на сторінку та номер вправи підставляються автоматично — вам залишиться лише описати, що саме не так.
+    </p>
+    
+    <div id="error-preview" class="bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-gray-700 rounded-lg p-3 font-mono text-xs text-gray-700 dark:text-gray-300 whitespace-pre-wrap mb-4 max-h-36 overflow-y-auto"></div>
+
+    <div class="flex flex-col gap-2">
+      <a id="error-btn-tg" href="#" target="_blank" rel="noopener" class="flex items-center justify-center gap-2 bg-[#229ED9] hover:bg-[#1a8ac0] text-white font-semibold py-2.5 px-4 rounded-lg transition-colors">
+        <Icon name="tabler:brand-telegram" class="w-5 h-5" />
+        Написати в Telegram
+      </a>
+      <a id="error-btn-email" href="#" class="flex items-center justify-center gap-2 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-200 font-semibold py-2.5 px-4 rounded-lg transition-colors border border-gray-200 dark:border-gray-600">
+        <Icon name="tabler:mail" class="w-5 h-5" />
+        Написати на email
+      </a>
+    </div>
+
+    <p class="text-xs text-gray-400 dark:text-gray-500 text-center mt-3">
+      Текст повідомлення автоматично скопіюється в буфер обміну при натисканні "Telegram"
+    </p>
+  </div>
+</div>
+
 <script>
   import { supabase } from '~/lib/supabase';
 
-  // Получить или создать анонимный ID для этого пользователя
   function getAnonId(): string {
     let id = localStorage.getItem('halyavka_anon_id');
     if (!id) {
@@ -95,13 +137,11 @@ const { classTitle = "ГДЗ", url = Astro.url.href } = Astro.props;
     return id;
   }
 
-  // bookId = путь страницы, нормализованный
   function getBookId(): string {
     const path = window.location.pathname;
     return path.endsWith('/') ? path : path + '/';
   }
 
-  // Показать звёзды по соотношению лайков к общему числу
   function formatRating(likes: number, dislikes: number): string {
     const total = likes + dislikes;
     if (total === 0) return '—';
@@ -121,7 +161,6 @@ const { classTitle = "ГДЗ", url = Astro.url.href } = Astro.props;
     const bookId = getBookId();
     const anonId = getAnonId();
 
-    // Загрузить агрегат
     const { data: agg } = await supabase
       .from('book_rating_agg')
       .select('likes, dislikes')
@@ -131,7 +170,6 @@ const { classTitle = "ГДЗ", url = Astro.url.href } = Astro.props;
     let likes = agg?.likes ?? 0;
     let dislikes = agg?.dislikes ?? 0;
 
-    // Узнать, голосовал ли уже этот аноним
     const { data: myVote } = await supabase
       .from('book_votes')
       .select('vote')
@@ -148,11 +186,9 @@ const { classTitle = "ГДЗ", url = Astro.url.href } = Astro.props;
         ratingTextEl.innerText = formatRating(likes, dislikes);
       }
 
-      // Снять все подсветки
       likeBtn!.classList.remove('bg-green-100', 'text-green-700', 'border-green-300');
       dislikeBtn!.classList.remove('bg-red-100', 'text-red-700', 'border-red-300');
 
-      // Подсветить текущий голос
       if (currentVote === 1) {
         likeBtn!.classList.add('bg-green-100', 'text-green-700', 'border-green-300');
       } else if (currentVote === -1) {
@@ -164,10 +200,8 @@ const { classTitle = "ГДЗ", url = Astro.url.href } = Astro.props;
     render();
 
     async function vote(newVote: number) {
-      // Оптимистичное обновление UI
       const prevVote = currentVote;
       if (prevVote === newVote) {
-        // Повторный клик — отмена голоса
         if (newVote === 1) likes--;
         else dislikes--;
         currentVote = null;
@@ -180,7 +214,6 @@ const { classTitle = "ГДЗ", url = Astro.url.href } = Astro.props;
       }
       render();
 
-      // Отправить на сервер
       const { data, error } = await supabase.rpc('cast_vote', {
         p_book_id: bookId,
         p_anon_id: anonId,
@@ -192,7 +225,6 @@ const { classTitle = "ГДЗ", url = Astro.url.href } = Astro.props;
         return;
       }
 
-      // Подстроиться под реальные значения из БД
       if (data && data[0]) {
         likes = data[0].likes;
         dislikes = data[0].dislikes;
@@ -233,9 +265,112 @@ const { classTitle = "ГДЗ", url = Astro.url.href } = Astro.props;
     }
   }
 
+  // ─── Error Report ────────────────────────────────────────────────────────────
+
+  const TG_BOT_USERNAME = 'halyavka_errors_bot';
+  const SUPPORT_EMAIL = 'admin@halyavka.net';
+
+  function buildErrorMessage(): string {
+    const url = window.location.href;
+    const hash = window.location.hash.replace('#', '');
+    const pageTitle = document.title;
+
+    const lines = [
+      `🐞 Помилка на сайті халявка`,
+      ``,
+      `Сторінка: ${pageTitle}`,
+      hash ? `Вправа: №${hash}` : null,
+      `Посилання: ${url}`,
+      ``,
+      `Опис помилки: `,
+    ].filter(Boolean);
+
+    return lines.join('\n');
+  }
+
+  async function saveErrorReport(channel: 'telegram' | 'email') {
+    try {
+      const hash = window.location.hash.replace('#', '');
+      await supabase.from('error_reports').insert({
+        book_id: getBookId(),
+        exercise_number: hash || null,
+        page_url: window.location.href,
+        page_title: document.title,
+        anon_id: getAnonId(),
+        channel: channel,
+      });
+    } catch (err) {
+      console.warn('Failed to save error report:', err);
+    }
+  }
+
+  function initErrorReport() {
+    const btn = document.getElementById('error-report-btn');
+    const modal = document.getElementById('error-modal');
+    const backdrop = document.getElementById('error-modal-backdrop');
+    const closeBtn = document.getElementById('error-modal-close');
+    const preview = document.getElementById('error-preview');
+    const btnTg = document.getElementById('error-btn-tg') as HTMLAnchorElement | null;
+    const btnEmail = document.getElementById('error-btn-email') as HTMLAnchorElement | null;
+
+    if (!btn || !modal || !preview || !btnTg || !btnEmail) return;
+
+    function openModal() {
+      const message = buildErrorMessage();
+      preview!.textContent = message;
+
+      const hash = window.location.hash.replace('#', '');
+      const subject = encodeURIComponent(hash ? `Помилка: вправа ${hash}` : 'Помилка на сайті');
+      const body = encodeURIComponent(message);
+
+      btnEmail!.href = `mailto:${SUPPORT_EMAIL}?subject=${subject}&body=${body}`;
+      btnEmail!.onclick = () => {
+        saveErrorReport('email');
+      };
+
+      btnTg!.href = `https://t.me/${TG_BOT_USERNAME}?start=report`;
+btnTg!.onclick = async () => {
+  // Сначала в буфер — пока клик "свежий"
+  try {
+    await navigator.clipboard.writeText(message);
+  } catch (err) {
+    console.warn('Clipboard failed', err);
+  }
+  // Потом уже в Supabase (fire-and-forget, не ждём)
+  saveErrorReport('telegram');
+};
+
+      modal!.classList.remove('hidden');
+      modal!.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      modal!.classList.add('hidden');
+      modal!.classList.remove('flex');
+      document.body.style.overflow = '';
+    }
+
+    btn.addEventListener('click', openModal);
+    closeBtn?.addEventListener('click', closeModal);
+    backdrop?.addEventListener('click', closeModal);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !modal!.classList.contains('hidden')) closeModal();
+    });
+
+    window.addEventListener('hashchange', () => {
+      if (!modal!.classList.contains('hidden')) {
+        preview!.textContent = buildErrorMessage();
+      }
+    });
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+
   function init() {
     initRating();
     initShare();
+    initErrorReport();
   }
 
   document.addEventListener('astro:page-load', init);
