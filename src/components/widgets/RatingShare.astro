@@ -7,6 +7,10 @@ export interface Props {
 }
 
 const { classTitle = "ГДЗ", url = Astro.url.href } = Astro.props;
+
+// Кодуємо для безпечної підстановки в href поширення
+const shareUrl = encodeURIComponent(url);
+const shareTitle = encodeURIComponent(classTitle);
 ---
 
 <div class="rating-share-widget flex flex-wrap items-center justify-between gap-4 rounded-xl bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-gray-700 p-4 mb-6 shadow-sm">
@@ -53,7 +57,7 @@ const { classTitle = "ГДЗ", url = Astro.url.href } = Astro.props;
        <div class="p-1">
  
         <a 
-          href={`https://www.facebook.com/sharer/sharer.php?u=${url}`} 
+          href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`}
           target="_blank" 
           rel="noopener noreferrer" 
           class="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-blue-50 dark:hover:bg-slate-700 rounded-md transition"
@@ -63,7 +67,7 @@ const { classTitle = "ГДЗ", url = Astro.url.href } = Astro.props;
         </a>
 
         <a 
-          href={`viber://forward?text=${url}`} 
+          href={`viber://forward?text=${shareUrl}`}
           target="_blank" 
           rel="noopener noreferrer" 
           class="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-purple-50 dark:hover:bg-slate-700 rounded-md transition"
@@ -77,11 +81,11 @@ const { classTitle = "ГДЗ", url = Astro.url.href } = Astro.props;
           Viber
         </a>
 
-        <a href={`https://wa.me/?text=${url}`} target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 rounded-md hover:bg-green-50 dark:hover:bg-slate-700 hover:text-green-500 transition">
+        <a href={`https://wa.me/?text=${shareUrl}`} target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 rounded-md hover:bg-green-50 dark:hover:bg-slate-700 hover:text-green-500 transition">
           <Icon name="tabler:brand-whatsapp" class="w-5 h-5 text-green-500" /> WhatsApp
         </a>
 
-        <a href={`https://t.me/share/url?url=${url}&text=${classTitle}`} target="_blank" class="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-blue-50 dark:hover:bg-slate-700 rounded-md">
+        <a href={`https://t.me/share/url?url=${shareUrl}&text=${shareTitle}`} target="_blank" class="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-blue-50 dark:hover:bg-slate-700 rounded-md">
           <Icon name="tabler:brand-telegram" class="w-5 h-5 text-blue-400" /> Telegram
         </a>
         <button id="copy-link-btn" class="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md border-t border-gray-100 dark:border-gray-700 mt-1">
@@ -128,6 +132,11 @@ const { classTitle = "ГДЗ", url = Astro.url.href } = Astro.props;
 <script>
   import { supabase } from '~/lib/supabase';
 
+  // ─── Глобальные ссылки на слушатели (для cleanup при View Transitions) ──────
+  let outsideClickHandler: ((e: MouseEvent) => void) | null = null;
+  let escKeyHandler: ((e: KeyboardEvent) => void) | null = null;
+  let hashChangeHandler: (() => void) | null = null;
+
   function getAnonId(): string {
     let id = localStorage.getItem('halyavka_anon_id');
     if (!id) {
@@ -145,9 +154,12 @@ const { classTitle = "ГДЗ", url = Astro.url.href } = Astro.props;
   function formatRating(likes: number, dislikes: number): string {
     const total = likes + dislikes;
     if (total === 0) return '—';
-    const score = (likes / total) * 5;
+    // Шкала 1–5, як у BookSchema (likes/total*4+1): 0% лайків → 1.0, 100% → 5.0
+    const score = (likes / total) * 4 + 1;
     return `${score.toFixed(1)}/5`;
   }
+
+  // ─── Rating ──────────────────────────────────────────────────────────────────
 
   async function initRating() {
     const likeBtn = document.getElementById('btn-like') as HTMLButtonElement | null;
@@ -161,21 +173,24 @@ const { classTitle = "ГДЗ", url = Astro.url.href } = Astro.props;
     const bookId = getBookId();
     const anonId = getAnonId();
 
-    const { data: agg } = await supabase
-      .from('book_rating_agg')
-      .select('likes, dislikes')
-      .eq('book_id', bookId)
-      .maybeSingle();
+    // ✅ Параллельные запросы — экономия ~700ms
+    const [aggResult, voteResult] = await Promise.all([
+      supabase
+        .from('book_rating_agg')
+        .select('likes, dislikes')
+        .eq('book_id', bookId)
+        .maybeSingle(),
+      supabase
+        .from('book_votes')
+        .select('vote')
+        .eq('book_id', bookId)
+        .eq('anon_id', anonId)
+        .maybeSingle(),
+    ]);
 
-    let likes = agg?.likes ?? 0;
-    let dislikes = agg?.dislikes ?? 0;
-
-    const { data: myVote } = await supabase
-      .from('book_votes')
-      .select('vote')
-      .eq('book_id', bookId)
-      .eq('anon_id', anonId)
-      .maybeSingle();
+    let likes = aggResult.data?.likes ?? 0;
+    let dislikes = aggResult.data?.dislikes ?? 0;
+    let currentVote: number | null = voteResult.data?.vote ?? null;
 
     function render() {
       likeCountEl!.innerText = String(likes);
@@ -196,10 +211,11 @@ const { classTitle = "ГДЗ", url = Astro.url.href } = Astro.props;
       }
     }
 
-    let currentVote: number | null = myVote?.vote ?? null;
     render();
 
     async function vote(newVote: number) {
+      // Знімок стану для відкату при помилці RPC
+      const snapLikes = likes, snapDislikes = dislikes, snapVote = currentVote;
       const prevVote = currentVote;
       if (prevVote === newVote) {
         if (newVote === 1) likes--;
@@ -222,6 +238,11 @@ const { classTitle = "ГДЗ", url = Astro.url.href } = Astro.props;
 
       if (error) {
         console.error('Vote error:', error);
+        // Відкат оптимістичного оновлення
+        likes = snapLikes;
+        dislikes = snapDislikes;
+        currentVote = snapVote;
+        render();
         return;
       }
 
@@ -232,9 +253,11 @@ const { classTitle = "ГДЗ", url = Astro.url.href } = Astro.props;
       }
     }
 
-    likeBtn.onclick = () => vote(1);
-    dislikeBtn.onclick = () => vote(-1);
+    likeBtn.addEventListener('click', () => vote(1));
+    dislikeBtn.addEventListener('click', () => vote(-1));
   }
+
+  // ─── Share ───────────────────────────────────────────────────────────────────
 
   function initShare() {
     const shareBtn = document.getElementById('share-btn');
@@ -245,23 +268,25 @@ const { classTitle = "ГДЗ", url = Astro.url.href } = Astro.props;
 
     dropdown.classList.add('hidden');
 
-    shareBtn.onclick = (e) => {
+    shareBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       dropdown.classList.toggle('hidden');
-    };
+    });
 
-    document.onclick = (e) => {
+    // ✅ Сохраняем ссылку на обработчик чтобы снять его при cleanup
+    outsideClickHandler = (e: MouseEvent) => {
       if (!shareBtn.contains(e.target as Node) && !dropdown.contains(e.target as Node)) {
         dropdown.classList.add('hidden');
       }
     };
+    document.addEventListener('click', outsideClickHandler);
 
     if (copyBtn) {
-      copyBtn.onclick = () => {
+      copyBtn.addEventListener('click', () => {
         navigator.clipboard.writeText(window.location.href);
         copyBtn.innerHTML = '<span class="text-green-600 text-xs font-bold">Скопійовано!</span>';
         setTimeout(() => copyBtn.innerHTML = 'Скопіювати', 1500);
-      };
+      });
     }
   }
 
@@ -329,16 +354,14 @@ const { classTitle = "ГДЗ", url = Astro.url.href } = Astro.props;
       };
 
       btnTg!.href = `https://t.me/${TG_BOT_USERNAME}?start=report`;
-btnTg!.onclick = async () => {
-  // Сначала в буфер — пока клик "свежий"
-  try {
-    await navigator.clipboard.writeText(message);
-  } catch (err) {
-    console.warn('Clipboard failed', err);
-  }
-  // Потом уже в Supabase (fire-and-forget, не ждём)
-  saveErrorReport('telegram');
-};
+      btnTg!.onclick = async () => {
+        try {
+          await navigator.clipboard.writeText(message);
+        } catch (err) {
+          console.warn('Clipboard failed', err);
+        }
+        saveErrorReport('telegram');
+      };
 
       modal!.classList.remove('hidden');
       modal!.classList.add('flex');
@@ -354,26 +377,77 @@ btnTg!.onclick = async () => {
     btn.addEventListener('click', openModal);
     closeBtn?.addEventListener('click', closeModal);
     backdrop?.addEventListener('click', closeModal);
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !modal!.classList.contains('hidden')) closeModal();
-    });
 
-    window.addEventListener('hashchange', () => {
+    // ✅ Сохраняем ссылку на Esc-handler
+    escKeyHandler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !modal!.classList.contains('hidden')) closeModal();
+    };
+    document.addEventListener('keydown', escKeyHandler);
+
+    // ✅ Сохраняем ссылку на hashchange-handler
+    hashChangeHandler = () => {
       if (!modal!.classList.contains('hidden')) {
         preview!.textContent = buildErrorMessage();
       }
-    });
+    };
+    window.addEventListener('hashchange', hashChangeHandler);
   }
 
-  // ─────────────────────────────────────────────────────────────────────────────
+  // ─── Инициализация всего блока ───────────────────────────────────────────────
 
-  function init() {
+  function initAll() {
     initRating();
     initShare();
     initErrorReport();
   }
 
+  function init() {
+    const root = document.querySelector('.rating-share-widget') as HTMLElement | null;
+    if (!root) return;
+
+    // Защита от двойной инициализации на той же странице
+    if (root.dataset.initialized === 'true') return;
+    root.dataset.initialized = 'true';
+
+    // Lazy-load: ждём пока блок появится в области видимости (+ 200px запас)
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          observer.disconnect();
+          initAll();
+        }
+      },
+      { rootMargin: '200px' }
+    );
+
+    observer.observe(root);
+  }
+
+  // ─── Cleanup при переходе между страницами (View Transitions) ────────────────
+
+  function cleanup() {
+    if (outsideClickHandler) {
+      document.removeEventListener('click', outsideClickHandler);
+      outsideClickHandler = null;
+    }
+    if (escKeyHandler) {
+      document.removeEventListener('keydown', escKeyHandler);
+      escKeyHandler = null;
+    }
+    if (hashChangeHandler) {
+      window.removeEventListener('hashchange', hashChangeHandler);
+      hashChangeHandler = null;
+    }
+    // Розблоковуємо скрол, якщо йдемо зі сторінки з відкритою модалкою
+    document.body.style.overflow = '';
+  }
+
+  // ─── Подписки на события жизненного цикла ────────────────────────────────────
+
   document.addEventListener('astro:page-load', init);
+  document.addEventListener('astro:before-swap', cleanup);
+
+  // Первый запуск при обычной загрузке (без View Transitions)
   if (document.readyState !== 'loading') {
     init();
   }
