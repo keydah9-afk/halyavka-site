@@ -1,0 +1,109 @@
+---
+/*
+  LabTools — панель інструментів Лабораторії, відфільтрованих за предметом книги.
+  Рендерить ЛИШЕ панель (схована). Перемикач — будь-який елемент із [data-lab-toggle]
+  на сторінці (кнопка «Лабораторія» в ряду дій).
+*/
+import { getToolsForSubject, LAB_BASE } from '~/data/lab-tools';
+
+export interface Props {
+  subject: string;
+}
+const { subject } = Astro.props;
+const tools = getToolsForSubject(subject);
+---
+
+{tools.length > 0 && (
+  <div id="lab-panel" class="lab-panel" hidden>
+    <div class="lab-grid">
+      {tools.map((t) => (
+        <a class="lab-card" href={`${LAB_BASE}/${t.slug}/`} target="_blank" rel="noopener">
+          <span class="lab-card__title">{t.title}</span>
+          <span class="lab-card__blurb">{t.blurb}</span>
+          <span class:list={['lab-card__tag', t.type === 'trainer' ? 'is-trainer' : 'is-utility']}>
+            {t.type === 'trainer' ? 'Тренажер' : 'Калькулятор'}
+          </span>
+        </a>
+      ))}
+    </div>
+  </div>
+)}
+
+<script>
+  function initLabPanel() {
+    const panel = document.getElementById('lab-panel');
+    const toggles = document.querySelectorAll('[data-lab-toggle]');
+    if (!panel || !toggles.length) return;
+
+    toggles.forEach((btn) => {
+      const el = btn as HTMLElement;
+      if (el.dataset.labBound === '1') return;
+      el.dataset.labBound = '1';
+      el.addEventListener('click', () => {
+        const willOpen = panel.hasAttribute('hidden');
+        if (willOpen) {
+          panel.removeAttribute('hidden');
+        } else {
+          panel.setAttribute('hidden', '');
+        }
+        el.setAttribute('aria-expanded', String(willOpen));
+      });
+    });
+  }
+
+  document.addEventListener('astro:page-load', initLabPanel);
+  if (document.readyState !== 'loading') initLabPanel();
+</script>
+
+<style>
+  .lab-panel {
+    max-width: 1000px;
+    width: 90%;
+    margin: 0.75rem auto 0;
+  }
+  .lab-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.6rem;
+  }
+  .lab-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.7rem 0.85rem;
+    background: #fff;
+    border: 1.5px solid #003049;
+    border-radius: 0.6rem;
+    text-decoration: none;
+    transition: transform 0.12s, box-shadow 0.12s;
+  }
+  .lab-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  }
+  .lab-card__title {
+    font-weight: 700;
+    color: #003049;
+    font-size: 0.95rem;
+  }
+  .lab-card__blurb {
+    font-size: 0.8rem;
+    color: #5f6b72;
+    line-height: 1.3;
+  }
+  .lab-card__tag {
+    align-self: flex-start;
+    margin-top: 0.15rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+  }
+  .lab-card__tag.is-trainer { background: #fdecef; color: #c1121f; }
+  .lab-card__tag.is-utility { background: #e7eef3; color: #003049; }
+
+  :global(.dark) .lab-card { background: #001f30; border-color: #0b3a55; }
+  :global(.dark) .lab-card__title { color: #fdf0d5; }
+  :global(.dark) .lab-card__blurb { color: #9fb3c0; }
+  :global(.dark) .lab-card__tag.is-utility { background: #0b3a55; color: #fdf0d5; }
+</style>
