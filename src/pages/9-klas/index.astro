@@ -1,7 +1,6 @@
 ---
 import BookCard from '../../components/BookCard.astro';
 import MainLayout from '../../layouts/PageLayout.astro';
-import SeoComponent from '../../components/common/Metadata.astro';
 import { Image } from 'astro:assets';
 import image8Klas from '../../assets/images/9-klas.webp';
 import FacebookComments from '~/components/FacebookComments.astro';
@@ -33,15 +32,13 @@ const pageSeoProps = {
   title: "ГДЗ 9 клас: Алгебра, Геометрія, Укр. мова, Фізика - Відповіді",
   description: "⭐ Готові домашні завдання (ГДЗ) для 9 класу. Відповіді до підручників з алгебри, української мови. Заходьте на ГДЗ Халявка та звіряйте домашню роботу за хвилину!",
   canonical: String(Astro.url.href),
-  openGraph: { images: [image8Klas], type: 'website', locale: 'uk_UA' },
+  openGraph: { images: [{ url: image8Klas }], type: 'website', locale: 'uk_UA' },
   twitter: { card: 'summary_large_image' },
 };
 
 const pageH1Title = "ГДЗ 9 клас";
 ---
-<SeoComponent {...pageSeoProps} />
-
-<MainLayout>
+<MainLayout metadata={pageSeoProps}>
   <script type="application/ld+json" set:html={JSON.stringify({ "@context": "http://schema.org", "@graph": [ { "@type": ["WebPage", "CollectionPage"], "name": pageSeoProps.title, "description": pageSeoProps.description, "url": pageSeoProps.canonical, "mainEntity": { "@type": "ItemList", "itemListElement": books.map((book, index) => ({ "@type": "ListItem", "position": index + 1, "item": { "@type": "CreativeWork", "name": `ГДЗ ${book.subject} ${book.author} (${book.type})`, "url": `${Astro.url.origin}${book.href}`, "image": `${Astro.url.origin}${book.cover}`, "author": { "@type": "Person", "name": book.author }, "genre": book.type, "about": book.subject } })) }, "image": image8Klas.src } ] })} />
 
   <main>

@@ -33,7 +33,7 @@ const typegdz = 'ГДЗ';
 
 // 4. SEO МЕТАДАННЫЕ ДЛЯ СТРАНИЦЫ
 const pageSeoProps = {
-  title: `${title} - Відповіді до підручника | halyavka.net`,
+  title: `${title} - Відповіді до підручника`,
   shortTitle: title,
   description: description,
   canonical: String(Astro.url.href),
@@ -64,9 +64,9 @@ const galleryBasePath = "/images/3-klas/gdz-matematyka-lystopad-ch1";
 
 {/* Компонент PageLayout включает <head> и <body>, а также общие стили */}
 <PageLayout metadata={pageSeoProps}>
-  
-  
+{/* SEOComponent отвечает за генерацию мета-тегов в <head> */}
 
+ 
   <BookSchema
   title={title}
   author={author}
@@ -79,15 +79,15 @@ const galleryBasePath = "/images/3-klas/gdz-matematyka-lystopad-ch1";
 
   <main itemprop="mainContentOfPage" class="text-center">
 
-<BookSchema
-  title={title}
-  author={author}
-  year={year}
-  description={description}
-  coverImage={coverImage}
-  pageTitle={pageSeoProps.title}
-  pageDescription={pageSeoProps.description}
-/>
+    <BookCover
+      title={title}
+      author={author}
+      year={year}
+      img={coverImage} // Передаем ИМПОРТИРОВАННЫЙ ОБЪЕКТ coverImage
+      alt={`${title} обкладинка`} // Альтернативный текст для изображения
+      description={description}
+      typegdz={typegdz}
+    />
     
     <ImageGallery
       id="gallery2"
