@@ -5,9 +5,11 @@
   Порядок під мобільний трафік: спершу вибір номера (теми відкриті), клік → «переносить»
   до картинки нижче. Переглядач/пошук/«← →»/зум/deep-link #N/запис #hash — як в ImageGallery.
 */
+type ExItem = number | string | { file: string; label: string | number };
 interface Topic {
   title: string;
-  numbers: number[];
+  numbers: ExItem[];
+  collapsed?: boolean; // якщо true — акордеон згорнутий за замовчуванням (напр. самоперевірки)
 }
 interface Paragraph {
   title: string;
@@ -27,11 +29,19 @@ export interface Props {
 
 const { id, base, sections, povtorennya } = Astro.props;
 
-const flat: number[] = [
+// Кожен елемент numbers — або число/рядок (підпис = ім'я файлу), або пара
+// { file, label } для картинок зі складним ім'ям (напр. z-d-s-1-vprava-1 з підписом «1»).
+const norm = (v: ExItem): { id: string; label: string } =>
+  v !== null && typeof v === 'object'
+    ? { id: String(v.file), label: String(v.label) }
+    : { id: String(v), label: String(v) };
+
+const allItems = [
   ...sections.flatMap((s) => s.paragraphs.flatMap((p) => p.topics.flatMap((t) => t.numbers))),
   ...(povtorennya?.numbers ?? []),
-];
-const idxOf = new Map<number, number>(flat.map((n, i) => [n, i]));
+].map(norm);
+const flat: string[] = allItems.map((i) => i.id);
+const idxOf = new Map<string, number>(flat.map((id, i) => [id, i]));
 const first = flat[0];
 ---
 
@@ -44,14 +54,17 @@ const first = flat[0];
           <div class="ex-para">
             <h3 class="ex-para-title">{p.title}</h3>
             {p.topics.map((t) => (
-              <details class="ex-topic" open>
+              <details class="ex-topic" open={!t.collapsed}>
                 <summary class="ex-summary">
                   <span>{t.title}</span>
                 </summary>
                 <div class="ex-grid">
-                  {t.numbers.map((n) => (
-                    <button type="button" class="ex-btn" data-num={n} data-index={idxOf.get(n)}>{n}</button>
-                  ))}
+                  {t.numbers.map((raw) => {
+                    const it = norm(raw);
+                    return (
+                      <button type="button" class="ex-btn" data-num={it.id} data-index={idxOf.get(it.id)}>{it.label}</button>
+                    );
+                  })}
                 </div>
               </details>
             ))}
@@ -68,9 +81,12 @@ const first = flat[0];
             <span>{povtorennya.title}</span>
           </summary>
           <div class="ex-grid">
-            {povtorennya.numbers.map((n) => (
-              <button type="button" class="ex-btn" data-num={n} data-index={idxOf.get(n)}>{n}</button>
-            ))}
+            {povtorennya.numbers.map((raw) => {
+              const it = norm(raw);
+              return (
+                <button type="button" class="ex-btn" data-num={it.id} data-index={idxOf.get(it.id)}>{it.label}</button>
+              );
+            })}
           </div>
         </details>
       </section>
@@ -154,8 +170,8 @@ const first = flat[0];
       if (!target) return;
       reset();
       img.src = `${base}/${num}.webp`;
-      img.alt = `ГДЗ до вправи ${num}`;
-      if (curNum) curNum.textContent = num;
+      img.alt = `ГДЗ до вправи ${target.textContent}`;
+      if (curNum) curNum.textContent = target.textContent;
       const det = target.closest('details');
       if (det && !det.open) det.open = true;
       if (window.history && window.history.replaceState) {
