@@ -19,11 +19,12 @@ export interface Props {
   city?: string;
   program?: string;
   count?: number;
+  countLabel?: string;
   updatedAt?: string;
   grif?: string;
 }
 
-const { title, author, year, typegdz, img, alt, description, publisher, city, program, count, updatedAt, grif } =
+const { title, author, year, typegdz, img, alt, description, publisher, city, program, count, countLabel = 'Вправ', updatedAt, grif } =
   Astro.props;
 
 const fmt = (iso?: string) => {
@@ -46,7 +47,7 @@ const updated = fmt(updatedAt);
       <div><dt>Рік</dt><dd>{year}</dd></div>
       {program && <div><dt>Програма</dt><dd>{program}</dd></div>}
       <div><dt>Тип</dt><dd>{typegdz}</dd></div>
-      {count && <div><dt>Вправ</dt><dd>{count}</dd></div>}
+      {count && <div><dt>{countLabel}</dt><dd>{count}</dd></div>}
       {updated && <div><dt>Оновлено</dt><dd>{updated}</dd></div>}
     </dl>
   </div>

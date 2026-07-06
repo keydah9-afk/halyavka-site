@@ -25,9 +25,11 @@ export interface Props {
   base: string;
   sections: Section[];
   povtorennya?: Topic;
+  noun?: string; // підпис одиниці у переглядачі (за замовч. «Вправа»; для англ. — «Стор.»)
+  altWord?: string; // слово в alt картинки (за замовч. «до вправи»; для англ. — «на сторінці»)
 }
 
-const { id, base, sections, povtorennya } = Astro.props;
+const { id, base, sections, povtorennya, noun = 'Вправа', altWord = 'до вправи' } = Astro.props;
 
 // Кожен елемент numbers — або число/рядок (підпис = ім'я файлу), або пара
 // { file, label } для картинок зі складним ім'ям (напр. z-d-s-1-vprava-1 з підписом «1»).
@@ -52,7 +54,7 @@ const first = flat[0];
         <h2 class="ex-rozdil">{s.rozdil}</h2>
         {s.paragraphs.map((p) => (
           <div class="ex-para">
-            <h3 class="ex-para-title">{p.title}</h3>
+            {p.title && <h3 class="ex-para-title">{p.title}</h3>}
             {p.topics.map((t) => (
               <details class="ex-topic" open={!t.collapsed}>
                 <summary class="ex-summary">
@@ -99,7 +101,7 @@ const first = flat[0];
         id={`${id}-img`}
         class="ex-img"
         src={`${base}/${first}.webp`}
-        alt={`ГДЗ до вправи ${first}`}
+        alt={`ГДЗ ${altWord} ${first}`}
         loading="lazy"
         onerror={`if(this.src.indexOf('placeholder.webp')===-1)this.src='/images/placeholder.webp';`}
       />
@@ -117,7 +119,7 @@ const first = flat[0];
         <button type="button" id={`${id}-search-button`} class="ex-ctrl" title="Знайти">🔍</button>
       </div>
       <div class="ex-actions">
-        <span id={`${id}-current-number`} class="ex-current" title="Поточна вправа">Вправа {first}</span>
+        <span id={`${id}-current-number`} class="ex-current" title="Поточна вправа">{noun} {first}</span>
         <button type="button" id={`${id}-zoom-in`} class="ex-ctrl" title="Збільшити">+</button>
         <button type="button" id={`${id}-zoom-out`} class="ex-ctrl" title="Зменшити">−</button>
         <button type="button" id={`${id}-prev-btn`} class="ex-ctrl" title="Попередня вправа">←</button>
@@ -127,7 +129,7 @@ const first = flat[0];
   </div>
 </div>
 
-<script define:vars={{ id, base, flat }}>
+<script define:vars={{ id, base, flat, noun, altWord }}>
   function initEx() {
     const root = document.getElementById(id);
     if (!root || root.dataset.initialized === 'true') return;
@@ -170,8 +172,8 @@ const first = flat[0];
       if (!target) return;
       reset();
       img.src = `${base}/${num}.webp`;
-      img.alt = `ГДЗ до вправи ${target.textContent}`;
-      if (curNum) curNum.textContent = 'Вправа ' + target.textContent;
+      img.alt = `ГДЗ ${altWord} ${target.textContent}`;
+      if (curNum) curNum.textContent = noun + ' ' + target.textContent;
       const det = target.closest('details');
       if (det && !det.open) det.open = true;
       if (window.history && window.history.replaceState) {

@@ -1,0 +1,122 @@
+---
+import PageLayout from '../../../layouts/PageLayout.astro';
+import BookHero from '~/components/BookHero.astro';
+import ExerciseGallery from '~/components/ExerciseGallery.astro';
+import LabTools from '~/components/LabTools.astro';
+import RatingShare from '~/components/widgets/RatingShare.astro';
+import FacebookComments from '~/components/FacebookComments.astro';
+import RecentlyViewed from '../../../components/RecentlyViewed.astro';
+import BookSchema from '../../../components/BookSchema.astro';
+import GdzTracker from '../../../components/GdzTracker.astro';
+
+import coverImage from '../../../assets/images/covers/7-angl-mova-kosta-gdz.webp';
+import { meta, sections, exercisesCount } from '~/data/kosta-english-7';
+
+const title = 'ГДЗ англійська мова 7 клас — Коста';
+const author = meta.author;
+const year = meta.year;
+const subject = 'Англійська мова';
+const description =
+  'Повне ГДЗ до підручника «Англійська мова (7-й рік навчання)» Prepare, Дж. Коста, М. Вільямс, І. Скрипник. Готові відповіді та переклади до вправ усіх юнітів, посторінково — зручно шукати за номером сторінки.';
+const typegdz = 'ГДЗ';
+
+const pageSeoProps = {
+  title: `${title} - Відповіді до підручника | halyavka.net`,
+  shortTitle: title,
+  description: description,
+  canonical: String(Astro.url.href),
+  openGraph: {
+    images: [{ url: coverImage, alt: title }],
+    type: 'book',
+    locale: 'uk_UA',
+  },
+  twitter: { card: 'summary_large_image' },
+};
+
+const galleryBasePath = '/images/7-klas/gdz-english-kosta';
+---
+
+<PageLayout metadata={pageSeoProps}>
+  <BookSchema
+    title={title}
+    author={author}
+    year={year}
+    description={description}
+    coverImage={coverImage}
+    pageTitle={pageSeoProps.title}
+    pageDescription={pageSeoProps.description}
+    dateModified={new Date(meta.updatedAt)}
+  />
+
+  <main itemprop="mainContentOfPage" class="text-center">
+    <BookHero
+      title={title}
+      author={author}
+      year={year}
+      typegdz={typegdz}
+      img={coverImage}
+      alt={`${title} обкладинка`}
+      description={description}
+      publisher={meta.publisher}
+      city={meta.city}
+      program={meta.program}
+      count={exercisesCount}
+      countLabel="Сторінок"
+      updatedAt={meta.updatedAt}
+      grif={meta.grif}
+    />
+
+    <ExerciseGallery
+      id="gallery2"
+      base={galleryBasePath}
+      sections={sections}
+      noun="Стор."
+      altWord="на сторінці"
+    />
+  </main>
+
+  <div class="flex flex-wrap justify-center gap-3 my-5">
+    <a href="/7-klas/" class="ex-action-btn">Усі ГДЗ для 7 класу</a>
+    <button type="button" data-lab-toggle aria-expanded="false" class="ex-action-btn ex-action-btn--lab">
+      🧪 Лабораторія
+    </button>
+  </div>
+  <LabTools subject={subject} />
+
+  <RatingShare classTitle={title} />
+
+  <RecentlyViewed />
+  <GdzTracker pageTitle={title} />
+
+  <div class="max-w-4xl mx-auto px-4">
+    <FacebookComments />
+  </div>
+</PageLayout>
+
+<style>
+  .ex-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    padding: 0 1.1rem;
+    border-radius: 8px;
+    border: 4px solid #c1121f;
+    background: #033049;
+    color: #fff;
+    font-weight: 600;
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition: transform 0.15s, background-color 0.15s, box-shadow 0.15s;
+  }
+  .ex-action-btn:hover {
+    transform: translateY(-1px);
+    background: #204060;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  .ex-action-btn--lab {
+    background: #c1121f;
+    border-color: #033049;
+  }
+  .ex-action-btn--lab:hover { background: #a10e1a; }
+</style>
