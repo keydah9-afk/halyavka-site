@@ -13,7 +13,7 @@ const shareUrl = encodeURIComponent(url);
 const shareTitle = encodeURIComponent(classTitle);
 ---
 
-<div class="rating-share-widget flex flex-wrap items-center justify-between gap-4 rounded-xl bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-gray-700 p-4 mb-6 shadow-sm">
+<div class="rating-share-widget flex flex-wrap items-center justify-between gap-4 rounded-xl bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-gray-700 p-4 mb-6 shadow-sm max-w-[1000px] w-[92%] mx-auto">
   
   <div class="flex items-center gap-4">
     <div class="flex items-center gap-2">
@@ -128,6 +128,15 @@ const shareTitle = encodeURIComponent(classTitle);
     </p>
   </div>
 </div>
+
+<style>
+  /* На вузьких екранах — та сама ширина, що й у галереї (.ex-root: 98%) */
+  @media (max-width: 600px) {
+    .rating-share-widget {
+      width: 98%;
+    }
+  }
+</style>
 
 <script>
   import { supabase } from '~/lib/supabase';
