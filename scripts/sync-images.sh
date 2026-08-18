@@ -20,17 +20,17 @@ echo "────────────────────────�
 # --chmod нормализует права на сервере, чтобы nginx/apache точно смог отдать файлы.
 "$RSYNC" -rltv $DRY \
   --chmod=D755,F644 \
-  --delete \
+  $PRUNE \
   --partial \
   --human-readable \
   --stats \
   "${JUNK[@]}" \
-  -e "ssh -p $SSH_PORT" \
+  -e "$SSH_CMD" \
   public/images/ "$SSH_TARGET:$WEBROOT/images/"
 
 echo
 if [ -n "$DRY" ]; then
-  echo "Это был пробный прогон. Посмотри список выше — особенно строки deleting."
+  echo "Это был пробный прогон."
   echo "Если всё верно, запускай:  ./scripts/sync-images.sh --go"
 else
   echo "✓ Картинки на сервере синхронизированы с public/images"

@@ -26,13 +26,14 @@ echo "→ Заливка dist/ (без images/)…"
   --human-readable \
   --stats \
   --exclude='/images/' \
+  --filter='protect /google*.html' \
   --filter='protect /.htaccess' \
   --filter='protect /.well-known/' \
   --filter='protect /cgi-bin/' \
   --filter='protect /logs/' \
   --filter='protect /stats/' \
   "${JUNK[@]}" \
-  -e "ssh -p $SSH_PORT" \
+  -e "$SSH_CMD" \
   dist/ "$SSH_TARGET:$WEBROOT/"
 
 echo
