@@ -1,0 +1,77 @@
+# Автодеплой halyavka.net на Hetzner Webhosting.
+#
+# Срабатывает на каждый push в master (и вручную кнопкой Run workflow).
+# Собирает сайт у GitHub и заливает готовый dist на сервер по rsync.
+#
+# Картинок в репозитории нет, поэтому сборка здесь весит ~100 МБ вместо 4.6 ГБ,
+# а папка images/ на сервере деплоем не трогается вообще.
+
+name: Deploy
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+# Два деплоя одновременно не запускаем, но и не отменяем начатый.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Установить зависимости
+        run: pnpm install --frozen-lockfile
+
+      - name: Собрать сайт
+        run: pnpm build
+
+      - name: Проверить, что собралось
+        run: |
+          test -f dist/index.html || { echo "::error::dist/index.html не создан — сборка пустая"; exit 1; }
+          echo "Размер сборки: $(du -sh dist | cut -f1), файлов: $(find dist -type f | wc -l)"
+
+      - name: Подготовить SSH
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Залить на сервер
+        run: |
+          rsync -rltvz --stats \
+            --chmod=D755,F644 \
+            --delete \
+            --exclude='/images/' \
+            --filter='protect /google*.html' \
+            --filter='protect /.htaccess' \
+            --filter='protect /.well-known/' \
+            --filter='protect /cgi-bin/' \
+            --filter='protect /logs/' \
+            --filter='protect /stats/' \
+            --exclude='.DS_Store' --exclude='._*' \
+            -e "ssh -p 222 -i ~/.ssh/deploy_key -o IdentitiesOnly=yes" \
+            dist/ "${{ secrets.DEPLOY_TARGET }}/"
+
+      - name: Проверить живой сайт
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' https://halyavka.net/)
+          echo "Главная отдаёт HTTP $code"
+          test "$code" = "200" || { echo "::error::Сайт отвечает $code вместо 200"; exit 1; }
