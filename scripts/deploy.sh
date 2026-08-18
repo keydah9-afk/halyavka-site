@@ -27,6 +27,7 @@ echo "→ Заливка dist/ (без images/)…"
   --stats \
   --exclude='/images/' \
   --filter='protect /google*.html' \
+  --filter='protect /dist.zip' \
   --filter='protect /.htaccess' \
   --filter='protect /.well-known/' \
   --filter='protect /cgi-bin/' \
