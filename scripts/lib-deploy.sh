@@ -60,7 +60,14 @@ for _arg in "$@"; do
     *) echo "✗ Неизвестный флаг: $_arg (можно --go и --prune)"; exit 1 ;;
   esac
 done
-[ -n "$PRUNE" ] && MODE="$MODE + УДАЛЕНИЕ лишнего на сервере"
+# При --prune ничего не стираем насовсем: rsync складывает вычищенные файлы
+# в датированную папку в домашней директории, вне вебрута. Вернуть — обычным
+# cp -a из этой папки обратно.
+if [ -n "$PRUNE" ]; then
+  QUARANTINE="/usr/home/halyam/pruned-$(date +%Y%m%d-%H%M)"
+  PRUNE="$PRUNE --backup --backup-dir=$QUARANTINE"
+  MODE="$MODE + вычистка лишнего в $QUARANTINE"
+fi
 
 # Мусор macOS на сервер не тащим никогда.
 JUNK=(--exclude='.DS_Store' --exclude='._*' --exclude='.Spotlight-V100' --exclude='.fseventsd')
