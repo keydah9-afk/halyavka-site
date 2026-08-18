@@ -14,3 +14,6 @@ dist/
 # Мастер-копия лежит здесь локально, на сервер заливается напрямую через rsync
 # (см. scripts/sync-images.sh). Историю почистили git-filter-repo 2026-08-18.
 public/images/
+
+# Личные доступы к серверу — не в git
+scripts/deploy.local.env
