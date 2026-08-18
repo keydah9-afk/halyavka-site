@@ -84,6 +84,26 @@ jobs:
             -e "ssh -p 222 -i ~/.ssh/deploy_key -o IdentitiesOnly=yes" \
             dist/ "${{ secrets.DEPLOY_TARGET }}/"
 
+      # Cloudflare держит копии страниц у себя и после заливки какое-то время
+      # продолжает отдавать старые. Старая страница зовёт файлы обложек со
+      # старыми хэшами, а их уже нет — картинки бьются. Сбрасываем кеш сразу.
+      # Делаем это и в холостом прогоне тоже: сброс безвреден, зато сразу видно,
+      # что токен и Zone ID заданы верно.
+      - name: Сбросить кеш Cloudflare
+        run: |
+          resp=$(curl -s -X POST \
+            "https://api.cloudflare.com/client/v4/zones/${{ secrets.CF_ZONE_ID }}/purge_cache" \
+            -H "Authorization: Bearer ${{ secrets.CF_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            --data '{"purge_everything":true}')
+          if echo "$resp" | grep -q '"success":true'; then
+            echo "::notice::Кеш Cloudflare сброшен"
+          else
+            echo "Ответ Cloudflare: $resp"
+            echo "::error::Cloudflare отклонил запрос — проверь секреты CF_API_TOKEN и CF_ZONE_ID"
+            exit 1
+          fi
+
       - name: Проверить живой сайт
         if: ${{ !inputs.dry_run }}
         run: |
