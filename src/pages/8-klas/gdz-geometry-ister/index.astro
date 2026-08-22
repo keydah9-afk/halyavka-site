@@ -8,6 +8,7 @@ import RecentlyViewed from '../../../components/RecentlyViewed.astro';
 
 import BookSchema from '../../../components/BookSchema.astro';
 import GdzTracker from '../../../components/GdzTracker.astro';
+import { videos, playlistId } from '~/data/videos/ister-geometry-8';
 // === МЕСТА ДЛЯ ИЗМЕНЕНИЙ ДЛЯ НОВОГО УЧЕБНИКА ===
 
 // 1. ИМПОРТ ОБЛОЖКИ КНИГИ
@@ -114,7 +115,7 @@ const galleryBasePath = "/images/8-klas/gdz-geometry-ister";
     <span>Усі гдз для 8 класу</span>
   </a>
 </div>
-<RatingShare classTitle={title} />
+<RatingShare classTitle={title} videos={videos} playlistId={playlistId} />
 
 <RecentlyViewed />
   <GdzTracker pageTitle={title} />

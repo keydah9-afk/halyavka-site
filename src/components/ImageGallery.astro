@@ -480,7 +480,7 @@ const initialNumber = list.length > 0 ? list[0] : '-';
     
     // Если в URL есть hash с номером — открываем его
     const initialHash = window.location.hash.replace('#', '');
-    if (initialHash && /^\d+$/.test(initialHash) && list.map(String).includes(initialHash)) {
+    if (initialHash && /^\d+(\.\d+)?$/.test(initialHash) && list.map(String).includes(initialHash)) {
       updateToImage(initialHash, true);
     }
 

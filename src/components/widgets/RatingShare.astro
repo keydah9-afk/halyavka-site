@@ -1,23 +1,35 @@
 ---
 import { Icon } from 'astro-icon/components';
+import VideoSolution from '~/components/VideoSolution.astro';
 
 export interface Props {
   classTitle?: string;
   url?: string;
+  /** Мапа «номер вправи → id ролика на YouTube». Є — з’являється кнопка відеорозв’язання. */
+  videos?: Record<string, string>;
+  playlistId?: string;
+  noun?: string; // підпис одиниці, як у ExerciseGallery («Вправа» / «Стор.»)
 }
 
-const { classTitle = "ГДЗ", url = Astro.url.href } = Astro.props;
+const { classTitle = "ГДЗ", url = Astro.url.href, videos, playlistId, noun = 'Вправа' } = Astro.props;
+
+const hasVideos = !!videos && Object.keys(videos).length > 0;
 
 // Кодуємо для безпечної підстановки в href поширення
 const shareUrl = encodeURIComponent(url);
 const shareTitle = encodeURIComponent(classTitle);
 ---
 
-<div class="rating-share-widget flex flex-wrap items-center justify-between gap-4 rounded-xl bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-gray-700 p-4 mb-6 shadow-sm max-w-[1000px] w-[92%] mx-auto">
+<div
+  class:list={[
+    'rating-share-widget flex flex-wrap items-center justify-between gap-4 rounded-xl bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-gray-700 p-4 mb-6 shadow-sm max-w-[1000px] w-[92%] mx-auto',
+    hasVideos && 'has-video',
+  ]}
+>
   
-  <div class="flex items-center gap-4">
+  <div class="rs-rating flex items-center gap-4">
     <div class="flex items-center gap-2">
-       <span class="text-sm font-semibold text-gray-500 dark:text-gray-400">Корисно?</span>
+       <span class="rs-useful text-sm font-semibold text-gray-500 dark:text-gray-400">Корисно?</span>
        
        <button id="btn-like" class="group flex items-center gap-1 rounded-full bg-white dark:bg-slate-700 px-3 py-1.5 text-sm font-bold text-gray-700 dark:text-gray-200 shadow-sm transition hover:bg-green-50 hover:text-green-600 border border-gray-200 dark:border-gray-600">
          <Icon name="tabler:thumb-up" class="w-5 h-5 group-hover:scale-110 transition-transform" />
@@ -38,7 +50,7 @@ const shareTitle = encodeURIComponent(classTitle);
     </div>
   </div>
 
-  <div class="flex items-center gap-2 relative">
+  <div class="rs-actions flex items-center gap-2">
 
 <button 
   id="error-report-btn" 
@@ -49,6 +61,7 @@ const shareTitle = encodeURIComponent(classTitle);
   <span>Помилка</span>
 </button>
 
+    <div class="rs-share relative">
     <button id="share-btn" class="flex items-center gap-2 rounded-lg bg-[#003049] text-white px-4 py-2 text-sm font-semibold hover:bg-[#c1121f] transition-colors shadow-md">
       <Icon name="tabler:share" class="w-5 h-5" />
       <span>Поділитися</span>
@@ -92,9 +105,22 @@ const shareTitle = encodeURIComponent(classTitle);
           <Icon name="tabler:copy" class="w-5 h-5 text-gray-400" /> Скопіювати
         </button>
        </div>
+      </div>
     </div>
   </div>
+
+  {hasVideos && (
+    <button type="button" data-video-cta hidden class="vs-cta" title="Дивитись відеорозв’язання">
+      <Icon name="tabler:brand-youtube" class="vs-cta__icon" />
+      <span class="vs-cta__label"
+        ><span class="vs-cta__long">Дивитись відеорозв’язання</span
+        ><span class="vs-cta__short">Відеорозв’язок</span> <span class="vs-cta__num"></span
+      ></span>
+    </button>
+  )}
 </div>
+
+{hasVideos && <VideoSolution videos={videos!} playlistId={playlistId} noun={noun} />}
 
 <!-- МОДАЛКА "Повідомити про помилку" -->
 <div id="error-modal" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" role="dialog" aria-modal="true">
@@ -135,6 +161,66 @@ const shareTitle = encodeURIComponent(classTitle);
     .rating-share-widget {
       width: 98%;
     }
+  }
+
+  /* ── Розкладка для книг із відеорозв’язаннями ──────────────────────────────
+     Сітка з іменованими зонами: DOM-порядок один, а розстановка різна на широких
+     і вузьких екранах. .rs-actions «розчиняється» (display: contents), щоб
+     «Помилка» і «Поділитися» стали самостійними комірками сітки.
+     Книги без відео лишаються на попередній flex-розкладці — їх це не чіпає. */
+  .rating-share-widget.has-video {
+    display: grid;
+    align-items: center;
+    grid-template-columns: 1fr auto auto;
+    grid-template-areas:
+      'rating error share'
+      'video  video video';
+    gap: 0.7rem 0.5rem;
+  }
+  .has-video .rs-actions { display: contents; }
+  .has-video .rs-rating { grid-area: rating; }
+  .has-video #error-report-btn { grid-area: error; }
+  .has-video .rs-share { grid-area: share; }
+  .has-video .vs-cta { grid-area: video; }
+
+  /* До поточної вправи відео немає — рядок з кнопкою просто зникає */
+  .rating-share-widget.has-video.video-off {
+    grid-template-areas: 'rating error share';
+  }
+
+  @media (max-width: 639px) {
+    /* «Поділитися» піднімається в перший рядок до оцінки, а «Помилка» стає
+       поруч із широкою кнопкою відео. Слово «Корисно?» прибираємо — воно
+       з’їдає місце, а зміст зрозумілий з пальців вгору/вниз. */
+    .rating-share-widget.has-video {
+      grid-template-columns: 1fr auto;
+      grid-template-areas:
+        'rating share'
+        'video  error';
+      gap: 0.5rem;
+      padding: 0.7rem;
+    }
+    .rating-share-widget.has-video.video-off {
+      grid-template-areas:
+        'rating share'
+        '.      error';
+    }
+    .has-video .rs-useful { display: none; }
+    .has-video .rs-rating { gap: 0.5rem; }
+    .has-video #error-report-btn { padding-left: 0.55rem; padding-right: 0.55rem; }
+    .has-video #share-btn { padding-left: 0.65rem; padding-right: 0.65rem; }
+  }
+
+  /* Найвужчі телефони (320–360): перший стовпчик сітки не може стиснутись нижче
+     за свій вміст, тож підтискаємо самі лайки, інакше правий стовпчик вилазить. */
+  @media (max-width: 360px) {
+    .has-video .rs-rating { gap: 0.3rem; }
+    .has-video #btn-like,
+    .has-video #btn-dislike {
+      padding-left: 0.45rem;
+      padding-right: 0.45rem;
+    }
+    .has-video #share-btn { padding-left: 0.5rem; padding-right: 0.5rem; }
   }
 </style>
 

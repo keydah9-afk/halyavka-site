@@ -11,6 +11,7 @@ import GdzTracker from '../../../components/GdzTracker.astro';
 
 import coverImage from '../../../assets/images/covers/7-geom-ister-2024-gdz.webp';
 import { meta, sections, exercisesCount } from '~/data/ister-geometry-7';
+import { videos, playlistId } from '~/data/videos/ister-geometry-7';
 
 const title = 'ГДЗ геометрія 7 клас — Істер';
 const author = meta.author;
@@ -76,7 +77,7 @@ const galleryBasePath = '/images/7-klas/gdz-geometry-ister';
   </div>
   <LabTools subject={subject} />
 
-  <RatingShare classTitle={title} />
+  <RatingShare classTitle={title} videos={videos} playlistId={playlistId} />
 
   <RecentlyViewed />
   <GdzTracker pageTitle={title} />
