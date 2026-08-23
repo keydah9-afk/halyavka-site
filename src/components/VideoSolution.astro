@@ -139,6 +139,19 @@ const { videos, playlistId, noun = 'Вправа' } = Astro.props;
     will-change: transform;
   }
 
+  /* Портрет телефона: ні рамки, ні полів — відео на всю ширину екрана.
+     Смуга лишається перетягуваною вгору/вниз, просто вона тепер на всю ширину. */
+  @media (max-width: 639px) {
+    .vs-modal { padding: 0; }
+    .vs-panel {
+      max-width: none;
+      border: 0;
+      border-radius: 0;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+    }
+    .vs-foot { padding: 0.5rem 0.7rem; }
+  }
+
   .vs-head {
     display: flex;
     align-items: center;
@@ -304,6 +317,40 @@ const { videos, playlistId, noun = 'Вправа' } = Astro.props;
       }
     }
 
+    /* Адресний рядок браузера прибирається лише справжнім Fullscreen API.
+       Викликати його можна тільки під час дії користувача, тому просимо повний
+       екран на тапі по кнопці — і він переживає поворот телефона. На десктопі
+       не чіпаємо (там вікно й так велике), на iPhone Safari метод відсутній —
+       тихо лишаємось на CSS-емуляції. */
+    function isTouch() {
+      return window.matchMedia('(pointer: coarse)').matches;
+    }
+
+    function enterNativeFullscreen(el) {
+      if (!el || !isTouch()) return;
+      if (document.fullscreenElement || document.webkitFullscreenElement) return;
+      const req = el.requestFullscreen || el.webkitRequestFullscreen;
+      if (!req) return;
+      try {
+        const p = req.call(el, { navigationUI: 'hide' });
+        if (p && p.catch) p.catch(() => {});
+      } catch (_) {
+        /* браузер відмовив — не критично, лишається звичайна модалка */
+      }
+    }
+
+    function exitNativeFullscreen() {
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) return;
+      const exit = document.exitFullscreen || document.webkitExitFullscreen;
+      if (!exit) return;
+      try {
+        const p = exit.call(document);
+        if (p && p.catch) p.catch(() => {});
+      } catch (_) {
+        /* вже вийшли */
+      }
+    }
+
     let lastTrigger = null;
 
     function openModal(num, trigger) {
@@ -335,6 +382,8 @@ const { videos, playlistId, noun = 'Вправа' } = Astro.props;
       applyOffset();
       modal.hidden = false;
       document.body.style.overflow = 'hidden';
+      // Поки ми всередині кліку — просимо повний екран (потім вже не дозволять)
+      enterNativeFullscreen(modal);
       syncFullscreen();
       const closeBtn = modal.querySelector('.vs-tool--close');
       if (closeBtn) closeBtn.focus({ preventScroll: true });
@@ -343,6 +392,7 @@ const { videos, playlistId, noun = 'Вправа' } = Astro.props;
     function closeModal() {
       const modal = $('vs-modal');
       if (!modal || modal.hidden) return;
+      exitNativeFullscreen();
       modal.hidden = true;
       modal.classList.remove('is-fullscreen');
       const slot = $('vs-slot');
@@ -441,6 +491,8 @@ const { videos, playlistId, noun = 'Вправа' } = Astro.props;
       else mql.addListener(syncFullscreen);
       window.addEventListener('resize', syncFullscreen);
       window.addEventListener('orientationchange', syncFullscreen);
+      document.addEventListener('fullscreenchange', syncFullscreen);
+      document.addEventListener('webkitfullscreenchange', syncFullscreen);
 
       keyHandler = (e) => {
         if (e.key === 'Escape') closeModal();
@@ -471,6 +523,8 @@ const { videos, playlistId, noun = 'Вправа' } = Astro.props;
       window.removeEventListener('hashchange', syncCta);
       window.removeEventListener('resize', syncFullscreen);
       window.removeEventListener('orientationchange', syncFullscreen);
+      document.removeEventListener('fullscreenchange', syncFullscreen);
+      document.removeEventListener('webkitfullscreenchange', syncFullscreen);
     }
 
     document.addEventListener('astro:page-load', initVideoSolution);
