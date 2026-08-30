@@ -11142,13 +11142,38 @@ export const rozdily: RozdilNav[] = sections.map((s, i) => {
   };
 });
 
-// Карта «id завдання → slug розділу». Потрібна головній сторінці, щоб старе
-// посилання виду /gdz-himiya-grygorovych/#121 перекинуло на потрібний розділ.
+// Скільки ПЕРШИХ розділів живуть просто на головній сторінці книги.
+// Сенс: поки книга невелика, тримаємо все на одному URL — так учень нікуди
+// не переходить, а сигнали не розмазуються по кількох сторінках. Розділи,
+// що не вмістилися, від'їжджають на власні /rozdil-<n>/ і НІКОЛИ не переїжджають
+// назад — тобто жодне посилання з часом не ламається.
+// Збільшувати це число не можна: розділ, який уже опублікований окремо,
+// має там і лишитися. Зменшувати — можна, коли головна стає заважкою.
+export const ROZDILY_ON_MAIN = 2;
+
+/** Розділи, що рендеряться прямо на головній. */
+export const mainSections: SolutionSection[] = sections.slice(0, ROZDILY_ON_MAIN);
+
+/** Розділи, що живуть на окремих сторінках (для них генеруються маршрути). */
+export const rozdilyOffMain: RozdilNav[] = rozdily.slice(ROZDILY_ON_MAIN);
+
+// Карта «id завдання → slug розділу» ТІЛЬКИ для тих розділів, що винесені
+// на окремі сторінки. Головна за нею перекидає посилання виду
+// /gdz-himiya-grygorovych/#305 на потрібну сторінку. Для завдань, які лежать
+// на самій головній, запису немає — і перекидати нікуди не треба.
 export const itemRozdil: Record<string, string> = Object.fromEntries(
-  sections.flatMap((s, i) =>
-    s.paragraphs.flatMap((p) => p.topics.flatMap((t) => t.items.map((it) => [it.id, `rozdil-${i + 1}`])))
-  )
+  sections
+    .slice(ROZDILY_ON_MAIN)
+    .flatMap((s, i) =>
+      s.paragraphs.flatMap((p) =>
+        t_items(p).map((it) => [it.id, `rozdil-${i + 1 + ROZDILY_ON_MAIN}`])
+      )
+    )
 );
+
+function t_items(p: SolutionSection['paragraphs'][number]) {
+  return p.topics.flatMap((t) => t.items);
+}
 
 // Розділи підручника, які ще не розібрані. Показуємо їх у змісті сірим —
 // щоб було видно, що книга в роботі, але окремих сторінок для них не створюємо

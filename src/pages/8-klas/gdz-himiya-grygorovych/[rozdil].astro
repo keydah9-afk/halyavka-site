@@ -16,18 +16,25 @@ import { Image } from 'astro:assets';
 import { plural } from '~/utils/plural';
 
 import coverImage from '~/assets/images/covers/8-himiya-grygorovych-2025.webp';
-import { meta, sections, rozdily } from '~/data/grygorovych-himiya-8';
+import { meta, sections, rozdily, rozdilyOffMain, ROZDILY_ON_MAIN } from '~/data/grygorovych-himiya-8';
 
+// Сторінки генеруються ЛИШЕ для розділів, яких немає на головній.
+// Поки ROZDILY_ON_MAIN покриває всю книгу, маршрут не дає жодної сторінки —
+// і це нормально: все лежить на одному URL.
 export function getStaticPaths() {
-  return rozdily.map((nav, i) => ({
-    params: { rozdil: nav.slug },
-    props: {
-      section: sections[i],
-      nav,
-      prev: rozdily[i - 1] ?? null,
-      next: rozdily[i + 1] ?? null,
-    },
-  }));
+  return rozdilyOffMain.map((nav) => {
+    const i = nav.num - 1;
+    return {
+      params: { rozdil: nav.slug },
+      props: {
+        section: sections[i],
+        nav,
+        // «Попередній» веде на головну, якщо попередній розділ лишився там.
+        prev: i > ROZDILY_ON_MAIN ? rozdily[i - 1] : null,
+        next: rozdily[i + 1] ?? null,
+      },
+    };
+  });
 }
 
 const { section, nav, prev, next } = Astro.props;
