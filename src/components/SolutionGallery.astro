@@ -259,7 +259,9 @@ const molarSum = (parts: [string, number, number][]) => {
     const renderProgress = () => {
       if (!progressEl) return;
       const total = flat.length;
-      const n = done.size;
+      // Прогрес зберігається на всю книгу (спільний storageKey), а сторінка показує
+      // лише свій розділ — тому рахуємо не весь набір, а перетин із цією сторінкою.
+      const n = flat.reduce((acc, key) => acc + (done.has(key) ? 1 : 0), 0);
       progressEl.textContent =
         'Розібрано: ' + n + ' із ' + total + (n === total && total > 0 ? ' — красунчик! 🎉' : '');
       items.forEach((el, key) => el.classList.toggle('sol-item-done', done.has(key)));

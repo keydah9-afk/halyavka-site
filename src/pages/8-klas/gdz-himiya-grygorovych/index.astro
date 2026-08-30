@@ -1,7 +1,12 @@
 ---
+/*
+  Головна сторінка книги. Самих розв'язань тут НЕМАЄ — вони живуть на
+  /rozdil-<n>/, бо в підручнику 411 вправ і на одній сторінці це вже
+  чотиримегабайтний HTML. Тут — обкладинка, зміст із перелінковкою
+  на розділи, тренажер і все навколокнижкове.
+*/
 import PageLayout from '../../../layouts/PageLayout.astro';
 import BookHero from '~/components/BookHero.astro';
-import SolutionGallery from '~/components/SolutionGallery.astro';
 import ChemTrainer from '~/components/ChemTrainer.astro';
 import LabTools from '~/components/LabTools.astro';
 import RatingShare from '~/components/widgets/RatingShare.astro';
@@ -11,7 +16,15 @@ import BookSchema from '../../../components/BookSchema.astro';
 import GdzTracker from '../../../components/GdzTracker.astro';
 
 import coverImage from '../../../assets/images/covers/8-himiya-grygorovych-2025.webp';
-import { meta, sections, trainerPool, exercisesCount } from '~/data/grygorovych-himiya-8';
+import { plural } from '~/utils/plural';
+import {
+  meta,
+  trainerPool,
+  exercisesCount,
+  rozdily,
+  rozdilyPlanned,
+  itemRozdil,
+} from '~/data/grygorovych-himiya-8';
 
 const title = 'ГДЗ хімія 8 клас — Григорович';
 const author = meta.author;
@@ -20,6 +33,8 @@ const subject = 'Хімія';
 const description =
   'Інтерактивне ГДЗ до підручника «Хімія, 8 клас» Олексій Григорович, Олександр Недоруб. Два режими на вибір: готова відповідь, як у зошиті, або покрокове розв\'язання з поясненнями і тренажером. Розрахункові відповіді звірено з відповідями підручника.';
 const typegdz = 'ГДЗ';
+
+const base = '/8-klas/gdz-himiya-grygorovych/';
 
 const pageSeoProps = {
   title: `${title} - Відповіді до підручника | halyavka.net`,
@@ -65,11 +80,45 @@ const pageSeoProps = {
       grif={meta.grif}
     />
 
-    <SolutionGallery
-      id="himiya8"
-      sections={sections}
-      checkedNote="Звірено з відповідями підручника (стор. 319)"
-    />
+    <section class="toc" aria-labelledby="toc-title">
+      <h2 class="toc__title" id="toc-title">Оберіть розділ</h2>
+      <p class="toc__hint">
+        Розв'язання розбито по розділах підручника — так сторінка вантажиться швидко навіть на телефоні.
+        Усередині розділу все як завжди: кнопки-номери, пошук і два режими — «⚡ Списати» та «🧠 Зрозуміти».
+      </p>
+
+      <ol class="toc__list">
+        {rozdily.map((r) => (
+          <li class="toc__item">
+            <a href={`${base}${r.slug}/`} class="toc__card">
+              <span class="toc__num">{r.num}</span>
+              <span class="toc__body">
+                <span class="toc__name">{r.shortTitle}</span>
+                <span class="toc__meta">
+                  <b>{r.count}</b> {plural(r.count, 'завдання', 'завдання', 'завдань')}
+                  {r.exFrom && r.exTo ? <> · вправи {r.exFrom}–{r.exTo}</> : null}
+                  {' '}· {r.paragraphs.length} {plural(r.paragraphs.length, 'параграф', 'параграфи', 'параграфів')}
+                </span>
+                <span class="toc__paras">{r.paragraphs.map((p) => p.title).join(' · ')}</span>
+              </span>
+              <span class="toc__go" aria-hidden="true">→</span>
+            </a>
+          </li>
+        ))}
+
+        {rozdilyPlanned.map((r) => (
+          <li class="toc__item">
+            <div class="toc__card toc__card--soon" aria-disabled="true">
+              <span class="toc__num">{r.num}</span>
+              <span class="toc__body">
+                <span class="toc__name">{r.title.replace(/^Розділ\s*\d+\.\s*/, '')}</span>
+                <span class="toc__meta">розв'язання {r.note}</span>
+              </span>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </section>
 
     <ChemTrainer id="himiya8-trainer" pool={trainerPool} />
   </main>
@@ -92,7 +141,122 @@ const pageSeoProps = {
   </div>
 </PageLayout>
 
+{/* Старі посилання виду /gdz-himiya-grygorovych/#121 вели на завдання, коли всі
+    вправи були на одній сторінці. Тепер перекидаємо на потрібний розділ, щоб
+    збережені закладки й поширені посилання не ламалися. */}
+<script is:inline define:vars={{ itemRozdil, base }}>
+  (function redirectLegacyHash() {
+    const go = () => {
+      const raw = window.location.hash.replace('#', '');
+      if (!raw) return;
+      const id = decodeURIComponent(raw);
+      const slug = itemRozdil[id];
+      if (slug) window.location.replace(base + slug + '/#' + encodeURIComponent(id));
+    };
+    go();
+    window.addEventListener('hashchange', go);
+  })();
+</script>
+
 <style>
+  .toc {
+    max-width: 1000px;
+    width: 92%;
+    margin: 0 auto 1.5rem;
+    text-align: left;
+  }
+  .toc__title {
+    margin: 0 0 0.35rem;
+    font-size: clamp(1.15rem, 4vw, 1.5rem);
+    font-weight: 800;
+    color: #003049;
+  }
+  :global(.dark) .toc__title { color: #fdf0d5; }
+  .toc__hint {
+    margin: 0 0 0.9rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #33475a;
+  }
+  :global(.dark) .toc__hint { color: #a8c2d4; }
+
+  .toc__list { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.7rem; }
+
+  .toc__card {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.85rem 1rem;
+    border: 3px solid #c1121f;
+    border-radius: 12px;
+    background: #fff;
+    color: #003049;
+    text-decoration: none;
+    transition: transform 0.15s, box-shadow 0.15s, background-color 0.15s;
+  }
+  :global(.dark) .toc__card { background: #0b2436; color: #fdf0d5; }
+  a.toc__card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    background: #fdf0d5;
+  }
+  :global(.dark) a.toc__card:hover { background: #123249; }
+
+  .toc__card--soon {
+    border-color: #b9c4cc;
+    border-style: dashed;
+    opacity: 0.72;
+    cursor: default;
+  }
+  :global(.dark) .toc__card--soon { border-color: #3c5a70; }
+
+  .toc__num {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #c1121f;
+    color: #fff;
+    font-size: 1.25rem;
+    font-weight: 800;
+  }
+  .toc__card--soon .toc__num { background: #b9c4cc; color: #55636e; }
+  :global(.dark) .toc__card--soon .toc__num { background: #3c5a70; color: #cfe3f0; }
+
+  .toc__body { min-width: 0; flex: 1 1 auto; display: block; }
+  .toc__name {
+    display: block;
+    font-size: 1.02rem;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+  .toc__meta {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.86rem;
+    color: #c1121f;
+  }
+  .toc__card--soon .toc__meta { color: #6b7a86; }
+  :global(.dark) .toc__card--soon .toc__meta { color: #8ea6b8; }
+  .toc__paras {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: #55636e;
+  }
+  :global(.dark) .toc__paras { color: #9db4c5; }
+
+  .toc__go { flex: 0 0 auto; font-size: 1.4rem; font-weight: 800; color: #c1121f; }
+
+  @media (max-width: 520px) {
+    .toc__card { gap: 0.7rem; padding: 0.7rem 0.75rem; }
+    .toc__num { width: 36px; height: 36px; font-size: 1.05rem; }
+    .toc__go { display: none; }
+  }
+
   .ex-action-btn {
     display: inline-flex;
     align-items: center;

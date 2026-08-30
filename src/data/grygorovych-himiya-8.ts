@@ -11112,3 +11112,49 @@ export const exercisesCount = sections.reduce(
   (acc, s) => acc + s.paragraphs.reduce((a, p) => a + p.topics.reduce((t, tp) => t + tp.items.length, 0), 0),
   0
 );
+
+// Книга розбита на сторінки по розділах: головна сторінка — зміст і перелінковка,
+// а самі розв'язання живуть на /rozdil-<n>/. Дані для навігації рахуємо тут один раз,
+// щоб головна й сторінки розділів завжди були узгоджені між собою.
+export interface RozdilNav {
+  slug: string; // 'rozdil-2'
+  num: number; // 2
+  title: string; // 'Розділ 2. Досліджуємо гази довкілля'
+  shortTitle: string; // 'Досліджуємо гази довкілля'
+  paragraphs: { title: string; pages?: string }[];
+  count: number; // скільки завдань усього в розділі
+  exFrom?: number; // перший номер вправи (без «Поміркуйте» й пунктів досліджень)
+  exTo?: number; // останній номер вправи
+}
+
+export const rozdily: RozdilNav[] = sections.map((s, i) => {
+  const items = s.paragraphs.flatMap((p) => p.topics.flatMap((t) => t.items));
+  const nums = items.map((it) => Number(it.label)).filter((n) => Number.isFinite(n));
+  return {
+    slug: `rozdil-${i + 1}`,
+    num: i + 1,
+    title: s.rozdil,
+    shortTitle: s.rozdil.replace(/^Розділ\s*\d+\.\s*/, ''),
+    paragraphs: s.paragraphs.map((p) => ({ title: p.title, pages: p.pages })),
+    count: items.length,
+    exFrom: nums.length ? Math.min(...nums) : undefined,
+    exTo: nums.length ? Math.max(...nums) : undefined,
+  };
+});
+
+// Карта «id завдання → slug розділу». Потрібна головній сторінці, щоб старе
+// посилання виду /gdz-himiya-grygorovych/#121 перекинуло на потрібний розділ.
+export const itemRozdil: Record<string, string> = Object.fromEntries(
+  sections.flatMap((s, i) =>
+    s.paragraphs.flatMap((p) => p.topics.flatMap((t) => t.items.map((it) => [it.id, `rozdil-${i + 1}`])))
+  )
+);
+
+// Розділи підручника, які ще не розібрані. Показуємо їх у змісті сірим —
+// щоб було видно, що книга в роботі, але окремих сторінок для них не створюємо
+// (порожня сторінка = тонкий контент). Щойно розділ з'явиться в `sections`,
+// його треба прибрати звідси.
+export const rozdilyPlanned: { num: number; title: string; note: string }[] = [
+  { num: 3, title: 'Розділ 3. Досліджуємо будову атома', note: 'у роботі' },
+  { num: 4, title: 'Розділ 4. Досліджуємо будову речовини', note: 'у роботі' },
+];
