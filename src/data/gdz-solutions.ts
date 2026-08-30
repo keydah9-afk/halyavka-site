@@ -30,6 +30,7 @@ export type SolutionWidget =
       symbol?: string; // підпис величини у підсумку, HTML: 'M' (за замовч.) або 'M<sub>r</sub>'
       unit?: string; // одиниця після числа: 'г/моль' (за замовч.); '' — для безрозмірної Mr
     }
+  // prompt і note, як і html, рендеряться через set:html — можна вживати <sub>, <sup>, <b>
   | { type: 'choice'; prompt: string; options: { html: string; correct?: boolean; note: string }[] };
 
 export interface Solution {
