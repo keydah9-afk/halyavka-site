@@ -45,6 +45,14 @@ const allItems = [
 const flat: string[] = allItems.map((i) => i.id);
 const idxOf = new Map<string, number>(flat.map((id, i) => [id, i]));
 const first = flat[0];
+
+// Підпис і alt беруться з ПІДПИСУ кнопки, а не з імені файлу: у книг зі складними
+// іменами (vprava-1-1, povt-7klas/1) інакше в статичному HTML друкувався шлях до файлу.
+// Словесним підписам («Стор. 7») слово «Вправа» не приклеюємо — той самий розбір, що в show().
+const firstLabel = allItems[0]?.label ?? '';
+const firstNamed = /^\d+(\.\d+)?$/.test(firstLabel);
+const firstCaption = firstNamed ? `${noun} ${firstLabel}` : firstLabel;
+const firstAlt = firstNamed ? `ГДЗ ${altWord} ${firstLabel}` : `ГДЗ, ${firstLabel}`;
 ---
 
 <div id={id} class="ex-root">
@@ -101,7 +109,7 @@ const first = flat[0];
         id={`${id}-img`}
         class="ex-img"
         src={`${base}/${first}.webp`}
-        alt={`ГДЗ ${altWord} ${first}`}
+        alt={firstAlt}
         loading="lazy"
         onerror={`if(this.src.indexOf('placeholder.webp')===-1)this.src='/images/placeholder.webp';`}
       />
@@ -119,7 +127,7 @@ const first = flat[0];
         <button type="button" id={`${id}-search-button`} class="ex-ctrl" title="Знайти">🔍</button>
       </div>
       <div class="ex-actions">
-        <span id={`${id}-current-number`} class="ex-current" title="Поточна вправа">{noun} {first}</span>
+        <span id={`${id}-current-number`} class="ex-current" title="Поточна вправа">{firstCaption}</span>
         <button type="button" id={`${id}-zoom-in`} class="ex-ctrl" title="Збільшити">+</button>
         <button type="button" id={`${id}-zoom-out`} class="ex-ctrl" title="Зменшити">−</button>
         <button type="button" id={`${id}-prev-btn`} class="ex-ctrl" title="Попередня вправа">←</button>
@@ -172,8 +180,11 @@ const first = flat[0];
       if (!target) return;
       reset();
       img.src = `${base}/${num}.webp`;
-      img.alt = `ГДЗ ${altWord} ${target.textContent}`;
-      if (curNum) curNum.textContent = noun + ' ' + target.textContent;
+      // У кнопок-рубрик підпис уже словесний («Стор. 253») — тоді «Вправа» не додаємо.
+      const lbl = target.textContent;
+      const named = /^\d+(\.\d+)?$/.test(lbl);
+      img.alt = named ? `ГДЗ ${altWord} ${lbl}` : `ГДЗ, ${lbl}`;
+      if (curNum) curNum.textContent = named ? noun + ' ' + lbl : lbl;
       const det = target.closest('details');
       if (det && !det.open) det.open = true;
       if (window.history && window.history.replaceState) {
@@ -239,8 +250,10 @@ const first = flat[0];
     img.addEventListener('load', dims);
     if (img.complete) dims();
 
-    const h = window.location.hash.replace('#', '');
-    if (h && /^\d+$/.test(h) && flatStr.includes(h)) {
+    // Deep-link #N. Номер може бути з крапкою (1.10 в Істера) або з підпапкою
+    // (dsr/dsr1-1), тому регекспу немає — досить перевірки «такий id справді є».
+    const h = decodeURIComponent((window.location.hash || '').replace('#', '')).trim();
+    if (h && flatStr.includes(h)) {
       show(h, true);
     } else {
       const fb = root.querySelector('.ex-btn');

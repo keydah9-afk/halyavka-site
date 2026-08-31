@@ -13,9 +13,35 @@
 export type ViewedItem = {
   url: string;
   title: string;
-  exercise?: number;
+  exercise?: string;
   viewedAt: number;
 };
+
+/**
+ * Номер вправи з #hash сторінки.
+ *
+ * Раніше тут стояло `/^\d+$/` + parseInt, тому книги з номерами виду 1.15, vprava-1-1,
+ * dsr/dsr1-1 писалися в історію БЕЗ номера: плашка «Нещодавно переглянуті» показувала
+ * лише назву книги й вела на її початок замість потрібної вправи.
+ *
+ * Беремо hash як рядок, але лише якщо на сторінці справді є така кнопка галереї
+ * (нова `.ex-btn[data-num]` або стара `[data-image-id]`) — інакше в історію потрапляли б
+ * службові якорі (#comments тощо).
+ */
+export function exerciseFromHash(): string | undefined {
+  if (typeof document === 'undefined' || typeof window === 'undefined') return undefined;
+  let raw: string;
+  try {
+    raw = decodeURIComponent((window.location.hash || '').replace('#', '')).trim();
+  } catch {
+    return undefined;
+  }
+  if (!raw || raw.includes('"') || raw.includes('\\')) return undefined;
+  const found = document.querySelector(
+    `.ex-btn[data-num="${raw}"], [data-image-id="${raw}"]`
+  );
+  return found ? raw : undefined;
+}
 
 const STORAGE_KEY = 'halyavka_recently_viewed';
 const MAX_ITEMS = 15;
@@ -82,7 +108,7 @@ export function trackView(item: Omit<ViewedItem, 'viewedAt'>): void {
 /** Возвращает историю, исключая точно текущий url + exercise. */
 export function getViewedExcept(
   currentUrl: string,
-  currentExercise?: number
+  currentExercise?: string
 ): ViewedItem[] {
   const currentKey = keyOf({ url: currentUrl, exercise: currentExercise });
   return getViewed().filter((v) => keyOf(v) !== currentKey);

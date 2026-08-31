@@ -23,7 +23,7 @@ const pageUrl = Astro.url.pathname;
 </script>
 
 <script>
-  import { trackView } from '~/scripts/recently-viewed';
+  import { trackView, exerciseFromHash } from '~/scripts/recently-viewed';
 
   // Один глобальный обработчик hashchange на всю сессию.
   // Читает свежие данные из window.__halyavkaPageData при каждом срабатывании,
@@ -35,8 +35,7 @@ const pageUrl = Astro.url.pathname;
     const { pageTitle, pageUrl } = data;
     const normalized = pageUrl.endsWith('/') ? pageUrl : pageUrl + '/';
 
-    const hash = window.location.hash.replace('#', '');
-    const exercise = hash && /^\d+$/.test(hash) ? parseInt(hash, 10) : undefined;
+    const exercise = exerciseFromHash();
 
     trackView({ url: normalized, title: pageTitle, exercise });
   }
@@ -55,8 +54,7 @@ const pageUrl = Astro.url.pathname;
     const { pageTitle, pageUrl } = data;
     const normalized = pageUrl.endsWith('/') ? pageUrl : pageUrl + '/';
 
-    const hash = window.location.hash.replace('#', '');
-    const exercise = hash && /^\d+$/.test(hash) ? parseInt(hash, 10) : undefined;
+    const exercise = exerciseFromHash();
 
     trackView({ url: normalized, title: pageTitle, exercise });
   }

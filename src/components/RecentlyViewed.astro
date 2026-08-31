@@ -18,7 +18,7 @@
 </section>
 
 <script>
-  import { getViewedExcept } from '~/scripts/recently-viewed';
+  import { getViewedExcept, exerciseFromHash } from '~/scripts/recently-viewed';
 
   function renderRecentlyViewed() {
     const section = document.getElementById('recently-viewed');
@@ -28,8 +28,7 @@
     const currentUrl = window.location.pathname;
     const normalized = currentUrl.endsWith('/') ? currentUrl : currentUrl + '/';
 
-    const hash = window.location.hash.replace('#', '');
-    const currentExercise = hash && /^\d+$/.test(hash) ? parseInt(hash, 10) : undefined;
+    const currentExercise = exerciseFromHash();
 
     const items = getViewedExcept(normalized, currentExercise);
 
