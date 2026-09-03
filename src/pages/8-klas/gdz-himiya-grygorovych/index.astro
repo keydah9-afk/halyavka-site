@@ -1,17 +1,15 @@
 ---
 /*
-  Головна сторінка книги. Розв'язання лежать ПРЯМО ТУТ — доки книга вміщається
-  в розумну вагу. Так учень нікуди не переходить: прийшов із пошуку, знайшов
-  номер, розібрався. Один URL збирає всі сигнали замість трьох слабких.
+  Сторінка книги в загальному форматі сайту: кнопки вправ + переглядач картинок.
+  Картинки-розв'язання генеруються з текстових відповідей режиму «Списати»
+  (scripts/gdz/render-answers.ts), тому виглядають однаково з рештою книг.
 
-  Коли головна стане заважкою, наступні розділи підуть на власні /rozdil-<n>/
-  (див. ROZDILY_ON_MAIN у даних). Уже опубліковані розділи назад не переїжджають,
-  тому жодне посилання від цього не ламається.
+  Покроковий розбір, віджети й тренажер живуть на himiya.halyavka.net —
+  сюди вони не повертаються: сторінка має лишатися легкою.
 */
 import PageLayout from '../../../layouts/PageLayout.astro';
 import BookHero from '~/components/BookHero.astro';
-import SolutionGallery from '~/components/SolutionGallery.astro';
-import ChemTrainer from '~/components/ChemTrainer.astro';
+import ExerciseGallery from '~/components/ExerciseGallery.astro';
 import LabTools from '~/components/LabTools.astro';
 import RatingShare from '~/components/widgets/RatingShare.astro';
 import FacebookComments from '~/components/FacebookComments.astro';
@@ -20,26 +18,18 @@ import BookSchema from '../../../components/BookSchema.astro';
 import GdzTracker from '../../../components/GdzTracker.astro';
 
 import coverImage from '../../../assets/images/covers/8-himiya-grygorovych-2025.webp';
-import {
-  meta,
-  mainSections,
-  rozdilyOffMain,
-  rozdilyPlanned,
-  trainerPool,
-  exercisesCount,
-  itemRozdil,
-} from '~/data/grygorovych-himiya-8';
+import { meta, sections, exercisesCount } from '~/data/grygorovych-himiya-8-images';
 
 const title = 'ГДЗ хімія 8 клас — Григорович';
 const author = meta.author;
 const year = meta.year;
 const subject = 'Хімія';
 const description =
-  'Інтерактивне ГДЗ до підручника «Хімія, 8 клас» Олексій Григорович, Олександр Недоруб. Два режими на вибір: готова відповідь, як у зошиті, або покрокове розв\'язання з поясненнями і тренажером. Розрахункові відповіді звірено з відповідями підручника.';
+  'Повне ГДЗ до підручника «Хімія, 8 клас» Олексій Григорович, Олександр Недоруб. Готові відповіді на вправи, запитання «Поміркуйте» і всі навчальні дослідження. Розрахункові задачі звірено з відповідями підручника.';
 const typegdz = 'ГДЗ';
 
-const base = '/8-klas/gdz-himiya-grygorovych/';
-const hasMoreRozdily = rozdilyOffMain.length > 0 || rozdilyPlanned.length > 0;
+const galleryBasePath = '/images/8-klas/gdz-himiya-grygorovych';
+const razborUrl = 'https://himiya.halyavka.net/8-klas/grygorovych/';
 
 const pageSeoProps = {
   title: `${title} - Відповіді до підручника | halyavka.net`,
@@ -85,45 +75,21 @@ const pageSeoProps = {
       grif={meta.grif}
     />
 
-    <SolutionGallery
-      id="himiya8"
-      sections={mainSections}
-      storageKey="himiya8"
-      checkedNote="Звірено з відповідями підручника (стор. 319)"
-    />
+    <ExerciseGallery id="gallery2" base={galleryBasePath} sections={sections} deepLinkBase={razborUrl} />
 
-    {hasMoreRozdily && (
-      <section class="more" aria-labelledby="more-title">
-        <h2 class="more__title" id="more-title">Решта розділів</h2>
-        <ul class="more__list">
-          {rozdilyOffMain.map((r) => (
-            <li>
-              <a class="more__item" href={`${base}${r.slug}/`}>
-                <span class="more__num">{r.num}</span>
-                <span class="more__body">
-                  <span class="more__name">{r.shortTitle}</span>
-                  {r.exFrom && r.exTo ? <span class="more__meta">вправи {r.exFrom}–{r.exTo}</span> : null}
-                </span>
-                <span class="more__go" aria-hidden="true">&rarr;</span>
-              </a>
-            </li>
-          ))}
-          {rozdilyPlanned.map((r) => (
-            <li>
-              <div class="more__item more__item--soon" aria-disabled="true">
-                <span class="more__num">{r.num}</span>
-                <span class="more__body">
-                  <span class="more__name">{r.title.replace(/^Розділ\s*\d+\.\s*/, '')}</span>
-                  <span class="more__meta">розв'язання {r.note}</span>
-                </span>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
-    )}
-
-    <ChemTrainer id="himiya8-trainer" pool={trainerPool} />
+    <section class="razbor">
+      <a class="razbor__card" href={razborUrl}>
+        <span class="razbor__icon" aria-hidden="true">🧠</span>
+        <span class="razbor__body">
+          <span class="razbor__title">Не зрозумів, звідки взялася відповідь?</span>
+          <span class="razbor__text">
+            На <b>himiya.halyavka.net</b> те саме завдання розібране покроково: формула, підстановка,
+            перевірка. Плюс тренажер задач і самоперевірка.
+          </span>
+        </span>
+        <span class="razbor__go" aria-hidden="true">&rarr;</span>
+      </a>
+    </section>
   </main>
 
   <div class="flex flex-wrap justify-center gap-3 my-5">
@@ -144,47 +110,20 @@ const pageSeoProps = {
   </div>
 </PageLayout>
 
-{/* Коли розділ виїжджає на власну сторінку, посилання виду
-    /gdz-himiya-grygorovych/#305 має вести туди, а не в нікуди.
-    Для завдань, що лишилися на головній, у карті запису немає — скрипт мовчить. */}
-<script is:inline define:vars={{ itemRozdil, base }}>
-  (function redirectMovedHash() {
-    if (!itemRozdil || !Object.keys(itemRozdil).length) return;
-    const go = () => {
-      const raw = window.location.hash.replace('#', '');
-      if (!raw) return;
-      const id = decodeURIComponent(raw);
-      const slug = itemRozdil[id];
-      if (slug) window.location.replace(base + slug + '/#' + encodeURIComponent(id));
-    };
-    go();
-    window.addEventListener('hashchange', go);
-  })();
-</script>
-
 <style>
-  /* Посилання на розділи, яких немає на цій сторінці. Блок з'являється сам,
-     щойно в ROZDILY_ON_MAIN лишиться менше розділів, ніж є в книзі. */
-  .more {
+  /* Місток на піддомен із покроковим розбором. Стоїть одразу під переглядачем:
+     людина щойно подивилася відповідь — саме тут виникає питання «а чому так». */
+  .razbor {
     max-width: 1000px;
     width: 92%;
-    margin: 1.5rem auto 0;
+    margin: 1.4rem auto 0;
     text-align: left;
   }
-  .more__title {
-    margin: 0 0 0.6rem;
-    font-size: 1.1rem;
-    font-weight: bold;
-    color: #c1121f;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
-  }
-  .more__list { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.6rem; }
-  .more__item {
+  .razbor__card {
     display: flex;
     align-items: center;
-    gap: 0.8rem;
-    padding: 0.7rem 0.9rem;
+    gap: 0.9rem;
+    padding: 0.9rem 1rem;
     border: 3px solid #c1121f;
     border-radius: 12px;
     background: #fff;
@@ -192,45 +131,22 @@ const pageSeoProps = {
     text-decoration: none;
     transition: transform 0.15s, box-shadow 0.15s, background-color 0.15s;
   }
-  :global(.dark) .more__item { background: #0b2436; color: #fdf0d5; }
-  a.more__item:hover {
+  :global(.dark) .razbor__card { background: #0b2436; color: #fdf0d5; }
+  .razbor__card:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
     background: #fdf0d5;
   }
-  :global(.dark) a.more__item:hover { background: #123249; }
-  .more__item--soon {
-    border-color: #b9c4cc;
-    border-style: dashed;
-    opacity: 0.72;
-    cursor: default;
-  }
-  :global(.dark) .more__item--soon { border-color: #3c5a70; }
-  .more__num {
-    flex: 0 0 auto;
-    width: 40px;
-    height: 40px;
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
-    background: #c1121f;
-    color: #fff;
-    font-size: 1.15rem;
-    font-weight: 800;
-  }
-  .more__item--soon .more__num { background: #b9c4cc; color: #55636e; }
-  :global(.dark) .more__item--soon .more__num { background: #3c5a70; color: #cfe3f0; }
-  .more__body { flex: 1 1 auto; min-width: 0; }
-  .more__name { display: block; font-weight: 700; line-height: 1.25; }
-  .more__meta { display: block; margin-top: 0.1rem; font-size: 0.85rem; color: #c1121f; }
-  .more__item--soon .more__meta { color: #6b7a86; }
-  :global(.dark) .more__item--soon .more__meta { color: #8ea6b8; }
-  .more__go { flex: 0 0 auto; font-size: 1.3rem; font-weight: 800; color: #c1121f; }
+  :global(.dark) .razbor__card:hover { background: #123249; }
+  .razbor__icon { flex: 0 0 auto; font-size: 1.8rem; line-height: 1; }
+  .razbor__body { flex: 1 1 auto; min-width: 0; }
+  .razbor__title { display: block; font-weight: 700; line-height: 1.3; }
+  .razbor__text { display: block; margin-top: 0.15rem; font-size: 0.92rem; line-height: 1.4; }
+  .razbor__go { flex: 0 0 auto; font-size: 1.3rem; font-weight: 800; color: #c1121f; }
 
   @media (max-width: 520px) {
-    .more__item { gap: 0.65rem; padding: 0.6rem 0.7rem; }
-    .more__num { width: 34px; height: 34px; font-size: 1rem; }
-    .more__go { display: none; }
+    .razbor__go { display: none; }
+    .razbor__card { padding: 0.75rem 0.8rem; gap: 0.7rem; }
   }
 
   .ex-action-btn {

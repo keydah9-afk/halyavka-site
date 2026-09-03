@@ -200,7 +200,7 @@ const molarSum = (parts: [string, number, number][]) => {
                   <div class="sol-steps">
                     {part.steps.map((st) => (
                       <div class={`sol-step${st.final ? ' sol-step-final' : ''}`}>
-                        <span class="sol-step-label">{st.label}</span>
+                        <span class="sol-step-label" set:html={st.label} />
                         <span set:html={st.html} />
                       </div>
                     ))}

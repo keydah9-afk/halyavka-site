@@ -27,9 +27,12 @@ export interface Props {
   povtorennya?: Topic;
   noun?: string; // підпис одиниці у переглядачі (за замовч. «Вправа»; для англ. — «Стор.»)
   altWord?: string; // слово в alt картинки (за замовч. «до вправи»; для англ. — «на сторінці»)
+  // Якщо задано — під переглядачем з'являється посилання на покроковий розбір
+  // цього ж завдання (піддомен). Хеш підставляється той самий, що й тут.
+  deepLinkBase?: string;
 }
 
-const { id, base, sections, povtorennya, noun = 'Вправа', altWord = 'до вправи' } = Astro.props;
+const { id, base, sections, povtorennya, noun = 'Вправа', altWord = 'до вправи', deepLinkBase } = Astro.props;
 
 // Кожен елемент numbers — або число/рядок (підпис = ім'я файлу), або пара
 // { file, label } для картинок зі складним ім'ям (напр. z-d-s-1-vprava-1 з підписом «1»).
@@ -134,10 +137,16 @@ const firstAlt = firstNamed ? `ГДЗ ${altWord} ${firstLabel}` : `ГДЗ, ${fir
         <button type="button" id={`${id}-next-btn`} class="ex-ctrl" title="Наступна вправа">→</button>
       </div>
     </div>
+
+    {deepLinkBase && (
+      <a id={`${id}-razbor`} class="ex-razbor" href={`${deepLinkBase}#${first}`}>
+        🧠 Покроковий розбір цього завдання
+      </a>
+    )}
   </div>
 </div>
 
-<script define:vars={{ id, base, flat, noun, altWord }}>
+<script define:vars={{ id, base, flat, noun, altWord, deepLinkBase }}>
   function initEx() {
     const root = document.getElementById(id);
     if (!root || root.dataset.initialized === 'true') return;
@@ -153,6 +162,7 @@ const firstAlt = firstNamed ? `ГДЗ ${altWord} ${firstLabel}` : `ГДЗ, ${fir
     const curNum = root.querySelector(`#${id}-current-number`);
     const prevBtn = root.querySelector(`#${id}-prev-btn`);
     const nextBtn = root.querySelector(`#${id}-next-btn`);
+    const razbor = root.querySelector(`#${id}-razbor`);
     if (!img || !inner) return;
 
     const flatStr = flat.map(String);
@@ -185,6 +195,7 @@ const firstAlt = firstNamed ? `ГДЗ ${altWord} ${firstLabel}` : `ГДЗ, ${fir
       const named = /^\d+(\.\d+)?$/.test(lbl);
       img.alt = named ? `ГДЗ ${altWord} ${lbl}` : `ГДЗ, ${lbl}`;
       if (curNum) curNum.textContent = named ? noun + ' ' + lbl : lbl;
+      if (razbor && deepLinkBase) razbor.href = deepLinkBase + '#' + encodeURIComponent(num);
       const det = target.closest('details');
       if (det && !det.open) det.open = true;
       if (window.history && window.history.replaceState) {
@@ -371,6 +382,26 @@ const firstAlt = firstNamed ? `ГДЗ ${altWord} ${firstLabel}` : `ГДЗ, ${fir
     user-select: none;
     -webkit-user-drag: none;
   }
+  /* Місток на піддомен із покроковим розбором; з'являється лише коли заданий deepLinkBase. */
+  .ex-razbor {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.6rem;
+    padding: 0.5rem 0.9rem;
+    border: 2px solid #c1121f;
+    border-radius: 8px;
+    background: #fff;
+    color: #003049;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: background-color 0.15s, transform 0.15s;
+  }
+  :global(.dark) .ex-razbor { background: #0b2436; color: #fdf0d5; }
+  .ex-razbor:hover { background: #fdf0d5; transform: translateY(-1px); }
+  :global(.dark) .ex-razbor:hover { background: #123249; }
+
   .ex-controls {
     display: flex;
     flex-wrap: wrap;

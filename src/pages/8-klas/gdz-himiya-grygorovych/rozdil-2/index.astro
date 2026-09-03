@@ -1,0 +1,48 @@
+---
+/*
+  Заглушка-перенаправлення. До 03.09.2026 тут жив розділ 2 інтерактивного ГДЗ;
+  тепер увесь покроковий розбір переїхав на himiya.halyavka.net, а на halyavka.net
+  лишилася звичайна сторінка книги з картинками.
+
+  Сторінка навмисно без шапки й меню: вона існує лише заради старих посилань
+  виду /rozdil-2/#160 — хеш переноситься на піддомен як є.
+  Чесний 301 краще дописати в .htaccess на сервері; це — страховка на випадок,
+  коли до конфігурації сервера руки не дійшли.
+*/
+const target = 'https://himiya.halyavka.net/8-klas/grygorovych/';
+---
+
+<html lang="uk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Розбір переїхав на himiya.halyavka.net</title>
+    <meta http-equiv="refresh" content={`0; url=${target}`} />
+    <link rel="canonical" href={target} />
+    <meta name="robots" content="noindex, follow" />
+    <script is:inline define:vars={{ target }}>
+      location.replace(target + location.hash);
+    </script>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        font: 16px/1.5 system-ui, -apple-system, 'Segoe UI', sans-serif;
+        background: #fdf0d5;
+        color: #003049;
+        text-align: center;
+        padding: 1.5rem;
+      }
+      a { color: #c1121f; font-weight: 700; }
+    </style>
+  </head>
+  <body>
+    <p>
+      Покроковий розбір хімії переїхав на новий сайт.<br />
+      <a href={target}>Перейти до розбору →</a><br /><br />
+      <a href="/8-klas/gdz-himiya-grygorovych/">Готові відповіді залишилися тут</a>
+    </p>
+  </body>
+</html>
