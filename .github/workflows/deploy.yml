@@ -109,6 +109,18 @@ jobs:
       - name: Проверить живой сайт
         if: ${{ !inputs.dry_run }}
         run: |
-          code=$(curl -s -o /dev/null -w '%{http_code}' https://halyavka.net/)
-          echo "Главная отдаёт HTTP $code"
-          test "$code" = "200" || { echo "::error::Сайт отвечает $code вместо 200"; exit 1; }
+          # Проверка идёт сразу после сброса кеша Cloudflare, и первый запрос
+          # иногда попадает в момент, когда кеш ещё перестраивается. Одиночный
+          # curl на этом ложно роняет весь деплой (сайт при этом уже залит),
+          # поэтому даём пять попыток с паузой и выходим по первому же 200.
+          for i in 1 2 3 4 5; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 https://halyavka.net/ || echo 000)
+            echo "Попытка $i: главная отдаёт HTTP $code"
+            if [ "$code" = "200" ]; then
+              echo "::notice::Сайт живой (попытка $i)"
+              exit 0
+            fi
+            [ "$i" = "5" ] || sleep 5
+          done
+          echo "::error::Сайт отвечает $code вместо 200 после 5 попыток"
+          exit 1
