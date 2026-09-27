@@ -69,8 +69,14 @@ for rozdil, secs in blocks:
         pages = next((s[1] for s in secs if s[1]), '')
         extra[pref] = (rozdil + (f' (стор. {pages})' if pages else ''), ids)
 
+# «Вправи для повторення розділу 3» у ЗМІСТ.html немає, а в книзі є: стор. 150–152,
+# вправи 1–34 (звірено з PDF підручника). Картинки приїхали 27.09.2026 як r3_1 … r3_34.
+if 'r3' not in extra:
+    extra['r3'] = ('Вправи для повторення розділу 3 (стор. 150–152)', [f'r3_{n}' for n in range(1, 35)])
+
 TAIL = {'Розділ 1. Чотирикутники': 'r1',
         'Розділ 2. Подібність трикутників': 'r2',
+        "Розділ 3. Розв'язування прямокутних трикутників": 'r3',
         'Розділ 4. Многокутники. Площі многокутників': 'r4'}
 
 # 2) Розділи 1–4 з §
@@ -107,13 +113,14 @@ for rozdil, topics in out_sections:
     if ts:
         clean.append((rozdil, ts))
 
-# блоки, яких зовсім немає в public (r1/r2/r4/ps)
+# блоки, яких зовсім немає в public (на 27.09.2026 — лише ps)
 absent = []
 for rozdil, secs in blocks:
     if rozdil.startswith('Розділ') or rozdil.startswith('Повторюємо'):
         continue
     ids = [i for s in secs for i in s[2]]
-    absent.append((rozdil, len(ids), ids[0], ids[-1]))
+    if not any(i in real for i in ids):
+        absent.append((rozdil, len(ids), ids[0], ids[-1]))
 
 flat = [i for _, ts in clean for tt, ids, _ in ts for i in ids]
 print('buttons:', len(flat), 'uniq:', len(set(flat)), 'real files:', len(real))
@@ -128,18 +135,24 @@ for r, n, a, b in absent:
 def js(s):
     return "'" + s.replace('\\', '\\\\').replace("'", "\\'") + "'"
 
+# r1_5 / ps_12 → кнопка «5» / «12»: префікс блоку видно із заголовка теми,
+# а файл і deep-link (#r1_5) лишаються за іменем картинки.
+def item(i):
+    m = re.fullmatch(r'(r\d|ps)_(\d+)', i)
+    return f"{{ file: {js(i)}, label: {js(m.group(2))} }}" if m else js(i)
+
 L = []
 L.append("// Дані книги «Геометрія, 8 клас» — Олександр Істер (НУШ, Генеза, Київ, 2025).")
 L.append("// Нумерація вправ — §-на: 1.1 … 25.36 (тому numbers — РЯДКИ, не числа: 1.10 ≠ 1.1).")
 L.append("// Блок «Повторюємо геометрію за 7 клас» (стор. 6–11) у public лежить як 1.webp…67.webp.")
 L.append("// Назви § і склад кожного § — з ЗМІСТ.html (точні дані від користувача), не з навігатора.")
 L.append("// Обрізані в ЗМІСТ.html заголовки § 19 і § 21 відновлені за друкованим змістом підручника.")
-L.append("// Стан картинок (серпень 2026): заново відзнято 526 вправ — увесь розділ 1 (1.1–10.30),")
-L.append("// увесь розділ 2 (11.1–16.29) і 17.1–17.34. Решта (17.35–20.23, 21.1–25.36, повторення")
-L.append("// за 7 клас) поки що на СТАРИХ картинках — імена ті самі, тому заміна пройде без правок тут.")
-L.append("// Не заведені (у public немає жодної картинки): «Вправи для повторення розділу 1» (84),")
-L.append("// «…розділу 2» (40), «…розділу 4» (34), «Задачі підвищеної складності» (42) — разом 200.")
-L.append("// Згенеровано scratchpad/gen_geom8.py. Сверено: 0 missing / 0 extra / 0 dup vs 887 файлів.")
+L.append("// Стан картинок (27.09.2026): усі вправи § 1.1–25.36, «Повторюємо геометрію за 7 клас»")
+L.append("// і «Вправи для повторення розділу 1–4» — нові (1080 px). Блоку повторення розділу 3 у")
+L.append("// ЗМІСТ.html немає — доданий у генераторі за PDF (стор. 150–152, r3_1 … r3_34).")
+L.append("// Кнопки r1_N / r2_N / r3_N / r4_N підписані просто N; deep-link — за іменем файлу (#r1_5).")
+L.append("// Не заведені (у public немає жодної картинки): «Задачі підвищеної складності» (42, ps_*).")
+L.append(f"// Згенеровано scripts/gdz/gen_geom8.py. Сверено: 0 missing / 0 extra / 0 dup vs {len(real)} файлів.")
 L.append("")
 L.append("export const meta = {")
 L.append("  author: 'Олександр Істер',")
@@ -148,7 +161,7 @@ L.append("  city: 'Київ',")
 L.append("  year: 2025,")
 L.append("  program: 'НУШ',")
 L.append("  grif: 'Рекомендовано Міністерством освіти і науки України',")
-L.append("  updatedAt: '2026-08-31',")
+L.append("  updatedAt: '2026-09-27',")
 L.append("};")
 L.append("")
 L.append("export type ExItem = number | string | { file: string; label: string };")
@@ -173,7 +186,7 @@ for rozdil, topics in clean:
     L.append("    paragraphs: [")
     L.append("    { title: '', topics: [")
     for tt, ids, coll in topics:
-        nums = ", ".join(js(i) for i in ids)
+        nums = ", ".join(item(i) for i in ids)
         extra = ", collapsed: true" if coll else ""
         L.append(f"      {{ title: {js(tt)}, numbers: [{nums}]{extra} }},")
     L.append("    ] },")
