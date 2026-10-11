@@ -35,6 +35,15 @@
 и снятие заморозки — там же; что делать на сайте, пока идёт пилот, —
 `~/Developer/semrush/НАЙДЕНО-сайт-halyavka-2709.md`.
 
+## Тест «ссылки на все картинки» (с 11.10.2026, замер 26.10 и 09.11)
+
+Проп `crawlLinks` у `ExerciseGallery`: кнопки вправ рендерятся как `<a href="…/N.webp">`,
+клик перехватывает скрипт. Включён на `/6-klas/gdz-matematyka-merzlyak/`, `/7-klas/gdz-algebra-merzlyak/`,
+`/6-klas/gdz-matematyka-tarasenkova/`, `/6-klas/gdz-ukr-mova-zabolotnyi/`. Контроль (не включать
+и не менять до замера): `/5-klas/gdz-matematyka-merzlyak/`, `/7-klas/gdz-geometry-merzlyak/`,
+`/5-klas/gdz-matematyka-bevz/`, `/9-klas/gdz-ukr-mova-zabolotnyi/`. Без пропа разметка кнопок
+обязана остаться байт в байт прежней — так проверено при вводе. Журнал — `ПИЛОТ-ССЫЛКИ-сен2026.md`.
+
 ## Хімія 8 клас, Григорович — книга на двух площадках
 
 03.09.2026 интерактивное ГДЗ по химии **уехало на поддомен**

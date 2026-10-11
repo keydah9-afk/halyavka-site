@@ -27,9 +27,13 @@ export interface Props {
   povtorennya?: Topic;
   noun?: string; // підпис одиниці у переглядачі (за замовч. «Вправа»; для англ. — «Стор.»)
   altWord?: string; // слово в alt картинки (за замовч. «до вправи»; для англ. — «на сторінці»)
+  // Кнопки вправ — посилання <a href="…/N.webp">: Google бачить адреси всіх картинок, а не лише
+  // першої. Клік перехоплює скрипт, для відвідувача нічого не змінюється. Тест з 11.10.2026
+  // на чотирьох хабах (журнал — ~/Developer/semrush/ПИЛОТ-ССЫЛКИ-сен2026.md).
+  crawlLinks?: boolean;
 }
 
-const { id, base, sections, povtorennya, noun = 'Вправа', altWord = 'до вправи' } = Astro.props;
+const { id, base, sections, povtorennya, noun = 'Вправа', altWord = 'до вправи', crawlLinks = false } = Astro.props;
 
 // Кожен елемент numbers — або число/рядок (підпис = ім'я файлу), або пара
 // { file, label } для картинок зі складним ім'ям (напр. z-d-s-1-vprava-1 з підписом «1»).
@@ -72,7 +76,9 @@ const firstAlt = firstNamed ? `ГДЗ ${altWord} ${firstLabel}` : `ГДЗ, ${fir
                   {t.numbers.map((raw) => {
                     const it = norm(raw);
                     return (
-                      <button type="button" class="ex-btn" data-num={it.id} data-index={idxOf.get(it.id)}>{it.label}</button>
+                      crawlLinks
+                        ? <a href={`${base}/${it.id}.webp`} class="ex-btn" data-num={it.id} data-index={idxOf.get(it.id)}>{it.label}</a>
+                        : <button type="button" class="ex-btn" data-num={it.id} data-index={idxOf.get(it.id)}>{it.label}</button>
                     );
                   })}
                 </div>
@@ -94,7 +100,9 @@ const firstAlt = firstNamed ? `ГДЗ ${altWord} ${firstLabel}` : `ГДЗ, ${fir
             {povtorennya.numbers.map((raw) => {
               const it = norm(raw);
               return (
-                <button type="button" class="ex-btn" data-num={it.id} data-index={idxOf.get(it.id)}>{it.label}</button>
+                crawlLinks
+                  ? <a href={`${base}/${it.id}.webp`} class="ex-btn" data-num={it.id} data-index={idxOf.get(it.id)}>{it.label}</a>
+                  : <button type="button" class="ex-btn" data-num={it.id} data-index={idxOf.get(it.id)}>{it.label}</button>
               );
             })}
           </div>
@@ -237,7 +245,14 @@ const firstAlt = firstNamed ? `ГДЗ ${altWord} ${firstLabel}` : `ГДЗ, ${fir
     }, { passive: false });
 
     root.querySelectorAll('.ex-btn').forEach((b) => {
-      b.addEventListener('click', () => show(b.dataset.num, true));
+      b.addEventListener('click', (e) => {
+        // Кнопка-посилання (crawlLinks): Ctrl/Cmd/Shift-клік відкриває картинку окремо, як звичайне посилання.
+        if (b.tagName === 'A') {
+          if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+          e.preventDefault();
+        }
+        show(b.dataset.num, true);
+      });
     });
 
     if (zoomIn) zoomIn.addEventListener('click', () => { const o = scale; scale = Math.min(3, scale + 0.2); if (scale > o) { x = 0; y = 0; } clamp(); apply(); if (scale > 1) img.style.cursor = 'grab'; });
@@ -341,6 +356,7 @@ const firstAlt = firstNamed ? `ГДЗ ${altWord} ${firstLabel}` : `ГДЗ, ${fir
     cursor: pointer;
     transition: background-color 0.12s, color 0.12s;
   }
+  a.ex-btn { display: block; text-align: center; text-decoration: none; }
   .ex-btn:hover { background: #c1121f; color: #fff; border-color: #c1121f; }
   .ex-btn.is-active { background: #c1121f; color: #fff; border-color: #c1121f; }
 
