@@ -70,4 +70,4 @@ if [ -n "$PRUNE" ]; then
 fi
 
 # Мусор macOS на сервер не тащим никогда.
-JUNK=(--exclude='.DS_Store' --exclude='._*' --exclude='.Spotlight-V100' --exclude='.fseventsd')
+JUNK=(--exclude='.DS_Store' --exclude='._*' --exclude='.Spotlight-V100' --exclude='.fseventsd' --exclude='*~')
