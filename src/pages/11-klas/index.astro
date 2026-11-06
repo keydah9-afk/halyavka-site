@@ -1,0 +1,58 @@
+---
+import BookCard from '../../components/BookCard.astro';
+import MainLayout from '../../layouts/PageLayout.astro';
+import { Image } from 'astro:assets';
+import RecentlyViewed from '../../components/RecentlyViewed.astro';
+import image11Klas from '../../assets/images/11-klas.webp';
+
+// --- Импорты для обложек ---
+import coverUkrMovaAvramenko from '../../assets/images/covers/200/11-ukr-mova-avram-2019-gdz.webp';
+
+const books = [
+  { cover: coverUkrMovaAvramenko, subject: 'Українська мова', author: 'Авраменко', type: 'ГДЗ', href: '/11-klas/gdz-ukr-mova-avramenko/' }
+];
+
+const pageSeoProps = {
+  title: "ГДЗ 11 клас: Українська мова - Відповіді",
+  description: "⭐ Готові домашні завдання (ГДЗ) для 11 класу. Відповіді до підручника з української мови. Заходьте на ГДЗ Халявка та звіряйте домашню роботу за хвилину!",
+  canonical: String(Astro.url.href),
+  openGraph: { images: [{ url: image11Klas }], type: 'website', locale: 'uk_UA' },
+  twitter: { card: 'summary_large_image' },
+};
+
+const pageH1Title = "ГДЗ 11 клас";
+---
+<MainLayout metadata={pageSeoProps}>
+  <script type="application/ld+json" set:html={JSON.stringify({ "@context": "http://schema.org", "@graph": [ { "@type": ["WebPage", "CollectionPage"], "name": pageSeoProps.title, "description": pageSeoProps.description, "url": pageSeoProps.canonical, "mainEntity": { "@type": "ItemList", "itemListElement": books.map((book, index) => ({ "@type": "ListItem", "position": index + 1, "item": { "@type": "CreativeWork", "name": `ГДЗ ${book.subject} ${book.author} (${book.type})`, "url": `${Astro.url.origin}${book.href}`, "image": `${Astro.url.origin}${book.cover.src}`, "author": { "@type": "Person", "name": book.author }, "genre": book.type, "about": book.subject } })) }, "image": image11Klas.src } ] })} />
+
+  <main>
+    <h1 class="text-3xl font-bold text-center my-8 text-[#003049] dark:text-gray-50">{pageH1Title}</h1>
+    <p class="max-w-3xl mx-auto mb-10 text-lg text-center text-[#003049] dark:text-gray-300">{pageSeoProps.description}</p>
+
+    <div class="main-image-block">
+      <Image src={image11Klas} alt="ГДЗ 11 клас - головне зображення" widths={[320, 640, 900]} sizes="(max-width: 600px) 100vw, 900px" loading="eager" fetchpriority="high" class="main-class-image" />
+    </div>
+
+    <div class="grid grid-cols-1 min-[300px]:grid-cols-2 min-[385px]:grid-cols-3 min-[600px]:grid-cols-4 xl:grid-cols-7 gap-2 items-stretch">
+      {books.map((book, i) => (
+        <div class="book-item w-[130px] rounded-[15px] flex flex-col items-center p-0 mx-auto h-full" key={i}>
+          <BookCard {...book} />
+        </div>
+      ))}
+    </div>
+  </main>
+
+  <style>
+    main { max-width: 1200px; margin: 0 auto; padding: 28px 8px; }
+    .main-image-block { text-align: center; margin-bottom: 30px; padding: 10px; background: #FDF0D5; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .main-class-image { max-width: 100%; height: auto; border-radius: 10px; display: block; margin: 0 auto; }
+    .book-item { transition: transform .12s, box-shadow .12s; padding: 5px; border-radius: 15px; }
+    .book-item:hover { transform: scale(1.04); box-shadow: 0 6px 20px rgba(0,0,0,0.13); }
+    @media (prefers-color-scheme: dark) {
+      .main-image-block { background: #2a2a2a; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 1px solid #333; }
+      .book-item:hover { box-shadow: 0 6px 20px rgba(255,255,255,0.1); }
+    }
+  </style>
+
+  <RecentlyViewed />
+</MainLayout>
