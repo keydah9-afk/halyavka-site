@@ -40,6 +40,10 @@ export const headerData = {
           text: '10 клас',
           href: getPermalink('/10-klas/'),
         },
+      {
+          text: '11 клас',
+          href: getPermalink('/11-klas/'),
+        },
     {/*
 
 Это части меню выше:
