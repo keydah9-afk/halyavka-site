@@ -1,4 +1,6 @@
 ---
+import AdSlot from '~/components/ads/AdSlot.astro';
+import { adsAllowed } from '~/utils/ads';
 /*
   Компонент галереи: принимает
     – id    : уникальный идентификатор (например "gallery2")
@@ -7,12 +9,16 @@
 */
 const { id, base, list } = Astro.props;
 
+// Реклама: над кнопками і під переглядачем — крім заморожених хабів (src/utils/ads.ts).
+const ads = adsAllowed(Astro.url.pathname);
+
 const initialImageSrc = list.length > 0 ? `${base}/${list[0]}.webp` : '/images/placeholder.webp';
 const initialImageAlt = list.length > 0 ? `ГДЗ до вправи ${list[0]}` : 'Изображення не знайдено';
 const initialNumber = list.length > 0 ? list[0] : '-';
 ---
 
 <div id={id} class="gallery-wrapper space-y-4">
+  {ads && <AdSlot slot="top" />}
 
   <ul class="gallery-thumbs grid grid-cols-[repeat(auto-fit,minmax(42px,1fr))] sm:grid-cols-[repeat(auto-fit,minmax(70px,1fr))] gap-2 px-4 list-none p-0">
     {list.map((n, index) => (
@@ -69,6 +75,7 @@ const initialNumber = list.length > 0 ? list[0] : '-';
       </div>
     </div>
   </div>
+  {ads && <AdSlot slot="answer" />}
 </div>
 
 <style>

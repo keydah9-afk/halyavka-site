@@ -1,0 +1,58 @@
+---
+/*
+  <head> рекламних сторінок (Layout вставляє лише коли adsAllowed). Замінює строгий CSP:
+  PubPower = prebid + Google Ad Manager + десятки SSP + CMP InMobi, а креативи малюються
+  у «дружніх» iframe, які успадковують CSP сторінки, — список доменів тут неможливий.
+  Тому дозволено https: (але не http:) і inline/eval для скриптів.
+
+  Перехід між «рекламним» і «нерекламним» світом через View Transitions небезпечний:
+  meta-CSP, раз застосований, не знімається. Тому:
+  - перехід на заморожений хаб — повне завантаження сторінки (astro:before-preparation);
+  - прихід на рекламну сторінку м'яким переходом з нерекламної (CSP ще строгий,
+    скрипти PubPower заблоковані) — одноразове перезавантаження.
+*/
+import { ADS_EXCLUDED, PUBPOWER_SITE } from '~/utils/ads';
+
+const noAds = [...ADS_EXCLUDED];
+const tagSrc = `https://nc.pubpowerplatform.io/w/${PUBPOWER_SITE}.js`;
+const advSrc = `https://nc.pubpowerplatform.io/ata/adv/${PUBPOWER_SITE}.js`;
+---
+
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self' https: data: blob:;
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https: blob:;
+  connect-src 'self' https: wss:;
+  frame-src 'self' https: blob: data:;
+  style-src 'self' 'unsafe-inline' https:;
+  img-src 'self' data: blob: https:;
+  font-src 'self' data: https:;
+  media-src 'self' data: blob: https:;
+  worker-src 'self' blob:;
+">
+<script is:inline define:vars={{ noAds }}>
+  if (document.readyState !== 'loading' && !window.__hvAdsCsp) {
+    // Сюди прийшли м'яким переходом з нерекламної сторінки — потрібен свіжий CSP.
+    location.reload();
+  } else if (!window.__hvAdsCsp) {
+    window.__hvAdsCsp = 1;
+    document.addEventListener('astro:before-preparation', function (e) {
+      var p = e.to.pathname;
+      if (p.slice(-1) !== '/') p += '/';
+      if (noAds.indexOf(p) !== -1) {
+        e.preventDefault();
+        location.href = e.to.href;
+      }
+    });
+  }
+</script>
+<script is:inline>var powerTag = powerTag || {};powerTag.gdprShowConsentToolButton = false;</script>
+<script is:inline type="text/javascript" src={tagSrc} async defer></script>
+<script is:inline type="text/javascript" src={advSrc} async defer></script>
+<style is:inline>
+  .hv-ad { display: flex; flex-direction: column; align-items: center; max-width: 100%; margin: 1.25rem auto; }
+  .hv-ad-label { font-size: 0.68rem; line-height: 1; letter-spacing: 0.06em; text-transform: uppercase; color: #6c757d; margin-bottom: 0.3rem; }
+  .hv-ad-top { min-height: 116px; }
+  .hv-ad-answer { min-height: 296px; }
+  @media (min-width: 768px) { .hv-ad-top { min-height: 106px; } }
+  .dark .hv-ad-label { color: #9fb3c2; }
+</style>

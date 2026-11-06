@@ -11,6 +11,9 @@ import Metadata from '~/components/common/Metadata.astro';
 import SiteVerification from '~/components/common/SiteVerification.astro';
 import Analytics from '~/components/common/Analytics.astro';
 import BasicScripts from '~/components/common/BasicScripts.astro';
+import AdsHead from '~/components/ads/AdsHead.astro';
+import AdsSticky from '~/components/ads/AdsSticky.astro';
+import { adsAllowed } from '~/utils/ads';
 
 // Comment the line below to disable View Transitions
 import { ClientRouter } from 'astro:transitions';
@@ -23,6 +26,8 @@ export interface Props {
 
 const { metadata = {} } = Astro.props;
 const { language, textDirection } = I18N;
+// Реклама PubPower — везде, кроме заморожённых хабов (src/utils/ads.ts).
+const ads = adsAllowed(Astro.url.pathname);
 ---
 
 <!doctype html>
@@ -41,19 +46,21 @@ const { language, textDirection } = I18N;
     <meta name="apple-mobile-web-app-title" content="Халявка" />
     <link rel="manifest" href="/site.webmanifest" />
    <!-- код защиты (Content Security Policy). Он позволит виджету Телеграма работать без ошибок, но заблокирует попытки внедрить сторонний вредоносный код -->
-<meta http-equiv="Content-Security-Policy" content="
+{!ads && <meta http-equiv="Content-Security-Policy" content="
   default-src 'self';
   script-src 'self' 'unsafe-inline' https://telegram.org https://www.googletagmanager.com https://static.cloudflareinsights.com;
   connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net https://cloudflareinsights.com https://zwjpvdqfcnwnhzfvrynd.supabase.co;
   frame-src 'self' https://t.me https://oauth.telegram.org https://oauth.tg.dev https://www.youtube-nocookie.com https://www.youtube.com;
   style-src 'self' 'unsafe-inline';
   img-src 'self' data: https:;
-">
+">}
+{ads && <AdsHead />}
   </head>
 
   <body class="antialiased text-default bg-page tracking-tight">
     <slot />
 
     <BasicScripts />
+    {ads && <AdsSticky />}
   </body>
 </html>

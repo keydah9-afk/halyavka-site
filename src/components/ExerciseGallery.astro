@@ -1,4 +1,6 @@
 ---
+import AdSlot from '~/components/ads/AdSlot.astro';
+import { adsAllowed } from '~/utils/ads';
 /*
   ExerciseGallery — кнопки вправ, згруповані по §/темах (усі відкриті), а нижче — переглядач.
 
@@ -35,6 +37,9 @@ export interface Props {
 
 const { id, base, sections, povtorennya, noun = 'Вправа', altWord = 'до вправи', crawlLinks = false } = Astro.props;
 
+// Реклама: над кнопками і під переглядачем — крім заморожених хабів (src/utils/ads.ts).
+const ads = adsAllowed(Astro.url.pathname);
+
 // Кожен елемент numbers — або число/рядок (підпис = ім'я файлу), або пара
 // { file, label } для картинок зі складним ім'ям (напр. z-d-s-1-vprava-1 з підписом «1»).
 const norm = (v: ExItem): { id: string; label: string } =>
@@ -60,6 +65,7 @@ const firstAlt = firstNamed ? `ГДЗ ${altWord} ${firstLabel}` : `ГДЗ, ${fir
 ---
 
 <div id={id} class="ex-root">
+  {ads && <AdSlot slot="top" />}
   <div class="ex-toc">
     {sections.map((s) => (
       <section class="ex-section">
@@ -143,6 +149,7 @@ const firstAlt = firstNamed ? `ГДЗ ${altWord} ${firstLabel}` : `ГДЗ, ${fir
       </div>
     </div>
   </div>
+  {ads && <AdSlot slot="answer" />}
 </div>
 
 <script define:vars={{ id, base, flat, noun, altWord }}>

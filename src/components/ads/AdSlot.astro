@@ -1,0 +1,33 @@
+---
+/*
+  Рекламний блок PubPower. Вставляти ТІЛЬКИ під умовою adsAllowed(Astro.url.pathname)
+  (див. src/utils/ads.ts). Свідомо без <style> і без бандл-скрипта: інакше змінився б
+  спільний CSS/JS усіх сторінок, зокрема заморожених хабів. Стилі .hv-ad — інлайном у Layout.
+
+  data-astro-rerun: Astro при переходах (View Transitions) не перезапускає інлайн-скрипт
+  з тим самим текстом, а нам на кожній новій сторінці треба заново показати блок.
+*/
+import { AD_SLOTS } from '~/utils/ads';
+
+export interface Props {
+  slot: 'top' | 'answer';
+}
+
+const { slot } = Astro.props;
+const adId = AD_SLOTS[slot];
+---
+
+<div class={`hv-ad hv-ad-${slot}`}>
+  <span class="hv-ad-label">Реклама</span>
+  {
+    slot === 'answer' ? (
+      <pubtag class="adsbypubpower" style="width:336px;height:280px;display:inline-block;" data-ad-slot={adId} />
+    ) : (
+      <pubtag class="adsbypubpower" data-ad-slot={adId} />
+    )
+  }
+  <script is:inline data-astro-rerun define:vars={{ adId }}>
+    window.powerTag = window.powerTag || {};
+    (powerTag.Init = window.powerTag.Init || []).push(function () { powerAPITag.display(adId); });
+  </script>
+</div>

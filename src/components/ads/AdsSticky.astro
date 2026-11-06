@@ -1,0 +1,15 @@
+---
+/*
+  Липкий банер PubPower (hv-sticky). Бібліотека додає його в document.body, тож при
+  переході View Transitions він зникає разом зі старим body, а цей скрипт (data-astro-rerun)
+  створює новий на наступній сторінці.
+*/
+import { AD_SLOTS } from '~/utils/ads';
+
+const adId = AD_SLOTS.sticky;
+---
+
+<script is:inline data-astro-rerun define:vars={{ adId }}>
+  window.powerTag = window.powerTag || {};
+  (powerTag.Init = window.powerTag.Init || []).push(function () { powerAPITag.initStickyBanner(adId); });
+</script>
