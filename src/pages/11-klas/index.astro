@@ -7,14 +7,16 @@ import image11Klas from '../../assets/images/11-klas.webp';
 
 // --- Импорты для обложек ---
 import coverUkrMovaAvramenko from '../../assets/images/covers/200/11-ukr-mova-avram-2019-gdz.webp';
+import coverEnglishKarpuk from '../../assets/images/covers/200/11-angl-mova-karpuk-2019-gdz.webp';
 
 const books = [
-  { cover: coverUkrMovaAvramenko, subject: 'Українська мова', author: 'Авраменко', type: 'ГДЗ', href: '/11-klas/gdz-ukr-mova-avramenko/' }
+  { cover: coverUkrMovaAvramenko, subject: 'Українська мова', author: 'Авраменко', type: 'ГДЗ', href: '/11-klas/gdz-ukr-mova-avramenko/' },
+  { cover: coverEnglishKarpuk, subject: 'Англійська мова', author: 'Карпюк', type: 'ГДЗ', href: '/11-klas/gdz-english-karpuk/' }
 ];
 
 const pageSeoProps = {
-  title: "ГДЗ 11 клас: Українська мова - Відповіді",
-  description: "⭐ Готові домашні завдання (ГДЗ) для 11 класу. Відповіді до підручника з української мови. Заходьте на ГДЗ Халявка та звіряйте домашню роботу за хвилину!",
+  title: "ГДЗ 11 клас: Українська мова, Англійська мова - Відповіді",
+  description: "⭐ Готові домашні завдання (ГДЗ) для 11 класу. Відповіді до підручників з української та англійської мови. Заходьте на ГДЗ Халявка та звіряйте домашню роботу за хвилину!",
   canonical: String(Astro.url.href),
   openGraph: { images: [{ url: image11Klas }], type: 'website', locale: 'uk_UA' },
   twitter: { card: 'summary_large_image' },
