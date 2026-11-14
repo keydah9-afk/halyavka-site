@@ -1,5 +1,9 @@
 # halyavka.net — ГДЗ-сайт (Astro, статика)
 
+**С 14.11.2026 сайт отдают воркеры Cloudflare, а не сервер Hetzner MC60** (`ЗАПУСК-WORKERS.md`).
+Страницы — push в master (GitHub Actions → воркер `halyavka`, когда в репозитории задана переменная `HOSTING=workers`).
+**Новые картинки — `bash scripts/workers.sh images --go` с этого Мака; `sync-images.sh` и `deploy.sh` (rsync на сервер) живой сайт больше не меняют.**
+
 - Запуск: `pnpm dev --port 4399` (см. `.claude/launch.json`). Билд: `pnpm build`.
 - Стек: Astro + Tailwind (`darkMode: 'class'`), View Transitions (`astro:page-load` в скриптах компонентов).
 - Бренд: червоний `#C1121F`, темно-синій `#003049`, кремовий `#FDF0D5`; тёмная тема через `:global(.dark)`.
