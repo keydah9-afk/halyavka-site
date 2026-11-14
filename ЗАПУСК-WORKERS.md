@@ -22,6 +22,13 @@
   (`max-age=0, must-revalidate` вместо суток) — после выкладки сброс кеша Cloudflare больше не нужен.
 - Файл подтверждения GSC `google18d2123d165a41c7.html` жил только на сервере — теперь в `public/`.
 
+## ЗАПУЩЕНО 14.11.2026
+
+По «Да, переключай» владельца: `route --go` — маршруты `halyavka.net/images/*`, `www.halyavka.net/*`, `halyavka.net/*`; workers.dev выключен
+(в конфигах `workers_dev: false`). Живой домен: все 1 115 файлов сайта и все 74 641 картинка на месте. Байты 138 страниц отличаются только скриптом
+Bot Fight Mode, который вставляет зона Cloudflare (как и при Apache); `/index.php` — 403 от правила WAF зоны, как раньше.
+Дальше — переменная `HOSTING=workers` в GitHub (шаг 5 ниже).
+
 ## Сделано 13.11.2026
 
 - Воркер `halyavka` залит без маршрута (версия `6a33ed63`), проверка `node scripts/check-workers.mjs pages https://halyavka.ztrmnn.workers.dev`:

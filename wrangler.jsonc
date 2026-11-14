@@ -3,7 +3,7 @@
 // ВНИМАНИЕ: "routes" сюда не вписывать (как у shkilni и matematika): маршрут halyavka.net/* ставит scripts/workers.sh route
 // в день запуска; `wrangler deploy` без routes маршрут не трогает — выкладка до запуска сайт не переключает,
 // а откат — снять маршрут, и снова отвечает Apache на MC60.
-// workers_dev: true — только на время проверки (halyavka.ztrmnn.workers.dev); в день запуска — false.
+// workers_dev: false с запуска 14.11.2026 (до него проверка шла на halyavka.ztrmnn.workers.dev).
 // account_id — аккаунт сайтов ГДЗ Ztrmnn@… (Workers Paid с 01.11.2026).
 {
   "$schema": "node_modules/wrangler/config-schema.json",
@@ -22,7 +22,7 @@
     // Страницы (со слешем) и /_astro/* идут мимо кода.
     "run_worker_first": ["/*", "!/*/", "!/_astro/*"]
   },
-  "workers_dev": true,
+  "workers_dev": false,
   "preview_urls": false,
   "observability": { "enabled": true }
 }
