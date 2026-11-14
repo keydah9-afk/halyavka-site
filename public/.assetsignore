@@ -1,0 +1,5 @@
+# Для воркера сайта (wrangler.jsonc): картинки отдаёт отдельный воркер halyavka-images
+images/
+.DS_Store
+._*
+*~

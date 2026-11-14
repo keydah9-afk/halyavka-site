@@ -1,7 +1,11 @@
-# Автодеплой halyavka.net на Hetzner Webhosting.
+# Автодеплой halyavka.net.
 #
 # Срабатывает на каждый push в master (и вручную кнопкой Run workflow).
-# Собирает сайт у GitHub и заливает готовый dist на сервер по rsync.
+# Собирает сайт у GitHub и выкладывает готовый dist:
+#   - пока переменная репозитория HOSTING не равна workers — на сервер Hetzner (MC60) по rsync, как раньше;
+#   - с HOSTING=workers — в воркер Cloudflare `halyavka` (wrangler.jsonc, ЗАПУСК-WORKERS.md).
+#     Нужен секрет CLOUDFLARE_API_TOKEN (права Workers Scripts: Edit на аккаунт сайтов ГДЗ).
+#     Картинки (воркер halyavka-images) отсюда не выкладываются — только с Мака: bash scripts/workers.sh images --go.
 #
 # Картинок в репозитории нет, поэтому сборка здесь весит ~100 МБ вместо 4.6 ГБ,
 # а папка images/ на сервере деплоем не трогается вообще.
@@ -55,6 +59,7 @@ jobs:
           echo "Размер сборки: $(du -sh dist | cut -f1), файлов: $(find dist -type f | wc -l)"
 
       - name: Подготовить SSH
+        if: ${{ vars.HOSTING != 'workers' }}
         run: |
           mkdir -p ~/.ssh && chmod 700 ~/.ssh
           printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
@@ -63,6 +68,7 @@ jobs:
           chmod 600 ~/.ssh/known_hosts
 
       - name: Залить на сервер
+        if: ${{ vars.HOSTING != 'workers' }}
         env:
           DRY: ${{ inputs.dry_run && '--dry-run' || '' }}
         run: |
@@ -85,6 +91,21 @@ jobs:
             --exclude='.DS_Store' --exclude='._*' \
             -e "ssh -p 222 -i ~/.ssh/deploy_key -o IdentitiesOnly=yes" \
             dist/ "${{ secrets.DEPLOY_TARGET }}/"
+
+      - name: Выложить в воркер Cloudflare
+        if: ${{ vars.HOSTING == 'workers' }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          WRANGLER_SEND_METRICS: 'false'
+        run: |
+          # Картинок в dist нет (их нет в git), а public/.assetsignore всё равно не пускает images/ в этот воркер.
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            echo "::notice::ХОЛОСТОЙ ПРОГОН — воркер не меняется"
+            pnpm exec wrangler deploy -c wrangler.jsonc --dry-run
+          else
+            echo "::notice::ВЫКЛАДКА В ВОРКЕР halyavka"
+            pnpm exec wrangler deploy -c wrangler.jsonc
+          fi
 
       # Cloudflare держит копии страниц у себя и после заливки какое-то время
       # продолжает отдавать старые. Старая страница зовёт файлы обложек со

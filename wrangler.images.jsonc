@@ -1,0 +1,18 @@
+// Worker картинок halyavka.net: только статика /images/…, кода нет. 74,6 тыс. файлов — в один воркер (лимит 100 тыс.).
+// Картинок нет в git, поэтому этот воркер выкладывается только с Мака: scripts/workers.sh images.
+// Каталог .images-root собирает scripts/workers.sh mirror: жёсткие ссылки на public/images + .images-legacy
+// (старые файлы, которых нет в public, но их ещё запрашивают) + _headers.
+// Маршрут halyavka.net/images/* — только в день запуска (scripts/workers.sh route). workers_dev — на время проверки.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "halyavka-images",
+  "account_id": "016884b36b0f6f68649f04bf2d661fc8",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./.images-root",
+    "html_handling": "none",
+    "not_found_handling": "none"
+  },
+  "workers_dev": true,
+  "preview_urls": false
+}

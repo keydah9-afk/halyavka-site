@@ -1,0 +1,10 @@
+// Worker www.halyavka.net/* → 301 на halyavka.net (worker/www.ts). Маршрут — в день запуска (scripts/workers.sh route).
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "halyavka-www",
+  "account_id": "016884b36b0f6f68649f04bf2d661fc8",
+  "main": "worker/www.ts",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": false,
+  "preview_urls": false
+}

@@ -17,3 +17,8 @@ public/images/
 
 # Личные доступы к серверу — не в git
 scripts/deploy.local.env
+
+# Воркеры Cloudflare: зеркало картинок для halyavka-images (жёсткие ссылки на public/images), старые картинки только с сервера, кеш wrangler
+.images-root/
+.images-legacy/
+.wrangler/
