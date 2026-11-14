@@ -42,6 +42,7 @@ import coverSapunCh2 from '../../assets/images/covers/200/4-ukr-mova-sapun-2021-
 import coverVarzatska from '../../assets/images/covers/200/4-ukr-mova-varzatska-2021-gdz.webp';
 import coverVashulenko from '../../assets/images/covers/200/4-ukr-mova-vashulenko-2026-gdz.webp';
 import coverZahariychuk from '../../assets/images/covers/200/4-ukr-mova-zahariychuk-2021-gdz.webp';
+import coverEnglishKarpuk from '../../assets/images/covers/200/4-angl-mova-karpuk-2026-gdz.webp';
 
 // --- Обновленный массив books ---
 const books = [
@@ -79,14 +80,15 @@ const books = [
   { cover: coverSapunCh2, subject: 'Українська мова', author: 'Сапун 2 частина', type: 'ГДЗ', href: '/4-klas/gdz-ukr-mova-sapun-ch2/' },
   { cover: coverVarzatska, subject: 'Українська мова', author: 'Варзацька', type: 'ГДЗ', href: '/4-klas/gdz-ukr-mova-varzatska/' },
   { cover: coverVashulenko, subject: 'Українська мова', author: 'Вашуленко', type: 'ГДЗ', href: '/4-klas/gdz-ukr-mova-vashulenko/' },
-  { cover: coverZahariychuk, subject: 'Українська мова', author: 'Захарійчук', type: 'ГДЗ', href: '/4-klas/gdz-ukr-mova-zahariychuk/' }
+  { cover: coverZahariychuk, subject: 'Українська мова', author: 'Захарійчук', type: 'ГДЗ', href: '/4-klas/gdz-ukr-mova-zahariychuk/' },
+  { cover: coverEnglishKarpuk, subject: 'Англійська мова', author: 'Карпюк', type: 'ГДЗ', href: '/4-klas/gdz-english-karpuk/' }
 ];
 
 const subjects = Array.from(new Set(books.map(b => b.subject)));
 
 const pageSeoProps = {
-  title: "ГДЗ 4 клас: Математика, Укр. мова - Відповіді",
-  description: "⭐ Готові домашні завдання (ГДЗ) для 4 класу. Відповіді до підручників з математики, укр. мови. Заходьте на ГДЗ Халявка та звіряйте домашню роботу за хвилину!",
+  title: "ГДЗ 4 клас: Математика, Укр. мова, Англ. мова - Відповіді",
+  description: "⭐ Готові домашні завдання (ГДЗ) для 4 класу. Відповіді до підручників з математики, укр. та англ. мови. Заходьте на ГДЗ Халявка та звіряйте домашню роботу за хвилину!",
   canonical: String(Astro.url.href),
   openGraph: { images: [{ url: image4Klas }], type: 'website', locale: 'uk_UA' },
   twitter: { card: 'summary_large_image' },

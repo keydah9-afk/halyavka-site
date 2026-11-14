@@ -2,22 +2,38 @@
 # «Англійська мова» Карпюк — ПОСТОРІНКОВІ книги (кнопка = сторінка підручника), як 8 клас
 # (src/data/karpuk-english-8.ts). Структура — зміст.html у папці книги: <h2>Unit N. Назва (с. A–B)</h2>
 # і посилання на сторінки (page-N.webp або готово/page-N.html). Файли на сайті: page-N.webp → N.webp.
-# Запуск: python3 scripts/gdz/gen_karpuk_english.py 9   (або 11)
+# Запуск: python3 scripts/gdz/gen_karpuk_english.py 9   (або 4, 10, 11)
 import re, html, os, sys
 
 ROOT = "/Users/grisana/Developer/halyavka-CLODE"
 SRC = "/Users/grisana/Developer/save my images/файлы"
 
 BOOKS = {
+    '4': dict(
+        zm=f"{SRC}/англ мова 4 Карпюк/зміст.html",
+        out='karpuk-english-4.ts',
+        title='«Англійська мова» (з аудіосупроводом) для 4 класу — О. Д. Карпюк (НУШ, Астон, Тернопіль, 2026)',
+        meta=dict(author='О. Карпюк', year=2026, program='НУШ',
+                  grif='Рекомендовано Міністерством освіти і науки України (наказ МОН від 20.08.2025 № 1164)'),
+        updated='2026-11-14',
+    ),
+    '10': dict(
+        zm=f"{SRC}/англ мова 10 Карпюк/зміст.html",
+        out='karpuk-english-10.ts',
+        title='«Англійська мова (10-й рік навчання) — English (the 10th year of studies)» — О. Д. Карпюк (рівень стандарту, Астон, Тернопіль, 2018)',
+        meta=dict(author='О. Карпюк', year=2018, program='Рівень стандарту',
+                  grif='Рекомендовано Міністерством освіти і науки України (наказ МОН від 31.05.2018 № 551)'),
+        updated='2026-11-14',
+    ),
     '9': dict(
-        zm=f"{SRC}/англ мова 9 Карпюк/зміст.html",
+        zm=f"{SRC}/готово/англ мова 9 Карпюк/зміст.html",
         out='karpuk-english-9.ts',
         title='«Англійська мова (9-й рік навчання) — English (Year 9)» — К. Т. Карпюк, О. Д. Карпюк (НУШ, Астон, Тернопіль, 2026)',
         meta=dict(author='К. Карпюк, О. Карпюк', year=2026, program='НУШ',
                   grif='Рекомендовано Міністерством освіти і науки України (наказ МОН від 27.01.2026 № 110)'),
     ),
     '11': dict(
-        zm=f"{SRC}/англ мова 11 Карпюк/зміст.html",
+        zm=f"{SRC}/готово/англ мова 11 Карпюк/зміст.html",
         out='karpuk-english-11.ts',
         title='«Англійська мова (11-й рік навчання) — English (the 11th year of studies)» — О. Д. Карпюк (рівень стандарту, Астон, Тернопіль, 2019)',
         meta=dict(author='О. Карпюк', year=2019, program='Рівень стандарту',
@@ -40,6 +56,7 @@ units = []  # [(назва, [сторінки])]
 for m in re.finditer(r'<h2[^>]*>(.*?)</h2>|<a [^>]*href="[^"]*page-(\d+)\.(?:webp|html)"', zm, re.S):
     if m.group(1) is not None:
         name = re.sub(r'\s*\(с\.\s*[\d–-]+\)$', '', text(m.group(1)))
+        name = re.sub(r'^(Unit \d+)\s+(?=[^.\s])', r'\1. ', name)  # «Unit 1 People» (10 кл.) → «Unit 1. People»
         units.append((name, []))
     else:
         units[-1][1].append(int(m.group(2)))
@@ -86,7 +103,7 @@ L = [
     f"  year: {M['year']},",
     f"  program: {js(M['program'])},",
     f"  grif: {js(M['grif'])},",
-    "  updatedAt: '2026-11-08',",
+    f"  updatedAt: '{B.get('updated', '2026-11-08')}',",
     '};',
     '',
     'export interface Topic {',

@@ -13,7 +13,9 @@
 | `gen_avram11.py` | `ПК вид/укр мова 11 Авраменко/зміст.html` + § з друкованого ЗМІСТу | `src/data/avramenko-ukr-mova-11.ts` (175 стор.) |
 | `gen_onatii9.py` | `файлы/укр мова 9 клас Онатій/зміст.html` + уроки з друкованого ЗМІСТу | `src/data/onatii-ukr-mova-9.ts` (424) |
 | `gen_onatii8.py` | `файлы/укр мова 8 Онатій/зміст.html` (уроки й розділи — прямо з нього) | `src/data/onatii-ukr-mova-8.ts` (470) |
-| `gen_karpuk_english.py 9` / `11` | `файлы/англ мова 9 Карпюк/зміст.html`, `…/англ мова 11 Карпюк/зміст.html` | `src/data/karpuk-english-9.ts` (162 стор.), `karpuk-english-11.ts` (194 стор.) |
+| `gen_karpuk_english.py 4` / `9` / `10` / `11` | `файлы/англ мова 4 Карпюк/зміст.html`, `…/англ мова 10 Карпюк/…`, `файлы/готово/англ мова 9 и 11 Карпюк/…` | `src/data/karpuk-english-4.ts` (130 стор.), `-9` (162), `-10` (217), `-11` (194) |
+| `gen_merzlyak_mat10.py` | `файлы/математика 10 Мерзляк/зміст.html` + § з друкованого ЗМІСТу | `src/data/merzlyak-matematyka-10.ts` (820) |
+| `gen_baryahtar_fiz11.py` | `файлы/фізика 11 клас Бар'яхтар/зміст.html` | `src/data/baryahtar-fizyka-11.ts` (334) |
 
 Шляхи до зміста і до `public` зашиті константами вгорі кожного скрипта.
 Запуск: `python3 scripts/gdz/gen_geom8.py` — скрипт друкує звірку і перезаписує data-файл.

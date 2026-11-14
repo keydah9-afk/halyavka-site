@@ -11,20 +11,24 @@ import coverAlgebraMerzlyak from '../../assets/images/covers/200/10-algebra-merz
 import coverUkrMovaAvramenko from '../../assets/images/covers/200/10-ukr-mova-avram.webp';
 import coverUkrMovaGlazova from '../../assets/images/covers/200/10-ukr-mova-glazova.webp';
 import coverUkrMovaZabolotnyi from '../../assets/images/covers/200/10-ukr-mova-zabol.webp';
+import coverMatematykaMerzlyak from '../../assets/images/covers/200/10-matematyka-merzlyak-2018-gdz.webp';
+import coverEnglishKarpuk from '../../assets/images/covers/200/10-angl-mova-karpuk-2018-gdz.webp';
 
 // --- Обновленный массив books ---
 const books = [
+  { cover: coverMatematykaMerzlyak, subject: 'Математика', author: 'Мерзляк', type: 'ГДЗ', href: '/10-klas/gdz-matematyka-merzlyak/' },
   { cover: coverAlgebraMerzlyak, subject: 'Алгебра', author: 'Мерзляк', type: 'ГДЗ', href: '/10-klas/gdz-algebra-merzlyak/' },
   { cover: coverUkrMovaAvramenko, subject: 'Українська мова', author: 'Авраменко', type: 'ГДЗ', href: '/10-klas/gdz-ukr-mova-avramenko/' },
   { cover: coverUkrMovaGlazova, subject: 'Українська мова', author: 'Глазова', type: 'ГДЗ', href: '/10-klas/gdz-ukr-mova-glazova/' },
-  { cover: coverUkrMovaZabolotnyi, subject: 'Українська мова', author: 'Заболотний', type: 'ГДЗ', href: '/10-klas/gdz-ukr-mova-zabolotnyi/' }
+  { cover: coverUkrMovaZabolotnyi, subject: 'Українська мова', author: 'Заболотний', type: 'ГДЗ', href: '/10-klas/gdz-ukr-mova-zabolotnyi/' },
+  { cover: coverEnglishKarpuk, subject: 'Англійська мова', author: 'Карпюк', type: 'ГДЗ', href: '/10-klas/gdz-english-karpuk/' }
 ];
 
 const subjects = Array.from(new Set(books.map(b => b.subject)));
 
 const pageSeoProps = {
-  title: "ГДЗ 10 клас: Алгебра, Геометрія, Укр. мова - Відповіді",
-  description: "⭐ Готові домашні завдання (ГДЗ) для 10 класу. Відповіді до підручників з алгебри, української мови. Заходьте на ГДЗ Халявка та звіряйте домашню роботу за хвилину!",
+  title: "ГДЗ 10 клас: Математика, Алгебра, Укр. мова, Англ. мова - Відповіді",
+  description: "⭐ Готові домашні завдання (ГДЗ) для 10 класу. Відповіді до підручників з математики, алгебри, української та англійської мови. Заходьте на ГДЗ Халявка та звіряйте домашню роботу за хвилину!",
   canonical: String(Astro.url.href),
   openGraph: { images: [{ url: image8Klas }], type: 'website', locale: 'uk_UA' },
   twitter: { card: 'summary_large_image' },
