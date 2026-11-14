@@ -3,6 +3,7 @@ import BookCard from '../../components/BookCard.astro';
 import MainLayout from '../../layouts/PageLayout.astro';
 import { Image } from 'astro:assets';
 import RecentlyViewed from '../../components/RecentlyViewed.astro';
+import FacebookComments from '~/components/FacebookComments.astro';
 import image11Klas from '../../assets/images/11-klas.webp';
 
 // --- Импорты для обложек ---
@@ -59,4 +60,8 @@ const pageH1Title = "ГДЗ 11 клас";
   </style>
 
   <RecentlyViewed />
+
+  <div class="max-w-4xl mx-auto px-4">
+      <FacebookComments />
+  </div>
 </MainLayout>
