@@ -1,0 +1,146 @@
+---
+/*
+  FormulaHint — блок «Формули до цього підручника» на сторінці книги ГДЗ.
+
+  Статично (у HTML) — посилання на всі теми формул, що стосуються книги.
+  Скрипт додає рядок «До цієї вправи: …»: бере відкриту вправу з #хеша, знаходить
+  її § за заголовком блоку кнопок у ExerciseGallery і підставляє тему з book-links.ts.
+
+  Компонент стоїть ПОРУЧ із ExerciseGallery, а не всередині: галерею не чіпаємо,
+  тож сторінки без цього блоку (зокрема заморожені хаби) лишаються байт у байт.
+  Стилі свої, без класів Tailwind — з тієї ж причини.
+*/
+import { bookFormulas, type BookKey } from '~/data/formuly/book-links';
+import { getTopic, topicUrl } from '~/data/formuly';
+
+export interface Props {
+  book: BookKey;
+  /** id кореня ExerciseGallery на цій сторінці. */
+  gallery: string;
+}
+const { book, gallery } = Astro.props;
+
+const ranges = bookFormulas[book];
+const slugs = [...new Set(ranges.map((r) => r.slug))];
+const links = slugs.map((slug) => {
+  const t = getTopic(slug);
+  if (!t) throw new Error(`FormulaHint: теми «${slug}» немає в src/data/formuly`);
+  return { slug, title: t.short, url: topicUrl(slug) };
+});
+---
+
+<aside class="fh" data-fh data-gallery={gallery} data-ranges={JSON.stringify(ranges)} aria-label="Формули до підручника">
+  <p class="fh-title">📐 Формули до цього підручника</p>
+  <p class="fh-now" data-fh-now hidden>
+    До цієї вправи: <a data-fh-link href="/formuly/"></a>
+  </p>
+  <ul class="fh-list">
+    {
+      links.map((l) => (
+        <li>
+          <a href={l.url} data-fh-slug={l.slug}>
+            {l.title}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</aside>
+
+<style>
+  .fh {
+    max-width: 56rem;
+    margin: 1.25rem auto 0;
+    padding: 0.9rem 1rem;
+    border: 1px solid rgba(0, 48, 73, 0.18);
+    border-left: 4px solid #c1121f;
+    border-radius: 0.75rem;
+    text-align: left;
+    letter-spacing: 0;
+  }
+  :global(.dark) .fh {
+    border-color: rgba(229, 236, 246, 0.2);
+    border-left-color: #ff6b6b;
+  }
+  .fh-title {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1rem;
+  }
+  .fh-now {
+    margin: 0.5rem 0 0;
+    font-size: 0.95rem;
+  }
+  .fh-now a {
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-color: #c1121f;
+    text-underline-offset: 3px;
+  }
+  .fh-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.6rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .fh-list a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.25rem;
+    padding: 0.25rem 0.8rem;
+    border-radius: 999px;
+    background: rgba(0, 48, 73, 0.07);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  :global(.dark) .fh-list a {
+    background: rgba(229, 236, 246, 0.1);
+  }
+  .fh-list a:hover,
+  .fh-list a.is-now {
+    outline: 2px solid #c1121f;
+  }
+</style>
+
+<script>
+  function updateFormulaHint() {
+    const box = document.querySelector<HTMLElement>('[data-fh]');
+    if (!box) return;
+    const now = box.querySelector<HTMLElement>('[data-fh-now]');
+    const link = box.querySelector<HTMLAnchorElement>('[data-fh-link]');
+    const root = document.getElementById(box.dataset.gallery || '');
+    if (!now || !link || !root) return;
+
+    let ranges: { from: number; to: number; slug: string }[] = [];
+    try {
+      ranges = JSON.parse(box.dataset.ranges || '[]');
+    } catch {
+      return;
+    }
+
+    // Відкрита вправа — з #хеша (галерея пише його при кожному перемиканні).
+    const id = decodeURIComponent((location.hash || '').replace('#', '')).trim();
+    const btn = id ? Array.from(root.querySelectorAll<HTMLElement>('.ex-btn')).find((b) => b.dataset.num === id) : null;
+    const title = btn?.closest('details')?.querySelector('summary')?.textContent || '';
+    const m = title.match(/§+\s*(\d+)/);
+    const n = m ? Number(m[1]) : NaN;
+    const range = ranges.find((r) => n >= r.from && n <= r.to);
+
+    box.querySelectorAll('.is-now').forEach((a) => a.classList.remove('is-now'));
+    const chip = range ? box.querySelector<HTMLAnchorElement>(`[data-fh-slug="${range.slug}"]`) : null;
+    if (!chip) {
+      now.hidden = true;
+      return;
+    }
+    chip.classList.add('is-now');
+    link.href = chip.href;
+    link.textContent = `${(chip.textContent || '').trim()} (§ ${n})`;
+    now.hidden = false;
+  }
+
+  window.addEventListener('hashchange', updateFormulaHint);
+  document.addEventListener('astro:page-load', updateFormulaHint);
+</script>

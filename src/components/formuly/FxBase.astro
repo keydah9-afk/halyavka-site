@@ -1,0 +1,521 @@
+---
+/*
+  Спільні стилі та скрипт розділу «Формули» (/formuly/).
+
+  Підключається ТІЛЬКИ на сторінках розділу, тому CSS і JS ідуть окремими файлами
+  і не зачіпають решту сайту (заморожені хаби пілоту лишаються байт у байт).
+  З тієї ж причини тут немає класів Tailwind — лише власні з префіксом fx-:
+  новий клас Tailwind змінив би спільний CSS усього сайту.
+*/
+import 'katex/dist/katex.min.css';
+---
+
+<style is:global>
+  .fx {
+    --fx-navy: #003049;
+    --fx-red: #c1121f;
+    --fx-cream: #fdf0d5;
+    --fx-accent: #c1121f;
+    --fx-text: #1b2b36;
+    --fx-muted: #56646e;
+    --fx-line: rgba(0, 48, 73, 0.16);
+    --fx-card: #ffffff;
+    --fx-box: #fdf6e6;
+    --fx-chip: rgba(0, 48, 73, 0.07);
+    max-width: 68rem;
+    margin: 0 auto;
+    padding: 0 1rem 3rem;
+    color: var(--fx-text);
+    text-align: left;
+    letter-spacing: 0;
+  }
+  .dark .fx {
+    --fx-accent: #ff6b6b;
+    --fx-text: #e5ecf6;
+    --fx-muted: #a9b6c4;
+    --fx-line: rgba(229, 236, 246, 0.18);
+    --fx-card: rgba(255, 255, 255, 0.04);
+    --fx-box: rgba(253, 240, 213, 0.07);
+    --fx-chip: rgba(229, 236, 246, 0.1);
+  }
+
+  .fx h1 {
+    font-size: clamp(1.6rem, 4.5vw, 2.3rem);
+    line-height: 1.2;
+    font-weight: 800;
+    color: var(--fx-navy);
+    margin: 0.75rem 0 0.75rem;
+  }
+  .fx h2 {
+    font-size: clamp(1.2rem, 3.2vw, 1.5rem);
+    line-height: 1.25;
+    font-weight: 800;
+    color: var(--fx-navy);
+    margin: 2.25rem 0 0.9rem;
+    padding-left: 0.7rem;
+    border-left: 4px solid var(--fx-red);
+    scroll-margin-top: 5.5rem;
+  }
+  .dark .fx h1,
+  .dark .fx h2 {
+    color: #f7f8f8;
+  }
+  .fx p {
+    margin: 0;
+  }
+  .fx a {
+    color: inherit;
+  }
+  .fx-lead {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--fx-muted);
+    max-width: 46rem;
+  }
+
+  /* Чипи: клас, предмет, навігація */
+  .fx-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.9rem 0;
+    padding: 0;
+    list-style: none;
+  }
+  .fx-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.25rem;
+    padding: 0.3rem 0.85rem;
+    border-radius: 999px;
+    background: var(--fx-chip);
+    border: 1px solid transparent;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--fx-text);
+    cursor: pointer;
+    font-family: inherit;
+  }
+  a.fx-chip:hover,
+  button.fx-chip:hover {
+    border-color: var(--fx-accent);
+  }
+  .fx-chip[aria-pressed='true'],
+  .fx-chip.is-on {
+    background: var(--fx-navy);
+    color: #fff;
+  }
+  .dark .fx-chip[aria-pressed='true'],
+  .dark .fx-chip.is-on {
+    background: var(--fx-cream);
+    color: var(--fx-navy);
+  }
+  .fx-chip--static {
+    cursor: default;
+    min-height: 1.75rem;
+    font-size: 0.8rem;
+    padding: 0.15rem 0.65rem;
+  }
+
+  /* Картки формул */
+  .fx-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.9rem;
+  }
+  @media (min-width: 52rem) {
+    .fx-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .fx-card {
+    background: var(--fx-card);
+    border: 1px solid var(--fx-line);
+    border-radius: 0.9rem;
+    padding: 1rem;
+    min-width: 0;
+    scroll-margin-top: 5.5rem;
+  }
+  .fx-card h3 {
+    font-size: 1rem;
+    line-height: 1.3;
+    font-weight: 700;
+    margin: 0 0 0.6rem;
+  }
+  .fx-box {
+    background: var(--fx-box);
+    border-radius: 0.65rem;
+    padding: 0.35rem 0.75rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    font-size: 1.02rem;
+  }
+  .fx-box .katex-display {
+    margin: 0.55em 0;
+  }
+  .fx-note {
+    margin-top: 0.6rem !important;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: var(--fx-muted);
+  }
+  .fx .katex {
+    font-size: 1.08em;
+  }
+  /* Телефон: формули трохи дрібніші, щоб довгі рядки вміщалися без прокрутки */
+  @media (max-width: 40rem) {
+    .fx-card {
+      padding: 0.8rem;
+    }
+    .fx-box {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.9rem;
+    }
+    .fx .fx-box .katex {
+      font-size: 1em;
+    }
+  }
+
+  /* Режим «Перевір себе» */
+  .fx.is-quiz .fx-box {
+    cursor: pointer;
+    position: relative;
+  }
+  .fx.is-quiz .fx-box:not(.is-open) > * {
+    filter: blur(9px);
+    user-select: none;
+  }
+  .fx.is-quiz .fx-box:not(.is-open)::after {
+    content: 'Натисни, щоб перевірити';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--fx-text);
+  }
+  .fx.is-quiz .fx-note {
+    display: none;
+  }
+  .fx-quizbar {
+    display: none;
+    margin: 0.5rem 0 0;
+    padding: 0.7rem 0.9rem;
+    border-radius: 0.65rem;
+    background: var(--fx-box);
+    border: 1px solid var(--fx-line);
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+  .fx.is-quiz .fx-quizbar {
+    display: block;
+  }
+
+  /* Рисунок */
+  .fx-figure {
+    margin: 1.2rem 0 0;
+    padding: 0.75rem;
+    max-width: 24rem;
+    border: 1px solid var(--fx-line);
+    border-radius: 0.9rem;
+    background: var(--fx-card);
+  }
+  .fx-figure svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .fx-figure figcaption {
+    margin-top: 0.4rem;
+    font-size: 0.85rem;
+    line-height: 1.45;
+    color: var(--fx-muted);
+  }
+
+  /* Приклади і помилки */
+  .fx-example {
+    border-left: 3px solid var(--fx-line);
+    padding: 0.2rem 0 0.2rem 0.9rem;
+    margin: 0 0 1.2rem;
+  }
+  .fx-example p {
+    line-height: 1.7;
+  }
+  .fx-task {
+    font-weight: 700;
+  }
+  .fx-steps {
+    margin: 0.4rem 0 0;
+    padding: 0;
+    list-style: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+  .fx-steps li {
+    line-height: 1.9;
+    padding: 0.1rem 0;
+  }
+  .fx-list {
+    margin: 0;
+    padding-left: 1.2rem;
+    list-style: disc;
+  }
+  .fx-list li {
+    line-height: 1.7;
+    margin: 0.35rem 0;
+  }
+  .fx-list li::marker {
+    color: var(--fx-accent);
+  }
+
+  /* Картки тем (хаб, сторінка класу, «дивись також») */
+  .fx-topics {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.8rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 40rem) {
+    .fx-topics {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 64rem) {
+    .fx-topics {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .fx-topic {
+    display: flex;
+    flex-direction: column;
+    background: var(--fx-card);
+    border: 1px solid var(--fx-line);
+    border-radius: 0.9rem;
+    padding: 0.95rem 1rem;
+    min-width: 0;
+  }
+  .fx-topic[hidden] {
+    display: none;
+  }
+  .fx-topic-link {
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.3;
+    text-decoration: none;
+    color: var(--fx-navy) !important;
+  }
+  .dark .fx-topic-link {
+    color: #f7f8f8 !important;
+  }
+  .fx-topic-link:hover {
+    text-decoration: underline;
+    text-decoration-color: var(--fx-accent);
+    text-underline-offset: 3px;
+  }
+  .fx-topic-sub {
+    margin-top: 0.35rem !important;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--fx-muted);
+  }
+  .fx-topic-meta {
+    margin-top: auto !important;
+    padding-top: 0.6rem;
+    font-size: 0.8rem;
+    color: var(--fx-muted);
+  }
+  .fx-hits {
+    margin: 0.5rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.9rem;
+  }
+  .fx-hits li[hidden] {
+    display: none;
+  }
+  .fx-hits a {
+    display: inline-block;
+    padding: 0.2rem 0;
+    text-decoration: underline;
+    text-decoration-color: var(--fx-accent);
+    text-underline-offset: 3px;
+  }
+
+  /* Пошук */
+  .fx-search {
+    display: block;
+    width: 100%;
+    max-width: 34rem;
+    margin: 1.1rem 0 0.4rem;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    font-family: inherit;
+    color: var(--fx-text);
+    background: var(--fx-card);
+    border: 2px solid var(--fx-line);
+    border-radius: 0.75rem;
+  }
+  .fx-search:focus {
+    outline: none;
+    border-color: var(--fx-accent);
+  }
+  .fx-empty {
+    padding: 1.2rem 0;
+    color: var(--fx-muted);
+  }
+  .fx-count {
+    font-size: 0.88rem;
+    color: var(--fx-muted);
+  }
+  .fx-toc a {
+    text-decoration: underline;
+    text-decoration-color: var(--fx-line);
+    text-underline-offset: 3px;
+  }
+
+  @media print {
+    #header,
+    footer,
+    .fx-noprint,
+    nav[aria-label='Breadcrumb'] {
+      display: none !important;
+    }
+    .fx {
+      max-width: none;
+      padding: 0;
+      color: #000;
+    }
+    .fx-card,
+    .fx-example {
+      break-inside: avoid;
+    }
+    .fx-box {
+      background: none;
+      border: 1px solid #bbb;
+    }
+    .fx-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>
+
+<script>
+  // «Перевір себе», друк і пошук на хабі. Працює і після м'яких переходів (View Transitions).
+  function initFx() {
+    const root = document.querySelector<HTMLElement>('.fx');
+    if (!root || root.dataset.fxReady) return;
+    root.dataset.fxReady = '1';
+
+    const quizBtn = root.querySelector<HTMLButtonElement>('[data-fx-quiz]');
+    if (quizBtn) {
+      quizBtn.addEventListener('click', () => {
+        const on = root.classList.toggle('is-quiz');
+        quizBtn.setAttribute('aria-pressed', String(on));
+        quizBtn.textContent = on ? '🧠 Перевір себе: увімкнено' : '🧠 Перевір себе';
+        root.querySelectorAll('.fx-box.is-open').forEach((b) => b.classList.remove('is-open'));
+      });
+      root.addEventListener('click', (e) => {
+        if (!root.classList.contains('is-quiz')) return;
+        const box = (e.target as HTMLElement).closest('.fx-box');
+        if (box) box.classList.add('is-open');
+      });
+      root.querySelector('[data-fx-showall]')?.addEventListener('click', () => {
+        root.querySelectorAll('.fx-box').forEach((b) => b.classList.add('is-open'));
+      });
+    }
+
+    root.querySelector('[data-fx-print]')?.addEventListener('click', () => window.print());
+
+    // Хаб: пошук за назвами тем і формул + фільтри класу й предмета.
+    const input = root.querySelector<HTMLInputElement>('[data-fx-search]');
+    if (!input) return;
+    const cards = Array.from(root.querySelectorAll<HTMLElement>('[data-fx-topic]'));
+    const sections = Array.from(root.querySelectorAll<HTMLElement>('[data-fx-section]'));
+    const allHits = Array.from(root.querySelectorAll<HTMLElement>('[data-fx-hit]'));
+    const empty = root.querySelector<HTMLElement>('[data-fx-empty]');
+    const count = root.querySelector<HTMLElement>('[data-fx-count]');
+    let grade = '';
+    let subject = '';
+
+    const apply = () => {
+      const q = input.value.trim().toLowerCase().replace(/[’'`ʼ]/g, '');
+      // Запит із кількох слів («обєм конуса»): тема підходить, якщо в ній є кожне слово;
+      // під карткою показуємо формули, у назві яких є хоча б одне з них.
+      // Слова обрізаємо до основи, щоб «конуса» знаходило «конус», а «трапеції» — «трапеція».
+      const words = q
+        .split(/\s+/)
+        .filter(Boolean)
+        .map((w) => (w.length > 5 ? w.slice(0, w.length - 2) : w.length > 4 ? w.slice(0, 4) : w));
+      // Наскільки слово рідкісне серед назв формул: під карткою показуємо формули
+      // з найрідкіснішим словом запиту («площа трапеції» → «Трапеція», а не всі площі).
+      const rarity = new Map<string, number>();
+      for (const w of words) rarity.set(w, allHits.filter((h) => (h.dataset.fxHit || '').includes(w)).length);
+      let shown = 0;
+      for (const card of cards) {
+        const okGrade = !grade || (card.dataset.grades || '').split(' ').includes(grade);
+        const okSubject = !subject || card.dataset.subject === subject;
+        let okText = true;
+        let anyHit = false;
+        const hits = Array.from(card.querySelectorAll<HTMLElement>('[data-fx-hit]'));
+        if (words.length) {
+          const full = (card.dataset.hay || '') + ' ' + hits.map((h) => h.dataset.fxHit || '').join(' ');
+          okText = words.every((w) => full.includes(w));
+          const inCard = words
+            .filter((w) => w.length > 2 && hits.some((h) => (h.dataset.fxHit || '').includes(w)))
+            .sort((a, b) => (rarity.get(a) || 0) - (rarity.get(b) || 0));
+          const key = inCard[0];
+          for (const h of hits) {
+            const match = okText && !!key && (h.dataset.fxHit || '').includes(key);
+            h.hidden = !match;
+            if (match) anyHit = true;
+          }
+        } else {
+          hits.forEach((h) => (h.hidden = true));
+        }
+        const hitsList = card.querySelector<HTMLElement>('.fx-hits');
+        if (hitsList) hitsList.hidden = !anyHit;
+        // Назва змінної навмисно «keep»: слова, схожі на класи Tailwind (знак оклику
+        // перед назвою властивості видимості тощо), він дописує в спільний CSS сайту.
+        const keep = okGrade && okSubject && okText;
+        card.hidden = keep === false;
+        if (keep) shown++;
+      }
+      for (const s of sections) {
+        s.hidden = !s.querySelector('[data-fx-topic]:not([hidden])');
+      }
+      if (empty) empty.hidden = shown > 0;
+      if (count) count.textContent = q || grade || subject ? `Знайдено тем: ${shown}` : '';
+    };
+
+    input.addEventListener('input', apply);
+    root.querySelectorAll<HTMLButtonElement>('[data-fx-grade]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        grade = grade === btn.dataset.fxGrade ? '' : btn.dataset.fxGrade || '';
+        root.querySelectorAll('[data-fx-grade]').forEach((b) => b.setAttribute('aria-pressed', String((b as HTMLElement).dataset.fxGrade === grade)));
+        apply();
+      });
+    });
+    root.querySelectorAll<HTMLButtonElement>('[data-fx-subject]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        subject = subject === btn.dataset.fxSubject ? '' : btn.dataset.fxSubject || '';
+        root.querySelectorAll('[data-fx-subject]').forEach((b) => b.setAttribute('aria-pressed', String((b as HTMLElement).dataset.fxSubject === subject)));
+        apply();
+      });
+    });
+    root.querySelector('[data-fx-reset]')?.addEventListener('click', () => {
+      input.value = '';
+      grade = '';
+      subject = '';
+      root.querySelectorAll('[data-fx-grade],[data-fx-subject]').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+      apply();
+    });
+    apply();
+  }
+
+  document.addEventListener('astro:page-load', initFx);
+</script>

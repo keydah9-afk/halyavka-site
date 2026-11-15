@@ -1,0 +1,266 @@
+---
+/*
+  /formuly/<тема>/ і /formuly/<N>-klas/ — сторінка теми з формулами та сторінка класу.
+  Дані — src/data/formuly/. Формули рендеряться під час білда (src/utils/formuly.ts).
+*/
+import PageLayout from '~/layouts/PageLayout.astro';
+import FxBase from '~/components/formuly/FxBase.astro';
+import { topics, getTopic, topicUrl, gradeUrl, topicsOfGrade, formulasCount, gradeSubjects, GRADES, SUBJECTS } from '~/data/formuly';
+import type { Topic } from '~/data/formuly';
+import { figures } from '~/data/formuly/figures';
+import { texBlock, rich, plain } from '~/utils/formuly';
+
+export function getStaticPaths() {
+  return [
+    ...topics.map((topic) => ({ params: { slug: topic.slug }, props: { topic } })),
+    ...GRADES.map((grade) => ({ params: { slug: `${grade}-klas` }, props: { grade } })),
+  ];
+}
+
+interface Props {
+  topic?: Topic;
+  grade?: number;
+}
+const { topic, grade } = Astro.props;
+
+const gradesLabel = (g: number[]) => (g.length === 1 ? `${g[0]} клас` : `${g.join(', ')} класи`);
+
+// ---------- сторінка теми ----------
+const figure = topic?.figure ? figures[topic.figure] : undefined;
+const related = topic ? topic.related.map((s) => getTopic(s)!).filter(Boolean) : [];
+
+// ---------- сторінка класу ----------
+const gradeTopics = grade ? topicsOfGrade(grade) : [];
+const gradeTitle = grade ? `Формули ${grade} клас: ${gradeSubjects(grade)}` : '';
+const gradeDescription = grade
+  ? `Усі формули за ${grade} клас в одному місці: ${gradeTopics
+      .slice(0, 6)
+      .map((t) => t.short.toLowerCase())
+      .join(', ')} та інші теми. З поясненнями, прикладами і режимом самоперевірки.`
+  : '';
+
+const title = topic ? topic.title : gradeTitle;
+const description = topic ? topic.description : gradeDescription;
+
+const metadata = {
+  title: topic ? `${topic.title} | halyavka.net` : `${gradeTitle} — шпаргалка | halyavka.net`,
+  shortTitle: topic ? topic.short : `${grade} клас`,
+  description,
+  canonical: String(Astro.url.href),
+  openGraph: { type: 'article', locale: 'uk_UA' },
+};
+
+const jsonLd = topic
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'LearningResource',
+      name: topic.title,
+      description: topic.description,
+      url: String(Astro.url.href),
+      inLanguage: 'uk',
+      learningResourceType: 'Довідник формул',
+      educationalLevel: topic.grades.map((g) => `${g} клас`),
+      about: topic.subject === 'Арифметика' ? 'Математика' : topic.subject,
+      isAccessibleForFree: true,
+      teaches: topic.groups.flatMap((g) => g.formulas.map((f) => f.name)),
+    }
+  : {
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: gradeTitle,
+      description: gradeDescription,
+      url: String(Astro.url.href),
+      inLanguage: 'uk',
+      hasPart: gradeTopics.map((t) => ({ '@type': 'LearningResource', name: t.title, url: `${Astro.url.origin}${topicUrl(t.slug)}` })),
+    };
+---
+
+<PageLayout metadata={metadata}>
+  <FxBase />
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+  {
+    topic && (
+      <article class="fx">
+        <h1>{title}</h1>
+        <ul class="fx-chips" aria-label="Клас і предмет">
+          <li class="fx-chip fx-chip--static">{topic.subject}</li>
+          {topic.grades.map((g) => (
+            <li>
+              <a class="fx-chip fx-chip--static" href={gradeUrl(g)}>
+                {g} клас
+              </a>
+            </li>
+          ))}
+        </ul>
+        <p class="fx-lead" set:html={rich(topic.intro)} />
+
+        <div class="fx-chips fx-noprint">
+          <button type="button" class="fx-chip" data-fx-quiz aria-pressed="false">
+            🧠 Перевір себе
+          </button>
+          <button type="button" class="fx-chip" data-fx-print>
+            🖨️ Друк / PDF
+          </button>
+        </div>
+        <p class="fx-quizbar fx-noprint">
+          Формули приховано. Прочитай назву, згадай формулу і натисни на неї, щоб перевірити себе.{' '}
+          <button type="button" class="fx-chip fx-chip--static" data-fx-showall style="cursor:pointer">
+            Показати всі
+          </button>
+        </p>
+
+        {topic.groups.length > 2 && (
+          <nav class="fx-toc fx-noprint" aria-label="Зміст">
+            <ul class="fx-chips">
+              {topic.groups.map((g, gi) => (
+                <li>
+                  <a class="fx-chip" href={`#g${gi + 1}`}>
+                    {g.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )}
+
+        {figure && (
+          <figure class="fx-figure">
+            <Fragment set:html={figure.svg} />
+            <figcaption set:html={rich(figure.caption)} />
+          </figure>
+        )}
+
+        {topic.groups.map((g, gi) => (
+          <section>
+            <h2 id={`g${gi + 1}`}>{g.title}</h2>
+            <div class="fx-grid">
+              {g.formulas.map((f, fi) => (
+                <div class="fx-card" id={`f${gi + 1}-${fi + 1}`}>
+                  <h3>{f.name}</h3>
+                  <div class="fx-box" set:html={f.tex.map(texBlock).join('')} />
+                  {f.note && <p class="fx-note" set:html={rich(f.note)} />}
+                </div>
+              ))}
+            </div>
+          </section>
+        ))}
+
+        {topic.examples.length > 0 && (
+          <section>
+            <h2 id="pryklady">Приклади розв’язання</h2>
+            {topic.examples.map((ex, i) => (
+              <div class="fx-example">
+                <p class="fx-task">
+                  Приклад {i + 1}. <span set:html={rich(ex.task)} />
+                </p>
+                <ul class="fx-steps">
+                  {ex.solution.map((line) => (
+                    <li set:html={rich(line)} />
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </section>
+        )}
+
+        {topic.mistakes && topic.mistakes.length > 0 && (
+          <section>
+            <h2 id="pomylky">Типові помилки</h2>
+            <ul class="fx-list">
+              {topic.mistakes.map((m) => (
+                <li set:html={rich(m)} />
+              ))}
+            </ul>
+          </section>
+        )}
+
+        <section class="fx-noprint">
+          <h2 id="dyvys-takozh">Дивись також</h2>
+          <ul class="fx-topics">
+            {related.map((t) => (
+              <li class="fx-topic">
+                <a class="fx-topic-link" href={topicUrl(t.slug)}>
+                  {t.short}
+                </a>
+                <p class="fx-topic-meta">
+                  {t.subject} · {gradesLabel(t.grades)}
+                </p>
+              </li>
+            ))}
+          </ul>
+          <ul class="fx-chips">
+            <li>
+              <a class="fx-chip" href="/formuly/">
+                Усі формули 5–11 клас
+              </a>
+            </li>
+            {topic.grades.map((g) => (
+              <li>
+                <a class="fx-chip" href={`/${g}-klas/`}>
+                  ГДЗ {g} клас
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </article>
+    )
+  }
+
+  {
+    grade && (
+      <article class="fx">
+        <h1>{gradeTitle}</h1>
+        <p class="fx-lead">
+          Формули, які вивчають у {grade} класі, зібрані за темами. У кожній темі — формули з поясненнями, розв’язані
+          приклади, типові помилки та режим «Перевір себе».
+        </p>
+        <ul class="fx-chips fx-noprint" aria-label="Інші класи">
+          {GRADES.map((g) => (
+            <li>
+              <a class={`fx-chip${g === grade ? ' is-on' : ''}`} href={gradeUrl(g)} aria-current={g === grade ? 'page' : undefined}>
+                {g} клас
+              </a>
+            </li>
+          ))}
+        </ul>
+
+        {SUBJECTS.filter((s) => gradeTopics.some((t) => t.subject === s)).map((s) => (
+          <section>
+            <h2>{s}</h2>
+            <ul class="fx-topics">
+              {gradeTopics
+                .filter((t) => t.subject === s)
+                .map((t) => (
+                  <li class="fx-topic">
+                    <a class="fx-topic-link" href={topicUrl(t.slug)}>
+                      {t.short}
+                    </a>
+                    <p class="fx-topic-sub">{t.groups.map((g) => g.title).join(' · ')}</p>
+                    <p class="fx-topic-meta">Формул: {formulasCount(t)}</p>
+                  </li>
+                ))}
+            </ul>
+          </section>
+        ))}
+
+        <ul class="fx-chips fx-noprint" style="margin-top:2rem">
+          <li>
+            <a class="fx-chip" href="/formuly/">
+              Усі формули 5–11 клас
+            </a>
+          </li>
+          <li>
+            <a class="fx-chip" href={`/${grade}-klas/`}>
+              ГДЗ {grade} клас
+            </a>
+          </li>
+        </ul>
+        <p class="fx-count" style="margin-top:1rem">
+          {plain(`Тем: ${gradeTopics.length}.`)}
+        </p>
+      </article>
+    )
+  }
+</PageLayout>

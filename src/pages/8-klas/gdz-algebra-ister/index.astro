@@ -2,6 +2,7 @@
 import PageLayout from '../../../layouts/PageLayout.astro';
 import BookHero from '~/components/BookHero.astro';
 import ExerciseGallery from '~/components/ExerciseGallery.astro';
+import FormulaHint from '~/components/formuly/FormulaHint.astro';
 import LabTools from '~/components/LabTools.astro';
 import RatingShare from '~/components/widgets/RatingShare.astro';
 import FacebookComments from '~/components/FacebookComments.astro';
@@ -66,6 +67,7 @@ const galleryBasePath = '/images/8-klas/gdz-algebra-ister';
     />
 
     <ExerciseGallery id="gallery2" base={galleryBasePath} sections={sections} />
+    <FormulaHint book="ister-algebra-8" gallery="gallery2" />
   </main>
 
   <div class="flex flex-wrap justify-center gap-3 my-5">

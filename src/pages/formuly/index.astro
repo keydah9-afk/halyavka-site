@@ -1,0 +1,127 @@
+---
+/*
+  /formuly/ — хаб розділу «Формули»: пошук за назвами тем і формул, фільтри класу й предмета.
+  Усі теми і назви формул є в HTML (пошук лише ховає зайве), тож сторінка читається без JS.
+*/
+import PageLayout from '~/layouts/PageLayout.astro';
+import FxBase from '~/components/formuly/FxBase.astro';
+import { topics, topicUrl, gradeUrl, formulasCount, totalFormulas, GRADES, SUBJECTS } from '~/data/formuly';
+
+const title = 'Формули з математики: 5–11 клас';
+const description = `Усі шкільні формули з математики, алгебри та геометрії за 5–11 клас: ${topics.length} тем і ${totalFormulas} формул з поясненнями, прикладами розв’язання і режимом самоперевірки.`;
+
+const metadata = {
+  title: `${title} — алгебра і геометрія | halyavka.net`,
+  shortTitle: 'Формули',
+  description,
+  canonical: String(Astro.url.href),
+  openGraph: { type: 'website', locale: 'uk_UA' },
+};
+
+// Пошук не має спотикатися об апострофи: «обєм» і «об’єм» мають знаходити одне й те саме.
+const norm = (s: string) => s.toLowerCase().replace(/[’'`ʼ]/g, '');
+const gradesLabel = (g: number[]) => (g.length === 1 ? `${g[0]} клас` : `${g.join(', ')} класи`);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: title,
+  description,
+  url: String(Astro.url.href),
+  inLanguage: 'uk',
+  hasPart: topics.map((t) => ({ '@type': 'LearningResource', name: t.title, url: `${Astro.url.origin}${topicUrl(t.slug)}` })),
+};
+---
+
+<PageLayout metadata={metadata}>
+  <FxBase />
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+  <article class="fx">
+    <h1>{title}</h1>
+    <p class="fx-lead">
+      Шпаргалка з усього шкільного курсу: {topics.length} тем і {totalFormulas} формул. У кожній темі — формули з поясненнями,
+      розв’язані приклади і типові помилки. Шукайте за назвою: «дискримінант», «площа трапеції», «похідна».
+    </p>
+
+    <div class="fx-noprint">
+      <input
+        type="search"
+        class="fx-search"
+        data-fx-search
+        placeholder="Пошук формули або теми"
+        aria-label="Пошук формули або теми"
+        autocomplete="off"
+      />
+      <div class="fx-chips" role="group" aria-label="Клас">
+        {GRADES.map((g) => (
+          <button type="button" class="fx-chip" data-fx-grade={String(g)} aria-pressed="false">
+            {g} клас
+          </button>
+        ))}
+      </div>
+      <div class="fx-chips" role="group" aria-label="Предмет">
+        {SUBJECTS.map((s) => (
+          <button type="button" class="fx-chip" data-fx-subject={s} aria-pressed="false">
+            {s}
+          </button>
+        ))}
+      </div>
+      <p class="fx-count" data-fx-count aria-live="polite"></p>
+    </div>
+
+    <div data-fx-empty hidden class="fx-empty">
+      <p>За цим запитом нічого не знайдено. Спробуйте інше слово або зніміть фільтри.</p>
+      <button type="button" class="fx-chip" data-fx-reset style="margin-top:.75rem">Показати всі теми</button>
+    </div>
+
+    {SUBJECTS.map((s) => (
+      <section data-fx-section>
+        <h2>{s}</h2>
+        <ul class="fx-topics">
+          {topics
+            .filter((t) => t.subject === s)
+            .map((t) => (
+              <li
+                class="fx-topic"
+                data-fx-topic
+                data-subject={t.subject}
+                data-grades={t.grades.join(' ')}
+                data-hay={norm(`${t.title} ${t.short} ${t.keywords ?? ''} ${t.groups.map((g) => g.title).join(' ')}`)}
+              >
+                <a class="fx-topic-link" href={topicUrl(t.slug)}>
+                  {t.short}
+                </a>
+                <p class="fx-topic-sub">{t.groups.map((g) => g.title).join(' · ')}</p>
+                <ul class="fx-hits" hidden>
+                  {t.groups.flatMap((g, gi) =>
+                    g.formulas.map((f, fi) => (
+                      <li data-fx-hit={norm(f.name)} hidden>
+                        <a href={`${topicUrl(t.slug)}#f${gi + 1}-${fi + 1}`}>{f.name}</a>
+                      </li>
+                    ))
+                  )}
+                </ul>
+                <p class="fx-topic-meta">
+                  {gradesLabel(t.grades)} · формул: {formulasCount(t)}
+                </p>
+              </li>
+            ))}
+        </ul>
+      </section>
+    ))}
+
+    <section>
+      <h2>Формули за класами</h2>
+      <ul class="fx-chips">
+        {GRADES.map((g) => (
+          <li>
+            <a class="fx-chip" href={gradeUrl(g)}>
+              Формули {g} клас
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  </article>
+</PageLayout>
