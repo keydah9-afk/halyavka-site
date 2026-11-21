@@ -4,8 +4,7 @@
 //
 // Додати книгу: дописати сюди діапазони § → slug теми і поставити на сторінці книги
 // <FormulaHint book="…" gallery="…" /> одразу після <ExerciseGallery>.
-// НЕ ставити на заморожені хаби пілоту посилань і тесту crawlLinks (список — ADS_EXCLUDED
-// у src/utils/ads.ts), доки експерименти не закриті.
+// Пошук § — за заголовком блоку «§ N» у ExerciseGallery: книги без «§» у заголовках не підійдуть.
 
 export interface ParagraphRange {
   /** Перший і останній номер § (включно). */
@@ -16,6 +15,42 @@ export interface ParagraphRange {
 }
 
 export const bookFormulas = {
+  // Математика 5, Істер (2022) — src/data/ister-5.ts
+  'ister-matematyka-5': [
+    { from: 1, to: 10, slug: 'diyi-z-naturalnymy-chyslamy' },
+    { from: 13, to: 13, slug: 'zadachi-na-rukh' },
+    { from: 20, to: 21, slug: 'kuty-i-paralelni-priami' },
+    { from: 25, to: 25, slug: 'ploshchi-fihur' },
+    { from: 26, to: 32, slug: 'podilnist-nsd-nsk' },
+    { from: 33, to: 39, slug: 'zvychaini-droby' },
+    { from: 40, to: 47, slug: 'desiatkovi-droby' },
+  ],
+  // Математика 6, Істер — src/data/ister-matematyka-6.ts
+  'ister-matematyka-6': [
+    { from: 1, to: 2, slug: 'vidsotky' },
+    { from: 3, to: 14, slug: 'zvychaini-droby' },
+    { from: 15, to: 20, slug: 'proportsii' },
+    { from: 21, to: 22, slug: 'vidsotky' },
+    { from: 23, to: 24, slug: 'kolo-i-kruh' },
+    { from: 26, to: 40, slug: 'ratsionalni-chysla-modul' },
+    { from: 44, to: 45, slug: 'kuty-i-paralelni-priami' },
+  ],
+  // Алгебра 7, Істер — src/data/ister-algebra-7.ts
+  'ister-algebra-7': [
+    { from: 1, to: 3, slug: 'liniini-rivniannia-i-systemy' },
+    { from: 6, to: 9, slug: 'stepeni' },
+    { from: 16, to: 21, slug: 'formuly-skorochenoho-mnozhennia' },
+    { from: 22, to: 24, slug: 'funktsii-ta-hrafiky' },
+    { from: 25, to: 30, slug: 'liniini-rivniannia-i-systemy' },
+  ],
+  // Геометрія 7, Істер — src/data/ister-geometry-7.ts
+  'ister-geometry-7': [
+    { from: 3, to: 10, slug: 'kuty-i-paralelni-priami' },
+    { from: 11, to: 18, slug: 'trykutnyky' },
+    { from: 19, to: 19, slug: 'priamokutnyi-trykutnyk' },
+    { from: 20, to: 20, slug: 'trykutnyky' },
+    { from: 21, to: 27, slug: 'kolo-i-kruh' },
+  ],
   // Алгебра 8, Істер (2025): §§ за змістом підручника — src/data/ister-algebra-8.ts
   'ister-algebra-8': [
     { from: 1, to: 8, slug: 'ratsionalni-droby' },

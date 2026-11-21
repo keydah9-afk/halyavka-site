@@ -27,29 +27,11 @@ export const AD_SLOTS = {
 } as const;
 
 /*
-  Страницы БЕЗ рекламы — идут SEO-замеры, любая правка вёрстки смазывает результат
-  (см. CLAUDE.md). Снимать отсюда только после решения по соответствующему эксперименту.
+  Страницы БЕЗ рекламы — на время SEO-замеров, когда правка вёрстки смазала бы результат.
+  До 21.11.2026 здесь были 13 хабов пилота ссылок и теста crawlLinks; оба замера закрыты
+  (~/Developer/semrush/НАЙДЕНО-итог-пилота-2111.md), список пуст.
 */
-export const ADS_EXCLUDED: readonly string[] = [
-  // Пилот купленных ссылок (решение ~конец ноября 2026). Со ссылками:
-  '/5-klas/gdz-matematyka-ister/',
-  '/7-klas/gdz-algebra-ister/',
-  '/7-klas/gdz-ukr-mova-zabolotnyi/',
-  // …контрольные:
-  '/6-klas/gdz-matematyka-ister/',
-  '/7-klas/gdz-geometry-ister/',
-
-  // Тест crawlLinks (замер 09–12.11.2026). Тестовые:
-  '/6-klas/gdz-matematyka-merzlyak/',
-  '/7-klas/gdz-algebra-merzlyak/',
-  '/6-klas/gdz-matematyka-tarasenkova/',
-  '/6-klas/gdz-ukr-mova-zabolotnyi/',
-  // …контрольные:
-  '/5-klas/gdz-matematyka-merzlyak/',
-  '/7-klas/gdz-geometry-merzlyak/',
-  '/5-klas/gdz-matematyka-bevz/',
-  '/9-klas/gdz-ukr-mova-zabolotnyi/',
-];
+export const ADS_EXCLUDED: readonly string[] = [];
 
 const norm = (p: string) => {
   let s = (p || '/').split(/[?#]/)[0];

@@ -15,7 +15,7 @@ export const meta = {
   year: 2024,
   program: 'НУШ',
   grif: 'Рекомендовано Міністерством освіти і науки України',
-  updatedAt: '2026-11-06',
+  updatedAt: '2026-11-21',
 };
 
 export type ExItem = number | string | { file: string; label: string };
