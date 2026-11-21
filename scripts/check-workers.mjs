@@ -94,6 +94,8 @@ if (kind === 'pages') {
     const got = res.headers.get('location');
     const locOk = !loc || (got && new URL(got, base).pathname + new URL(got, base).search === loc);
     if (res.status !== code || !locOk) bad.push([url, `${code} ${loc ?? ''}`, `${res.status} ${got ?? ''}`]);
+    // 404 — со страницей «не знайдено», а не с пустым телом
+    if (code === 404 && !(await res.text()).includes('Сторінку не знайдено')) bad.push([url, '404 со страницей', '404 без страницы']);
   }
   console.log(`особых адресов: ${special.length}`);
 } else {

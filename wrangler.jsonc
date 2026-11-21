@@ -16,8 +16,9 @@
     "binding": "ASSETS",
     // /5-klas/ → dist/5-klas/index.html (trailingSlash: 'always' в astro.config.ts)
     "html_handling": "auto-trailing-slash",
-    // адреса без файла получает код: 404 со страницей
-    "not_found_handling": "none",
+    // нет файла → 404 со страницей dist/404.html (public/404.html). Для /x/ код не вызывается, поэтому страницу
+    // отдаёт статика сама; с "none" там был 404 с пустым телом (до 21.11.2026).
+    "not_found_handling": "404-page",
     // Код первым — только для адресов без слеша на конце: там статика ответила бы 307, а нужен 301.
     // Страницы (со слешем) и /_astro/* идут мимо кода.
     "run_worker_first": ["/*", "!/*/", "!/_astro/*"]

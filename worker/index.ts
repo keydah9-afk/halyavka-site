@@ -3,7 +3,8 @@
 // Страницы, стили и скрипты (dist/) отдаёт статика сама, код при этом не запускается. Код получает только адреса
 // без слеша на конце (run_worker_first в wrangler.jsonc): /favicon.ico, /robots.txt, /5-klas и т. п. Здесь:
 //   - /5-klas → 301 на /5-klas/ (как Apache с DirectorySlash; статика ответила бы 307), параметры сохраняются;
-//   - нет такого файла → 404 со страницей «не знайдено»;
+//   - нет такого файла → 404 со страницей «не знайдено» (public/404.html; её же статика отдаёт сама для /x/ без файла —
+//     not_found_handling: "404-page" в wrangler.jsonc).
 //   - остальное — файл как есть.
 // Картинки /images/… отдаёт отдельный воркер halyavka-images (маршрут halyavka.net/images/* сильнее halyavka.net/*),
 // www.halyavka.net → 301 на halyavka.net делает воркер halyavka-www (worker/www.ts).
@@ -12,13 +13,6 @@
 interface Env {
   ASSETS: { fetch(input: Request | string, init?: RequestInit): Promise<Response> };
 }
-
-const NOT_FOUND_HTML = `<!doctype html>
-<html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex"><title>Сторінку не знайдено — Халявка</title>
-<style>body{font-family:system-ui,sans-serif;max-width:36rem;margin:4rem auto;padding:0 1rem;color:#003049}a{color:#C1121F}</style>
-</head><body><h1>Сторінку не знайдено</h1>
-<p>Такої сторінки на сайті немає. Перейдіть на <a href="/">головну</a> і оберіть клас.</p></body></html>`;
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -54,13 +48,6 @@ async function route(request: Request, env: Env, url: URL): Promise<Response> {
       target.search = url.search;
       return new Response(null, { status: 301, headers: { Location: target.toString() } });
     }
-  }
-  if (res.status === 404) {
-    const isHead = request.method === 'HEAD';
-    return new Response(isHead ? null : NOT_FOUND_HTML, {
-      status: 404,
-      headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'public, max-age=3600' },
-    });
   }
   return res;
 }
