@@ -9,6 +9,7 @@ import { topics, getTopic, topicUrl, gradeUrl, topicsOfGrade, formulasCount, gra
 import type { Topic } from '~/data/formuly';
 import { figures } from '~/data/formuly/figures';
 import { texBlock, rich, plain } from '~/utils/formuly';
+import { hubsForTopic, hubsForGrade } from '~/data/formuly/book-hubs';
 
 export function getStaticPaths() {
   return [
@@ -28,9 +29,12 @@ const gradesLabel = (g: number[]) => (g.length === 1 ? `${g[0]} клас` : `${g
 // ---------- сторінка теми ----------
 const figure = topic?.figure ? figures[topic.figure] : undefined;
 const related = topic ? topic.related.map((s) => getTopic(s)!).filter(Boolean) : [];
+// Хаби ГДЗ, де є § до цієї теми (зворотний бік FormulaHint, src/data/formuly/book-hubs.ts).
+const hubLinks = topic ? hubsForTopic(topic.slug) : [];
 
 // ---------- сторінка класу ----------
 const gradeTopics = grade ? topicsOfGrade(grade) : [];
+const gradeHubs = grade ? hubsForGrade(grade) : [];
 const gradeTitle = grade ? `Формули ${grade} клас: ${gradeSubjects(grade)}` : '';
 const gradeDescription = grade
   ? `Усі формули за ${grade} клас в одному місці: ${gradeTopics
@@ -146,6 +150,22 @@ const jsonLd = topic
           </section>
         ))}
 
+        {hubLinks.length > 0 && (
+          <section class="fx-noprint">
+            <h2 id="gdz">Розв’язання вправ з цієї теми</h2>
+            <ul class="fx-topics">
+              {hubLinks.map((h) => (
+                <li class="fx-topic">
+                  <a class="fx-topic-link" href={h.url}>
+                    ГДЗ {h.label}
+                  </a>
+                  <p class="fx-topic-meta">{h.paragraphs} — вправи з поясненнями</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         {topic.examples.length > 0 && (
           <section>
             <h2 id="pryklady">Приклади розв’язання</h2>
@@ -244,6 +264,22 @@ const jsonLd = topic
             </ul>
           </section>
         ))}
+
+        {gradeHubs.length > 0 && (
+          <section class="fx-noprint">
+            <h2>ГДЗ {grade} клас з підказками формул</h2>
+            <ul class="fx-topics">
+              {gradeHubs.map((h) => (
+                <li class="fx-topic">
+                  <a class="fx-topic-link" href={h.url}>
+                    ГДЗ {h.label}
+                  </a>
+                  <p class="fx-topic-meta">До кожного § — посилання на потрібні формули</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         <ul class="fx-chips fx-noprint" style="margin-top:2rem">
           <li>

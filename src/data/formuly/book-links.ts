@@ -5,6 +5,8 @@
 // Додати книгу: дописати сюди діапазони § → slug теми і поставити на сторінці книги
 // <FormulaHint book="…" gallery="…" /> одразу після <ExerciseGallery>.
 // Пошук § — за заголовком блоку «§ N» у ExerciseGallery: книги без «§» у заголовках не підійдуть.
+// Ця ж таблиця, прочитана навпаки, дає посилання з тем формул на хаби (book-hubs.ts):
+// нову книгу треба дописати і туди — адресу хаба та її дані.
 
 export interface ParagraphRange {
   /** Перший і останній номер § (включно). */
@@ -71,6 +73,26 @@ export const bookFormulas = {
     { from: 17, to: 20, slug: 'priamokutnyi-trykutnyk' },
     { from: 21, to: 21, slug: 'chotyrykutnyky' },
     { from: 22, to: 25, slug: 'ploshchi-fihur' },
+  ],
+  // Алгебра 9, Істер — src/data/ister-algebra-9.ts (§ 13–14, системи рівнянь другого степеня, — без теми)
+  'ister-algebra-9': [
+    { from: 1, to: 7, slug: 'nerivnosti' },
+    { from: 8, to: 10, slug: 'funktsii-ta-hrafiky' },
+    { from: 11, to: 12, slug: 'kvadratychna-funktsiia' },
+    { from: 15, to: 18, slug: 'prohresii' },
+    { from: 19, to: 19, slug: 'vidsotky' },
+    { from: 20, to: 21, slug: 'prohresii' },
+    { from: 22, to: 26, slug: 'kombinatoryka-ymovirnist' },
+  ],
+  // Геометрія 9, Істер — src/data/ister-geometry-9.ts (§ 18–23, геометричні перетворення, — без теми)
+  'ister-geometry-9': [
+    { from: 1, to: 1, slug: 'koordynaty-i-vektory' },
+    { from: 2, to: 2, slug: 'teorema-synusiv-i-kosynusiv' },
+    { from: 3, to: 10, slug: 'koordynaty-i-vektory' },
+    { from: 11, to: 13, slug: 'teorema-synusiv-i-kosynusiv' },
+    { from: 14, to: 14, slug: 'ploshchi-fihur' },
+    { from: 15, to: 15, slug: 'pravylni-mnohokutnyky' },
+    { from: 16, to: 17, slug: 'kolo-i-kruh' },
   ],
 } satisfies Record<string, ParagraphRange[]>;
 
